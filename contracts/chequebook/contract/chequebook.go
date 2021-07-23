@@ -7,7 +7,7 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/Gessiux/neatchain"
+	neatchain "github.com/Gessiux/neatchain"
 	"github.com/Gessiux/neatchain/accounts/abi"
 	"github.com/Gessiux/neatchain/accounts/abi/bind"
 	"github.com/Gessiux/neatchain/common"
@@ -251,10 +251,10 @@ type ChequebookOverdraftIterator struct {
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
 
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
+	logs chan types.Log         // Log channel receiving the found contract events
+	sub  neatchain.Subscription // Subscription for errors, completion and termination
+	done bool                   // Whether the subscription completed delivering logs
+	fail error                  // Occurred error to stop iteration
 }
 
 // Next advances the iterator to the subsequent event, returning whether there

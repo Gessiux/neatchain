@@ -128,8 +128,8 @@ func newTester(t *testing.T, confOverride func(*neatprotocol.Config)) *tester {
 		t.Fatalf("failed to create JavaScript console: %v", err)
 	}
 	// Create the final tester and return
-	var ethereum *neatprotocol.NeatChain
-	stack.Service(&ethereum)
+	var neatchain *neatprotocol.NeatChain
+	stack.Service(&neatchain)
 
 	return &tester{
 		workspace: workspace,

@@ -5759,7 +5759,7 @@ module.exports = Personal;
 */
 /** @file shh.js
  * @authors:
- *   Fabian Vogelsteller <fabian@ethereum.org>
+ *   Fabian Vogelsteller <fabian@neatchain.org>
  *   Marek Kotewicz <marek@ethcore.io>
  * @date 2017
  */

@@ -297,11 +297,11 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 
 	validator := false
 
-	var ethereum *neatprotocol.NeatChain
-	cm.mainChain.IntNode.Service(&ethereum)
+	var neatchain *neatprotocol.NeatChain
+	cm.mainChain.IntNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
 		localEtherbase = neatbyft.PrivateValidator()
 	}
 
@@ -429,11 +429,11 @@ func (cm *ChainManager) formalizeChildChain(chainId string, cci core.CoreChainIn
 }
 
 func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool {
-	var ethereum *neatprotocol.NeatChain
-	cm.mainChain.IntNode.Service(&ethereum)
+	var neatchain *neatprotocol.NeatChain
+	cm.mainChain.IntNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
 		localEtherbase = neatbyft.PrivateValidator()
 	}
 

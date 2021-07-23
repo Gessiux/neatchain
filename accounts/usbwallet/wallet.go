@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	ethereum "github.com/Gessiux/neatchain"
+	"github.com/Gessiux/neatchain"
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
@@ -82,11 +82,11 @@ type wallet struct {
 	accounts []accounts.Account                         // List of derive accounts pinned on the hardware wallet
 	paths    map[common.Address]accounts.DerivationPath // Known derivation paths for signing operations
 
-	deriveNextPath accounts.DerivationPath   // Next derivation path for account auto-discovery
-	deriveNextAddr common.Address            // Next derived account address for auto-discovery
-	deriveChain    ethereum.ChainStateReader // Blockchain state reader to discover used account with
-	deriveReq      chan chan struct{}        // Channel to request a self-derivation on
-	deriveQuit     chan chan error           // Channel to terminate the self-deriver with
+	deriveNextPath accounts.DerivationPath    // Next derivation path for account auto-discovery
+	deriveNextAddr common.Address             // Next derived account address for auto-discovery
+	deriveChain    neatchain.ChainStateReader // Blockchain state reader to discover used account with
+	deriveReq      chan chan struct{}         // Channel to request a self-derivation on
+	deriveQuit     chan chan error            // Channel to terminate the self-deriver with
 
 	healthQuit chan chan error
 
@@ -484,7 +484,7 @@ func (w *wallet) Derive(path accounts.DerivationPath, pin bool) (accounts.Accoun
 // user used previously (based on the chain state), but ones that he/she did not
 // explicitly pin to the wallet manually. To avoid chain head monitoring, self
 // derivation only runs during account listing (and even then throttled).
-func (w *wallet) SelfDerive(base accounts.DerivationPath, chain ethereum.ChainStateReader) {
+func (w *wallet) SelfDerive(base accounts.DerivationPath, chain neatchain.ChainStateReader) {
 	w.stateLock.Lock()
 	defer w.stateLock.Unlock()
 

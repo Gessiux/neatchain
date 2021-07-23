@@ -112,8 +112,8 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	// Check End Block already passed
-	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
-	currentBlock := ethereum.BlockChain().CurrentBlock()
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	currentBlock := neatchain.BlockChain().CurrentBlock()
 	if endBlock.Cmp(currentBlock.Number()) <= 0 {
 		return errors.New("end block number has already passed")
 	}
@@ -307,25 +307,25 @@ func (cch *CrossChainHelper) UpdateNextEpoch(ep *epoch.Epoch, from common.Addres
 }
 
 func (cch *CrossChainHelper) GetHeightFromMainChain() *big.Int {
-	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
-	return ethereum.BlockChain().CurrentBlock().Number()
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	return neatchain.BlockChain().CurrentBlock().Number()
 }
 
 func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Transaction {
-	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
-	chainDb := ethereum.ChainDb()
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	chainDb := neatchain.ChainDb()
 
 	tx, _, _, _ := rawdb.ReadTransaction(chainDb, txHash)
 	return tx
 }
 
 func (cch *CrossChainHelper) GetEpochFromMainChain() (string, *epoch.Epoch) {
-	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	var ep *epoch.Epoch
-	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
 		ep = neatbyft.GetEpoch()
 	}
-	return ethereum.ChainConfig().NeatChainId, ep
+	return neatchain.ChainConfig().NeatChainId, ep
 }
 
 func (cch *CrossChainHelper) ChangeValidators(chainId string) {

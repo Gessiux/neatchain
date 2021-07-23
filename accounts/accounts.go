@@ -20,7 +20,7 @@ package accounts
 import (
 	"math/big"
 
-	ethereum "github.com/Gessiux/neatchain"
+	"github.com/Gessiux/neatchain"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
@@ -85,7 +85,7 @@ type Wallet interface {
 	//
 	// You can disable automatic account discovery by calling SelfDerive with a nil
 	// chain state reader.
-	SelfDerive(base DerivationPath, chain ethereum.ChainStateReader)
+	SelfDerive(base DerivationPath, chain neatchain.ChainStateReader)
 
 	// SignHash requests the wallet to sign the given hash.
 	//
