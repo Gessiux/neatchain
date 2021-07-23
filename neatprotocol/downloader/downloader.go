@@ -20,6 +20,11 @@ package downloader
 import (
 	"errors"
 	"fmt"
+	"math/big"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/Gessiux/neatchain"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/rawdb"
@@ -29,10 +34,6 @@ import (
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
 	"github.com/Gessiux/neatchain/params"
-	"math/big"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 var (
@@ -55,7 +56,7 @@ var (
 	qosConfidenceCap = 10   // Number of peers above which not to modify RTT confidence
 	qosTuningImpact  = 0.25 // Impact that a new tuning target has on the previous value
 
-	maxQueuedHeaders  = 32 * 1024 // [intprotocol/62] Maximum number of headers to queue for import (DOS protection)
+	maxQueuedHeaders  = 32 * 1024 // [neatprotocol/62] Maximum number of headers to queue for import (DOS protection)
 	maxHeadersProcess = 2048      // Number of header download results to import at once into the chain
 	maxResultsProcess = 2048      // Number of content download results to import at once into the chain
 
@@ -121,17 +122,17 @@ type Downloader struct {
 	committed       int32
 
 	// Channels
-	headerCh      chan dataPack        // [intprotocol/62] Channel receiving inbound block headers
-	bodyCh        chan dataPack        // [intprotocol/62] Channel receiving inbound block bodies
-	receiptCh     chan dataPack        // [intprotocol/63] Channel receiving inbound receipts
-	bodyWakeCh    chan bool            // [intprotocol/62] Channel to signal the block body fetcher of new tasks
-	receiptWakeCh chan bool            // [intprotocol/63] Channel to signal the receipt fetcher of new tasks
-	headerProcCh  chan []*types.Header // [intprotocol/62] Channel to feed the header processor new tasks
+	headerCh      chan dataPack        // [neatprotocol/62] Channel receiving inbound block headers
+	bodyCh        chan dataPack        // [neatprotocol/62] Channel receiving inbound block bodies
+	receiptCh     chan dataPack        // [neatprotocol/63] Channel receiving inbound receipts
+	bodyWakeCh    chan bool            // [neatprotocol/62] Channel to signal the block body fetcher of new tasks
+	receiptWakeCh chan bool            // [neatprotocol/63] Channel to signal the receipt fetcher of new tasks
+	headerProcCh  chan []*types.Header // [neatprotocol/62] Channel to feed the header processor new tasks
 
 	// for stateFetcher
 	stateSyncStart chan *stateSync
 	trackStateReq  chan *stateReq
-	stateCh        chan dataPack // [intprotocol/63] Channel receiving inbound node state data
+	stateCh        chan dataPack // [neatprotocol/63] Channel receiving inbound node state data
 
 	// Cancellation and termination
 	cancelPeer string        // Identifier of the peer currently being used as the master (cancel on drop)

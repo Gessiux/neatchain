@@ -17,14 +17,14 @@
 package params
 
 // MainnetBootnodes are the enode URLs of the P2P bootstrap nodes running on
-// the INT Chain main network.
+// the NEAT Chain main network.
 var MainnetBootnodes = []string{
 
 	"enode://e1fadafa76bad701b108e03e4781cc6cf65df32e9773a7b7175d3b542986baade931c186374b07eaedf31a4d65e2aecabc28fcbb8a6f586110c436198c59d192@135.181.195.79:8550",
 }
 
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the
-// INT Chain test network.
+// NEAT Chain test network.
 var TestnetBootnodes = []string{
 	"enode://20c9a43afb9b19ada68883ef404810d93963be0e09f90444cce52e9a68fbdb9b7fec0187dd1e2c31737c0b452884a43e0fd654bde18310588b368d080836f8f9@101.32.74.50:8550", // Titans
 	//"enode://6eb4941356e557692057bd58c6324ccb6fff2864389e73e67d661a83114d4e9218c1a00b018d38ef4076f2581ecc48aa5e4ec37da241c42ef4817532dcc4ad0b@129.226.59.148:8551", // Oceanus

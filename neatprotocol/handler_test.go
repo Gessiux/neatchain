@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"math"
@@ -30,7 +30,7 @@ import (
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/params"
 )
@@ -446,7 +446,7 @@ func testGetReceipt(t *testing.T, protocol int) {
 	}
 }
 
-// Tests that post intprotocol protocol handshake, DAO fork-enabled clients also execute
+// Tests that post neatprotocol protocol handshake, DAO fork-enabled clients also execute
 // a DAO "challenge" verifying each others' DAO fork headers to ensure they're on
 // compatible chains.
 func TestDAOChallengeNoVsNo(t *testing.T)       { testDAOChallenge(t, false, false, false) }

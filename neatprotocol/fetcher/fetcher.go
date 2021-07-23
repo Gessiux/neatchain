@@ -140,9 +140,9 @@ type Fetcher struct {
 	// Testing hooks
 	announceChangeHook func(common.Hash, bool) // Method to call upon adding or deleting a hash from the announce list
 	queueChangeHook    func(common.Hash, bool) // Method to call upon adding or deleting a block from the import queue
-	fetchingHook       func([]common.Hash)     // Method to call upon starting a block (intprotocol/61) or header (intprotocol/62) fetch
-	completingHook     func([]common.Hash)     // Method to call upon starting a block body fetch (intprotocol/62)
-	importedHook       func(*types.Block)      // Method to call upon successful block import (both intprotocol/61 and intprotocol/62)
+	fetchingHook       func([]common.Hash)     // Method to call upon starting a block (neatprotocol/61) or header (neatprotocol/62) fetch
+	completingHook     func([]common.Hash)     // Method to call upon starting a block body fetch (neatprotocol/62)
+	importedHook       func(*types.Block)      // Method to call upon successful block import (both neatprotocol/61 and neatprotocol/62)
 }
 
 // New creates a block fetcher to retrieve blocks based on hash announcements.

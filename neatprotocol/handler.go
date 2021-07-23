@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"encoding/json"
@@ -35,9 +35,9 @@ import (
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
-	"github.com/Gessiux/neatchain/intprotocol/fetcher"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/fetcher"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/p2p/discover"
 	"github.com/Gessiux/neatchain/params"
@@ -115,8 +115,8 @@ type ProtocolManager struct {
 	preimageLogger log.Logger
 }
 
-// NewProtocolManager returns a new INT Chain sub protocol manager. The INT Chain sub protocol manages peers capable
-// with the INT Chain network.
+// NewProtocolManager returns a new NEAT Chain sub protocol manager. The NEAT Chain sub protocol manages peers capable
+// with the NEAT Chain network.
 func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, networkId uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb intdb.Database, cch core.CrossChainHelper) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
@@ -216,9 +216,9 @@ func (pm *ProtocolManager) removePeer(id string) {
 	if peer == nil {
 		return
 	}
-	pm.logger.Debug("Removing INT Chain peer", "peer", id)
+	pm.logger.Debug("Removing NEAT Chain peer", "peer", id)
 
-	// Unregister the peer from the downloader and INT Chain peer set
+	// Unregister the peer from the downloader and NEAT Chain peer set
 	pm.downloader.UnregisterPeer(id)
 	if err := pm.peers.Unregister(id); err != nil {
 		pm.logger.Error("Peer removal failed", "peer", id, "err", err)
@@ -251,7 +251,7 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 }
 
 func (pm *ProtocolManager) Stop() {
-	pm.logger.Info("Stopping INT Chain protocol")
+	pm.logger.Info("Stopping NEAT Chain protocol")
 
 	pm.txSub.Unsubscribe()         // quits txBroadcastLoop
 	pm.tx3PrfDtSub.Unsubscribe()   // quits tx3PrfDtBroadcastLoop
@@ -273,23 +273,23 @@ func (pm *ProtocolManager) Stop() {
 	// Wait for all peer handler goroutines and the loops to come down.
 	pm.wg.Wait()
 
-	pm.logger.Info("INT Chain protocol stopped")
+	pm.logger.Info("NEAT Chain protocol stopped")
 }
 
 func (pm *ProtocolManager) newPeer(pv int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 	return newPeer(pv, p, newMeteredMsgWriter(rw))
 }
 
-// handle is the callback invoked to manage the life cycle of an intprotocol peer. When
+// handle is the callback invoked to manage the life cycle of an neatprotocol peer. When
 // this function terminates, the peer is disconnected.
 func (pm *ProtocolManager) handle(p *peer) error {
 	// Ignore maxPeers if this is a trusted peer
 	if pm.peers.Len() >= pm.maxPeers && !p.Peer.Info().Network.Trusted {
 		return p2p.DiscTooManyPeers
 	}
-	p.Log().Debug("INT Chain peer connected", "name", p.Name())
+	p.Log().Debug("NEAT Chain peer connected", "name", p.Name())
 
-	// Execute the INT Chain handshake
+	// Execute the NEAT Chain handshake
 	var (
 		genesis = pm.blockchain.Genesis()
 		head    = pm.blockchain.CurrentHeader()
@@ -298,7 +298,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 		td      = pm.blockchain.GetTd(hash, number)
 	)
 	if err := p.Handshake(pm.networkId, td, hash, genesis.Hash()); err != nil {
-		p.Log().Debug("INT Chain handshake failed", "err", err)
+		p.Log().Debug("NEAT Chain handshake failed", "err", err)
 		return err
 	}
 	if rw, ok := p.rw.(*meteredMsgReadWriter); ok {
@@ -306,7 +306,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	}
 	// Register the peer locally
 	if err := pm.peers.Register(p); err != nil {
-		p.Log().Error("INT Chain peer registration failed", "err", err)
+		p.Log().Error("NEAT Chain peer registration failed", "err", err)
 		return err
 	}
 
@@ -335,7 +335,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	// main loop. handle incoming messages.
 	for {
 		if err := pm.handleMsg(p); err != nil {
-			p.Log().Debug("INT Chain message handling failed", "err", err)
+			p.Log().Debug("NEAT Chain message handling failed", "err", err)
 			return err
 		}
 	}
@@ -930,10 +930,10 @@ func (self *ProtocolManager) tx3PrfDtBroadcastLoop() {
 	}
 }
 
-// NodeInfo represents a short summary of the INT Chain sub-protocol metadata
+// NodeInfo represents a short summary of the NEAT Chain sub-protocol metadata
 // known about the host peer.
 type NodeInfo struct {
-	Network    uint64              `json:"network"`    // INT Chain network ID (1=Frontier, 2=Morden, Ropsten=3, Rinkeby=4)
+	Network    uint64              `json:"network"`    // NEAT Chain network ID (1=Frontier, 2=Morden, Ropsten=3, Rinkeby=4)
 	Difficulty *big.Int            `json:"difficulty"` // Total difficulty of the host's blockchain
 	Genesis    common.Hash         `json:"genesis"`    // SHA3 hash of the host's genesis block
 	Config     *params.ChainConfig `json:"config"`     // Chain configuration for the fork rules

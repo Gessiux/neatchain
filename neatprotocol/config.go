@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"math/big"
@@ -29,8 +29,8 @@ import (
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/consensus/ipbft"
 	"github.com/Gessiux/neatchain/core"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
-	"github.com/Gessiux/neatchain/intprotocol/gasprice"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
 	"github.com/Gessiux/neatchain/params"
 )
 

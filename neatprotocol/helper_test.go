@@ -17,7 +17,7 @@
 // This file contains some shares testing functionality, common to  multiple
 // different files and modules being tested.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"crypto/ecdsa"
@@ -35,7 +35,7 @@ import (
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/p2p/discover"
 	"github.com/Gessiux/neatchain/params"

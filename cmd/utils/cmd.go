@@ -28,7 +28,7 @@ import (
 	"syscall"
 
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/intprotocol"
+	"github.com/Gessiux/neatchain/neatprotocol"
 	"gopkg.in/urfave/cli.v1"
 
 	"github.com/Gessiux/neatchain/common"
@@ -88,7 +88,7 @@ func StartNode(ctx *cli.Context, stack *node.Node) error {
 	//}()
 
 	mining := false
-	var neatchain *intprotocol.NeatChain
+	var neatchain *neatprotocol.NeatChain
 	if err := stack.Service(&neatchain); err == nil {
 		if ipbft, ok := neatchain.Engine().(consensus.IPBFT); ok {
 			mining = ipbft.ShouldStart()
@@ -102,9 +102,9 @@ func StartNode(ctx *cli.Context, stack *node.Node) error {
 	if mining || ctx.GlobalBool(DeveloperFlag.Name) {
 		stack.GetLogger().Info("Mine will be start shortly")
 		// Mining only makes sense if a full neatchain node is running
-		var neatchain *intprotocol.NeatChain
+		var neatchain *neatprotocol.NeatChain
 		if err := stack.Service(&neatchain); err != nil {
-			Fatalf("INT Chain service not running: %v", err)
+			Fatalf("NEAT Chain service not running: %v", err)
 		}
 
 		// Use a reduced number of threads if requested

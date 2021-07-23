@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package miner implements INT Chain block creation and mining.
+// Package miner implements NEAT Chain block creation and mining.
 package miner
 
 import (
@@ -29,8 +29,8 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/params"
 )
 

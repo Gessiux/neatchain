@@ -20,17 +20,18 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/core"
-	"github.com/Gessiux/neatchain/log"
 	"io"
 	"os"
 	"reflect"
 	"unicode"
 
+	"github.com/Gessiux/neatchain/core"
+	"github.com/Gessiux/neatchain/log"
+
 	"gopkg.in/urfave/cli.v1"
 
 	"github.com/Gessiux/neatchain/cmd/utils"
-	"github.com/Gessiux/neatchain/intprotocol"
+	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/naoina/toml"
@@ -74,7 +75,7 @@ type ethstatsConfig struct {
 }
 
 type gethConfig struct {
-	Eth      intprotocol.Config
+	Eth      neatprotocol.Config
 	Node     node.Config
 	Ethstats ethstatsConfig
 }
@@ -107,7 +108,7 @@ func defaultNodeConfig() node.Config {
 func makeConfigNode(ctx *cli.Context, chainId string) (*node.Node, gethConfig) {
 	// Load defaults.
 	cfg := gethConfig{
-		Eth:  intprotocol.DefaultConfig,
+		Eth:  neatprotocol.DefaultConfig,
 		Node: defaultNodeConfig(),
 	}
 

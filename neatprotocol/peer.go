@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"errors"
@@ -306,7 +306,7 @@ func (p *peer) RequestPreimages(hashes []common.Hash) error {
 	return p2p.Send(p.rw, GetPreImagesMsg, hashes)
 }
 
-// Handshake executes the intprotocol protocol handshake, negotiating version number,
+// Handshake executes the neatprotocol protocol handshake, negotiating version number,
 // network IDs, difficulties, head and genesis blocks.
 func (p *peer) Handshake(network uint64, td *big.Int, head common.Hash, genesis common.Hash) error {
 	// Send out own handshake in a new thread

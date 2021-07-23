@@ -19,8 +19,8 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/intclient"
-	"github.com/Gessiux/neatchain/intprotocol"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/pkg/errors"
 	"gopkg.in/urfave/cli.v1"
@@ -297,7 +297,7 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 
 	validator := false
 
-	var ethereum *intprotocol.NeatChain
+	var ethereum *neatprotocol.NeatChain
 	cm.mainChain.IntNode.Service(&ethereum)
 
 	var localEtherbase common.Address
@@ -391,7 +391,7 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 
 	cm.childQuits[chain.Id] = chain.IntNode.StopChan()
 
-	var childEthereum *intprotocol.NeatChain
+	var childEthereum *neatprotocol.NeatChain
 	chain.IntNode.Service(&childEthereum)
 	firstEpoch := childEthereum.Engine().(consensus.IPBFT).GetEpoch()
 	// Child Chain start success, then delete the pending data in chain info db
@@ -429,7 +429,7 @@ func (cm *ChainManager) formalizeChildChain(chainId string, cci core.CoreChainIn
 }
 
 func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool {
-	var ethereum *intprotocol.NeatChain
+	var ethereum *neatprotocol.NeatChain
 	cm.mainChain.IntNode.Service(&ethereum)
 
 	var localEtherbase common.Address
@@ -482,7 +482,7 @@ func (cm *ChainManager) Wait() {
 
 func (cm *ChainManager) getNodeValidator(intNode *node.Node) (common.Address, bool) {
 
-	var neatchain *intprotocol.NeatChain
+	var neatchain *neatprotocol.NeatChain
 	intNode.Service(&neatchain)
 
 	var coinbase common.Address

@@ -14,17 +14,18 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package consensus implements different INT Chain consensus engines.
+// Package consensus implements different NEAT Chain consensus engines.
 package consensus
 
 import (
+	"math/big"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rpc"
-	"math/big"
 )
 
 // ChainReader defines a small collection of methods needed to access the local

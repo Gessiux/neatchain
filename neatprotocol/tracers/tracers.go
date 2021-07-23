@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/Gessiux/neatchain/intprotocol/tracers/internal/tracers"
+	"github.com/Gessiux/neatchain/neatprotocol/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.

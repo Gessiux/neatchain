@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package intprotocol implements the Ethereum protocol.
-package intprotocol
+// Package neatprotocol implements the Ethereum protocol.
+package neatprotocol
 
 import (
 	"errors"
@@ -40,11 +40,11 @@ import (
 	"github.com/Gessiux/neatchain/event"
 	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/internal/neatapi"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
-	"github.com/Gessiux/neatchain/intprotocol/filters"
-	"github.com/Gessiux/neatchain/intprotocol/gasprice"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/miner"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/filters"
+	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/params"
@@ -60,7 +60,7 @@ type LesServer interface {
 	SetBloomBitsIndexer(bbIndexer *core.ChainIndexer)
 }
 
-// NeatChain implements the INT Chain full node service.
+// NeatChain implements the NEAT Chain full node service.
 type NeatChain struct {
 	config      *Config
 	chainConfig *params.ChainConfig
@@ -97,8 +97,8 @@ type NeatChain struct {
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 }
 
-// New creates a new INT Chain object (including the
-// initialisation of the common INT Chain object)
+// New creates a new NEAT Chain object (including the
+// initialisation of the common NEAT Chain object)
 func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	cch core.CrossChainHelper, logger log.Logger, isTestnet bool) (*NeatChain, error) {
 

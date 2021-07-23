@@ -427,7 +427,7 @@ func signHash(data []byte) []byte {
 	return crypto.Keccak256([]byte(msg))
 }
 
-// Sign calculates an INT Chain ECDSA signature for:
+// Sign calculates an NEAT Chain ECDSA signature for:
 // keccack256("\x19INT Chain Signed Message:\n" + len(message) + message))
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
@@ -468,7 +468,7 @@ func (s *PrivateAccountAPI) EcRecover(ctx context.Context, data, sig hexutil.Byt
 		return "", fmt.Errorf("signature must be 65 bytes long")
 	}
 	if sig[64] != 27 && sig[64] != 28 {
-		return "", fmt.Errorf("invalid INT Chain signature (V is not 27 or 28)")
+		return "", fmt.Errorf("invalid NEAT Chain signature (V is not 27 or 28)")
 	}
 	sig[64] -= 27 // Transform yellow paper V from 27/28 to 0/1
 
@@ -1573,14 +1573,14 @@ func (s *PublicTransactionPoolAPI) Resend(ctx context.Context, sendArgs SendTxAr
 	return common.Hash{}, fmt.Errorf("Transaction %#x not found", matchTx.Hash())
 }
 
-// PublicDebugAPI is the collection of INT Chain APIs exposed over the public
+// PublicDebugAPI is the collection of NEAT Chain APIs exposed over the public
 // debugging endpoint.
 type PublicDebugAPI struct {
 	b Backend
 }
 
 // NewPublicDebugAPI creates a new API definition for the public debug methods
-// of the INT Chain service.
+// of the NEAT Chain service.
 func NewPublicDebugAPI(b Backend) *PublicDebugAPI {
 	return &PublicDebugAPI{b: b}
 }
@@ -1607,14 +1607,14 @@ func (api *PublicDebugAPI) PrintBlock(ctx context.Context, number uint64) (strin
 	return block.String(), nil
 }
 
-// PrivateDebugAPI is the collection of INT Chain APIs exposed over the private
+// PrivateDebugAPI is the collection of NEAT Chain APIs exposed over the private
 // debugging endpoint.
 type PrivateDebugAPI struct {
 	b Backend
 }
 
 // NewPrivateDebugAPI creates a new API definition for the private debug methods
-// of the INT Chain service.
+// of the NEAT Chain service.
 func NewPrivateDebugAPI(b Backend) *PrivateDebugAPI {
 	return &PrivateDebugAPI{b: b}
 }

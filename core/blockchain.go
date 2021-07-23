@@ -20,13 +20,14 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"io"
 	"math/big"
 	mrand "math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/Gessiux/neatchain/core/rawdb"
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/mclock"
@@ -43,7 +44,7 @@ import (
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 var (
@@ -627,7 +628,7 @@ func (bc *BlockChain) GetReceiptsByHash(hash common.Hash) types.Receipts {
 }
 
 // GetBlocksFromHash returns the block corresponding to hash and up to n-1 ancestors.
-// [deprecated by intprotocol/62]
+// [deprecated by neatprotocol/62]
 func (bc *BlockChain) GetBlocksFromHash(hash common.Hash, n int) (blocks []*types.Block) {
 	number := bc.hc.GetBlockNumber(hash)
 	if number == nil {

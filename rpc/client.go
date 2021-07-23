@@ -392,7 +392,7 @@ func (c *Client) Notify(ctx context.Context, method string, args ...interface{})
 	}
 }
 
-// EthSubscribe registers a subscripion under the "intprotocol" namespace.
+// EthSubscribe registers a subscripion under the "neatprotocol" namespace.
 func (c *Client) EthSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
 	return c.Subscribe(ctx, "eth", channel, args...)
 }

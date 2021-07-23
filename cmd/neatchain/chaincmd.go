@@ -18,14 +18,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol"
-	"github.com/Gessiux/neatchain/params"
 	"os"
 	"runtime"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatprotocol"
+	"github.com/Gessiux/neatchain/params"
 
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/common"
@@ -35,8 +36,8 @@ import (
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/rlp"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -707,7 +708,7 @@ func version(ctx *cli.Context) error {
 		fmt.Println("Git Commit Date:", gitDate)
 	}
 	fmt.Println("Architecture:", runtime.GOARCH)
-	fmt.Println("Protocol Versions:", intprotocol.ProtocolVersions)
+	fmt.Println("Protocol Versions:", neatprotocol.ProtocolVersions)
 	fmt.Println("Go Version:", runtime.Version())
 	fmt.Println("Operating System:", runtime.GOOS)
 	fmt.Printf("GOPATH=%s\n", os.Getenv("GOPATH"))

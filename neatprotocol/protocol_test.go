@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/rlp"
 )

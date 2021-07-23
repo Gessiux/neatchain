@@ -3,6 +3,11 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"math/big"
+	"os"
+	"strings"
+	"sync"
+
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/go-wire"
@@ -11,10 +16,6 @@ import (
 	ep "github.com/Gessiux/neatchain/consensus/ipbft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/log"
-	"math/big"
-	"os"
-	"strings"
-	"sync"
 )
 
 const (
@@ -298,7 +299,7 @@ func SaveChainGenesis(db dbm.DB, chainId string, ethGenesis, tdmGenesis []byte) 
 	mtx.Lock()
 	defer mtx.Unlock()
 
-	// Save the intprotocol genesis
+	// Save the neatprotocol genesis
 	db.SetSync(calcETHGenesisKey(chainId), ethGenesis)
 
 	// Save the tdm genesis

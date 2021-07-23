@@ -1,4 +1,4 @@
-// neatchain is the official command-line client for INT Chain.
+// neatchain is the official command-line client for NEAT Chain.
 package main
 
 import (
@@ -107,7 +107,7 @@ func init() {
 	// Initialize the CLI app and start neatchain
 	app.Action = neatchainCmd
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2018-2020 The INT Chain Authors"
+	app.Copyright = "Copyright 2018-2020 The NEAT Chain Authors"
 	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		createValidatorCmd,

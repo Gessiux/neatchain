@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intprotocol
+package neatprotocol
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ const (
 )
 
 // protocolName is the official short name of the protocol used during capability negotiation.
-const protocolName = "intprotocol"
+const protocolName = "neatprotocol"
 
 // ProtocolVersions are the supported versions of the eth protocol (first is primary).
 var ProtocolVersions = []uint{intprotocol65, intprotocol64, intprotocol63}
@@ -46,9 +46,9 @@ var protocolLengths = map[uint]uint64{intprotocol65: 17, intprotocol64: 17, intp
 
 const ProtocolMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 
-// intprotocol protocol message codes
+// neatprotocol protocol message codes
 const (
-	// Protocol messages belonging to intprotocol/62
+	// Protocol messages belonging to neatprotocol/62
 	StatusMsg          = 0x00
 	NewBlockHashesMsg  = 0x01
 	TxMsg              = 0x02
@@ -58,7 +58,7 @@ const (
 	BlockBodiesMsg     = 0x06
 	NewBlockMsg        = 0x07
 
-	// Protocol messages belonging to intprotocol/63
+	// Protocol messages belonging to neatprotocol/63
 	GetNodeDataMsg = 0x0d
 	NodeDataMsg    = 0x0e
 	GetReceiptsMsg = 0x0f

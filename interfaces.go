@@ -1,4 +1,4 @@
-// Package neatchain defines interfaces for interacting with INT Chain.
+// Package neatchain defines interfaces for interacting with NEAT Chain.
 package neatchain
 
 import (

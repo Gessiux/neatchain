@@ -35,11 +35,11 @@ import (
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol"
-	"github.com/Gessiux/neatchain/intprotocol/downloader"
-	"github.com/Gessiux/neatchain/intprotocol/gasprice"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/neatprotocol"
+	"github.com/Gessiux/neatchain/neatprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/p2p/discover"
@@ -123,7 +123,7 @@ var (
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
 		Usage: "Network identifier (integer, mainnet=8550, testnet=8551)",
-		Value: intprotocol.DefaultConfig.NetworkId,
+		Value: neatprotocol.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
@@ -149,7 +149,7 @@ var (
 		Usage: "Enable fast syncing through state downloads",
 	}
 
-	defaultSyncMode = intprotocol.DefaultConfig.SyncMode
+	defaultSyncMode = neatprotocol.DefaultConfig.SyncMode
 	SyncModeFlag    = TextMarshalerFlag{
 		Name: "syncmode",
 		//Usage: `Blockchain sync mode ("fast", "full", or "light")`,
@@ -180,37 +180,37 @@ var (
 	TxPoolPriceLimitFlag = cli.Uint64Flag{
 		Name:  "txpool.pricelimit",
 		Usage: "Minimum gas price limit to enforce for acceptance into the pool",
-		Value: intprotocol.DefaultConfig.TxPool.PriceLimit,
+		Value: neatprotocol.DefaultConfig.TxPool.PriceLimit,
 	}
 	TxPoolPriceBumpFlag = cli.Uint64Flag{
 		Name:  "txpool.pricebump",
 		Usage: "Price bump percentage to replace an already existing transaction",
-		Value: intprotocol.DefaultConfig.TxPool.PriceBump,
+		Value: neatprotocol.DefaultConfig.TxPool.PriceBump,
 	}
 	TxPoolAccountSlotsFlag = cli.Uint64Flag{
 		Name:  "txpool.accountslots",
 		Usage: "Minimum number of executable transaction slots guaranteed per account",
-		Value: intprotocol.DefaultConfig.TxPool.AccountSlots,
+		Value: neatprotocol.DefaultConfig.TxPool.AccountSlots,
 	}
 	TxPoolGlobalSlotsFlag = cli.Uint64Flag{
 		Name:  "txpool.globalslots",
 		Usage: "Maximum number of executable transaction slots for all accounts",
-		Value: intprotocol.DefaultConfig.TxPool.GlobalSlots,
+		Value: neatprotocol.DefaultConfig.TxPool.GlobalSlots,
 	}
 	TxPoolAccountQueueFlag = cli.Uint64Flag{
 		Name:  "txpool.accountqueue",
 		Usage: "Maximum number of non-executable transaction slots permitted per account",
-		Value: intprotocol.DefaultConfig.TxPool.AccountQueue,
+		Value: neatprotocol.DefaultConfig.TxPool.AccountQueue,
 	}
 	TxPoolGlobalQueueFlag = cli.Uint64Flag{
 		Name:  "txpool.globalqueue",
 		Usage: "Maximum number of non-executable transaction slots for all accounts",
-		Value: intprotocol.DefaultConfig.TxPool.GlobalQueue,
+		Value: neatprotocol.DefaultConfig.TxPool.GlobalQueue,
 	}
 	TxPoolLifetimeFlag = cli.DurationFlag{
 		Name:  "txpool.lifetime",
 		Usage: "Maximum amount of time non-executable transaction are queued",
-		Value: intprotocol.DefaultConfig.TxPool.Lifetime,
+		Value: neatprotocol.DefaultConfig.TxPool.Lifetime,
 	}
 	// Performance tuning settings
 	CacheFlag = cli.IntFlag{
@@ -246,17 +246,17 @@ var (
 	MinerGasTargetFlag = cli.Uint64Flag{
 		Name:  "miner.gastarget",
 		Usage: "Target gas floor for mined blocks",
-		Value: intprotocol.DefaultConfig.MinerGasFloor,
+		Value: neatprotocol.DefaultConfig.MinerGasFloor,
 	}
 	MinerGasLimitFlag = cli.Uint64Flag{
 		Name:  "miner.gaslimit",
 		Usage: "Target gas ceiling for mined blocks",
-		Value: intprotocol.DefaultConfig.MinerGasCeil,
+		Value: neatprotocol.DefaultConfig.MinerGasCeil,
 	}
 	MinerGasPriceFlag = BigFlag{
 		Name:  "miner.gasprice",
 		Usage: "Minimal gas price for mining a transactions",
-		Value: intprotocol.DefaultConfig.MinerGasPrice,
+		Value: neatprotocol.DefaultConfig.MinerGasPrice,
 	}
 	MinerCoinbaseFlag = cli.StringFlag{
 		Name:  "miner.etherbase",
@@ -442,12 +442,12 @@ var (
 	GpoBlocksFlag = cli.IntFlag{
 		Name:  "gpoblocks",
 		Usage: "Number of recent blocks to check for gas prices",
-		Value: intprotocol.DefaultConfig.GPO.Blocks,
+		Value: neatprotocol.DefaultConfig.GPO.Blocks,
 	}
 	GpoPercentileFlag = cli.IntFlag{
 		Name:  "gpopercentile",
 		Usage: "Suggested gas price is the given percentile of a set of recent transaction gas prices",
-		Value: intprotocol.DefaultConfig.GPO.Percentile,
+		Value: neatprotocol.DefaultConfig.GPO.Percentile,
 	}
 
 	// Data Reduction Flag
@@ -810,7 +810,7 @@ func MakeAddress(ks *keystore.KeyStore, account string) (accounts.Account, error
 
 // setCoinbase retrieves the etherbase either from the directly specified
 // command line flags or from the keystore if CLI indexed.
-func setCoinbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *intprotocol.Config) {
+func setCoinbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *neatprotocol.Config) {
 	var coinbase string
 	if ctx.GlobalIsSet(MinerCoinbaseFlag.Name) {
 		coinbase = ctx.GlobalString(MinerCoinbaseFlag.Name)
@@ -998,8 +998,8 @@ func checkExclusive(ctx *cli.Context, args ...interface{}) {
 //	}
 //}
 
-// SetEthConfig applies intprotocol-related command line flags to the config.
-func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *intprotocol.Config) {
+// SetEthConfig applies neatprotocol-related command line flags to the config.
+func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *neatprotocol.Config) {
 	// Avoid conflicting network flags
 	checkExclusive(ctx, TestnetFlag)
 	checkExclusive(ctx, FastSyncFlag, SyncModeFlag)
@@ -1075,12 +1075,12 @@ func SetGeneralConfig(ctx *cli.Context) {
 	params.GenCfg.PerfTest = ctx.GlobalBool(PerfTestFlag.Name)
 }
 
-// registerIntService adds an INT Chain client to the stack.
-func RegisterIntService(stack *node.Node, cfg *intprotocol.Config, cliCtx *cli.Context, cch core.CrossChainHelper) {
+// registerIntService adds an NEAT Chain client to the stack.
+func RegisterIntService(stack *node.Node, cfg *neatprotocol.Config, cliCtx *cli.Context, cch core.CrossChainHelper) {
 	var err error
 	err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		//return NewBackend(ctx, cfg, cliCtx, pNode, cch)
-		fullNode, err := intprotocol.New(ctx, cfg, cliCtx, cch, stack.GetLogger(), cliCtx.GlobalBool(TestnetFlag.Name))
+		fullNode, err := neatprotocol.New(ctx, cfg, cliCtx, cch, stack.GetLogger(), cliCtx.GlobalBool(TestnetFlag.Name))
 		//if fullNode != nil && cfg.LightServ > 0 {
 		//	ls, _ := les.NewLesServer(fullNode, cfg)
 		//	fullNode.AddLesServer(ls)
@@ -1092,11 +1092,11 @@ func RegisterIntService(stack *node.Node, cfg *intprotocol.Config, cliCtx *cli.C
 	}
 }
 
-//// RegisterEthService adds an INT Chain client to the stack.
-//func RegisterIntService(stack *node.Node, cfg *intprotocol.Config) {
+//// RegisterEthService adds an NEAT Chain client to the stack.
+//func RegisterIntService(stack *node.Node, cfg *neatprotocol.Config) {
 //	var err error
 //	err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-//		fullNode, err := intprotocol.New(ctx, cfg, nil, nil, stack.GetLogger(), false)
+//		fullNode, err := neatprotocol.New(ctx, cfg, nil, nil, stack.GetLogger(), false)
 //		//if fullNode != nil && cfg.LightServ > 0 {
 //		//	ls, _ := les.NewLesServer(fullNode, cfg)
 //		//	fullNode.AddLesServer(ls)
@@ -1162,11 +1162,11 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		Fatalf("--%s must be either 'full' or 'archive'", GCModeFlag.Name)
 	}
 	cache := &core.CacheConfig{
-		TrieCleanLimit: intprotocol.DefaultConfig.TrieCleanCache,
+		TrieCleanLimit: neatprotocol.DefaultConfig.TrieCleanCache,
 
-		TrieDirtyLimit:    intprotocol.DefaultConfig.TrieDirtyCache,
+		TrieDirtyLimit:    neatprotocol.DefaultConfig.TrieDirtyCache,
 		TrieDirtyDisabled: ctx.GlobalString(GCModeFlag.Name) == "archive",
-		TrieTimeLimit:     intprotocol.DefaultConfig.TrieTimeout,
+		TrieTimeLimit:     neatprotocol.DefaultConfig.TrieTimeout,
 	}
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheTrieFlag.Name) {
 		cache.TrieCleanLimit = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheTrieFlag.Name) / 100

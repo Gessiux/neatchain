@@ -25,8 +25,8 @@ import (
 	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/intclient"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intprotocol"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
@@ -825,7 +825,7 @@ func (cch *CrossChainHelper) GetAllTX3ProofData() []*types.TX3ProofData {
 
 // TX3LocalCache end
 
-func MustGetNeatChainFromNode(node *node.Node) *intprotocol.NeatChain {
+func MustGetNeatChainFromNode(node *node.Node) *neatprotocol.NeatChain {
 	neatChain, err := getNeatChainFromNode(node)
 	if err != nil {
 		panic("getNeatChainFromNode error: " + err.Error())
@@ -833,8 +833,8 @@ func MustGetNeatChainFromNode(node *node.Node) *intprotocol.NeatChain {
 	return neatChain
 }
 
-func getNeatChainFromNode(node *node.Node) (*intprotocol.NeatChain, error) {
-	var neatChain *intprotocol.NeatChain
+func getNeatChainFromNode(node *node.Node) (*neatprotocol.NeatChain, error) {
+	var neatChain *neatprotocol.NeatChain
 	if err := node.Service(&neatChain); err != nil {
 		return nil, err
 	}

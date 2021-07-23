@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package types contains data types related to INT Chain consensus.
+// Package types contains data types related to NEAT Chain consensus.
 package types
 
 import (
@@ -171,7 +171,7 @@ type Block struct {
 	// of the chain up to and including the block.
 	td *big.Int
 
-	// These fields are used by package intprotocol to track
+	// These fields are used by package neatprotocol to track
 	// inter-peer block relay.
 	ReceivedAt   time.Time
 	ReceivedFrom interface{}
@@ -184,20 +184,20 @@ func (b *Block) DeprecatedTd() *big.Int {
 	return b.td
 }
 
-// [deprecated by intprotocol/63]
+// [deprecated by neatprotocol/63]
 // StorageBlock defines the RLP encoding of a Block stored in the
 // state database. The StorageBlock encoding contains fields that
 // would otherwise need to be recomputed.
 type StorageBlock Block
 
-// "external" block encoding. used for intprotocol protocol, etc.
+// "external" block encoding. used for neatprotocol protocol, etc.
 type extblock struct {
 	Header *Header
 	Txs    []*Transaction
 	Uncles []*Header
 }
 
-// [deprecated by intprotocol/63]
+// [deprecated by neatprotocol/63]
 // "storage" block encoding. used for database.
 type storageblock struct {
 	Header *Header
@@ -292,7 +292,7 @@ func (b *Block) EncodeRLP(w io.Writer) error {
 	})
 }
 
-// [deprecated by intprotocol/63]
+// [deprecated by neatprotocol/63]
 func (b *StorageBlock) DecodeRLP(s *rlp.Stream) error {
 	var sb storageblock
 	if err := s.Decode(&sb); err != nil {
