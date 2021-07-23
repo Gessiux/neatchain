@@ -14,19 +14,25 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ipbft
+package neatbyft
 
-import "errors"
+type ProposerPolicy uint64
 
-var (
-	// ErrUnauthorizedAddress is returned when given address cannot be found in
-	// current validator set.
-	ErrUnauthorizedAddress = errors.New("unauthorized address")
-	// ErrStoppedEngine is returned if the engine is stopped
-	ErrStoppedEngine = errors.New("stopped engine")
-	// ErrStartedEngine is returned if the engine is already started
-	ErrStartedEngine = errors.New("started engine")
-
-	// ErrNoPrivValidator is returned if private validator is not set during the start of the node
-	ErrNoPrivValidator = errors.New("cannot start node without private validator")
+const (
+	RoundRobin ProposerPolicy = iota
+	Sticky
 )
+
+type Config struct {
+	RequestTimeout uint64         `toml:",omitempty"` // The timeout for each Istanbul round in milliseconds.
+	BlockPeriod    uint64         `toml:",omitempty"` // Default minimum difference between two consecutive block's timestamps in second
+	ProposerPolicy ProposerPolicy `toml:",omitempty"` // The policy for proposer selection
+	Epoch          uint64         `toml:",omitempty"` // The number of blocks after which to checkpoint and reset the pending votes
+}
+
+var DefaultConfig = &Config{
+	RequestTimeout: 10000,
+	BlockPeriod:    1,
+	ProposerPolicy: RoundRobin,
+	Epoch:          30000,
+}

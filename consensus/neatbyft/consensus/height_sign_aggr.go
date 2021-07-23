@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	. "github.com/Gessiux/go-common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/log"
 )
 

@@ -1,14 +1,15 @@
-package ipbft
+package neatbyft
 
 import (
-	"gopkg.in/urfave/cli.v1"
 	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
 
+	"gopkg.in/urfave/cli.v1"
+
 	cfg "github.com/Gessiux/go-config"
-	tmcfg "github.com/Gessiux/neatchain/consensus/ipbft/config/tendermint"
+	tmcfg "github.com/Gessiux/neatchain/consensus/neatbyft/config/neatcon"
 )
 
 func GetTendermintConfig(chainId string, ctx *cli.Context) cfg.Config {

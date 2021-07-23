@@ -8,7 +8,7 @@ import (
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"

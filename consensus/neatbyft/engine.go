@@ -1,4 +1,4 @@
-package ipbft
+package neatbyft
 
 import (
 	"bytes"
@@ -10,8 +10,8 @@ import (
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/params"
@@ -21,7 +21,7 @@ import (
 
 const (
 	// fetcherID is the ID indicates the block is from Tendermint engine
-	fetcherID = "ipbft"
+	fetcherID = "neatbyft"
 )
 
 var (
@@ -85,7 +85,7 @@ func (sb *backend) APIs(chain consensus.ChainReader) []rpc.API {
 	return []rpc.API{{
 		Namespace: "int",
 		Version:   "1.0",
-		Service:   &API{chain: chain, tendermint: sb},
+		Service:   &API{chain: chain, neatcon: sb},
 		Public:    true,
 	}}
 }
@@ -113,7 +113,7 @@ func (sb *backend) Start(chain consensus.ChainReader, currentBlock func() *types
 	sb.vcommitCh = make(chan *tdmTypes.IntermediateBlockResult, 1)
 
 	sb.chain = chain
-	fmt.Printf("ipbft backend start chain %v\n", chain)
+	fmt.Printf("neatbyft backend start chain %v\n", chain)
 	sb.currentBlock = currentBlock
 	sb.hasBadBlock = hasBadBlock
 
@@ -139,7 +139,7 @@ func (sb *backend) Stop() error {
 		return ErrStoppedEngine
 	}
 	if !sb.core.Stop() {
-		return errors.New("ipbft stop error")
+		return errors.New("neatbyft stop error")
 	}
 	sb.coreStarted = false
 

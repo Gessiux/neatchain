@@ -51,7 +51,7 @@ func (e ErrAppBlockHeightTooHigh) Error() string {
 	return Fmt("App block height (%d) is higher than core (%d)", e.AppHeight, e.CoreHeight)
 }
 func (e ErrLastStateMismatch) Error() string {
-	return Fmt("Latest ipbft block (%d) LastAppHash (%X) does not match app's AppHash (%X)", e.Height, e.Core, e.App)
+	return Fmt("Latest neatbyft block (%d) LastAppHash (%X) does not match app's AppHash (%X)", e.Height, e.Core, e.App)
 }
 
 func (e ErrStateMismatch) Error() string {

@@ -25,7 +25,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
@@ -220,8 +220,8 @@ func (self *worker) start() {
 	//	istanbul.Start(self.chain, self.chain.CurrentBlock, self.chain.HasBadBlock)
 	//}
 
-	if ipbft, ok := self.engine.(consensus.IPBFT); ok {
-		err := ipbft.Start(self.chain, self.chain.CurrentBlock, self.chain.HasBadBlock)
+	if neatbyft, ok := self.engine.(consensus.IPBFT); ok {
+		err := neatbyft.Start(self.chain, self.chain.CurrentBlock, self.chain.HasBadBlock)
 		if err != nil {
 			self.logger.Error("Starting IPBFT failed", "err", err)
 		}

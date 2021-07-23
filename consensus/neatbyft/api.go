@@ -1,27 +1,28 @@
-package ipbft
+package neatbyft
 
 import (
 	"errors"
 	"fmt"
+	"math/big"
+
 	"github.com/Gessiux/go-crypto"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	intCrypto "github.com/Gessiux/neatchain/crypto"
-	"math/big"
 )
 
 // API is a user facing RPC API of Tendermint
 type API struct {
-	chain      consensus.ChainReader
-	tendermint *backend
+	chain   consensus.ChainReader
+	neatcon *backend
 }
 
 // GetCurrentEpochNumber retrieves the current epoch number.
 func (api *API) GetCurrentEpochNumber() (hexutil.Uint64, error) {
-	return hexutil.Uint64(api.tendermint.core.consensusState.Epoch.Number), nil
+	return hexutil.Uint64(api.neatcon.core.consensusState.Epoch.Number), nil
 }
 
 // GetEpoch retrieves the Epoch Detail by Number
@@ -29,7 +30,7 @@ func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, erro
 
 	number := uint64(num)
 	var resultEpoch *epoch.Epoch
-	curEpoch := api.tendermint.core.consensusState.Epoch
+	curEpoch := api.neatcon.core.consensusState.Epoch
 	if number < 0 || number > curEpoch.Number {
 		return nil, errors.New("epoch number out of range")
 	}
@@ -64,7 +65,7 @@ func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, erro
 // GetEpochVote
 func (api *API) GetNextEpochVote() (*tdmTypes.EpochVotesApiForConsole, error) {
 
-	ep := api.tendermint.core.consensusState.Epoch
+	ep := api.neatcon.core.consensusState.Epoch
 	if ep.GetNextEpoch() != nil {
 
 		var votes []*epoch.EpochValidatorVote
@@ -104,7 +105,7 @@ func (api *API) GetNextEpochValidators() ([]*tdmTypes.EpochValidatorForConsole, 
 
 	//height := api.chain.CurrentBlock().NumberU64()
 
-	ep := api.tendermint.core.consensusState.Epoch
+	ep := api.neatcon.core.consensusState.Epoch
 	nextEp := ep.GetNextEpoch()
 	if nextEp == nil {
 		return nil, errors.New("voting for next epoch has not started yet")
@@ -192,7 +193,7 @@ func (api *API) GetConsensusPublicKey(extra string) ([]string, error) {
 	//fmt.Printf("GetConsensusPublicKey tdmExtra %v\n", tdmExtra)
 	number := uint64(tdmExtra.EpochNumber)
 	var resultEpoch *epoch.Epoch
-	curEpoch := api.tendermint.core.consensusState.Epoch
+	curEpoch := api.neatcon.core.consensusState.Epoch
 	if number < 0 || number > curEpoch.Number {
 		return nil, errors.New("epoch number out of range")
 	}

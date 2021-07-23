@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/Gessiux/neatchain/cmd/utils"
-	"github.com/Gessiux/neatchain/consensus/ipbft/consensus"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/consensus"
 	"github.com/Gessiux/neatchain/internal/debug"
 	"github.com/Gessiux/neatchain/log"
 	"gopkg.in/urfave/cli.v1"

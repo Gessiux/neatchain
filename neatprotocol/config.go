@@ -27,7 +27,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
-	"github.com/Gessiux/neatchain/consensus/ipbft"
+	"github.com/Gessiux/neatchain/consensus/neatbyft"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
@@ -111,7 +111,7 @@ type Config struct {
 	EnablePreimageRecording bool
 
 	// Tendermint options
-	IPBFT ipbft.Config
+	IPBFT neatbyft.Config
 
 	// Miscellaneous options
 	DocRoot string `toml:"-"`

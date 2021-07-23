@@ -3,14 +3,16 @@ package epoch
 import (
 	"errors"
 	"fmt"
+
 	goCrypto "github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/common"
-	tmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/log"
+
 	//"math"
 	"math/big"
 	"sort"

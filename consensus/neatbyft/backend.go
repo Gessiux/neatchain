@@ -1,4 +1,4 @@
-package ipbft
+package neatbyft
 
 import (
 	"crypto/ecdsa"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	ethTypes "github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
@@ -27,9 +27,9 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 
 	backend := &backend{
 		//config:             config,
-		chainConfig:        chainConfig,
-		tendermintEventMux: new(event.TypeMux),
-		privateKey:         privateKey,
+		chainConfig:     chainConfig,
+		neatconEventMux: new(event.TypeMux),
+		privateKey:      privateKey,
 		//address:          crypto.PubkeyToAddress(privateKey.PublicKey),
 		//core:             node,
 		//chain:     chain,
@@ -48,15 +48,15 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 
 type backend struct {
 	//config             cfg.Config
-	chainConfig        *params.ChainConfig
-	tendermintEventMux *event.TypeMux
-	privateKey         *ecdsa.PrivateKey
-	address            common.Address
-	core               *Node
-	logger             log.Logger
-	chain              consensus.ChainReader
-	currentBlock       func() *ethTypes.Block
-	hasBadBlock        func(hash common.Hash) bool
+	chainConfig     *params.ChainConfig
+	neatconEventMux *event.TypeMux
+	privateKey      *ecdsa.PrivateKey
+	address         common.Address
+	core            *Node
+	logger          log.Logger
+	chain           consensus.ChainReader
+	currentBlock    func() *ethTypes.Block
+	hasBadBlock     func(hash common.Hash) bool
 
 	// the channels for istanbul engine notifications
 	commitCh          chan *ethTypes.Block

@@ -3,9 +3,10 @@ package state
 import (
 	"errors"
 	"fmt"
+
 	"github.com/Gessiux/neatchain/consensus"
-	ep "github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	ep "github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	ethTypes "github.com/Gessiux/neatchain/core/types"
 )

@@ -48,9 +48,9 @@ import (
 	"github.com/Gessiux/neatchain/params"
 	"gopkg.in/urfave/cli.v1"
 
-	// import tendermint config
+	// import neatcon config
 	cfg "github.com/Gessiux/go-config"
-	tmcfg "github.com/Gessiux/neatchain/consensus/ipbft/config/tendermint"
+	tmcfg "github.com/Gessiux/neatchain/consensus/neatbyft/config/neatcon"
 )
 
 var (
@@ -1226,7 +1226,7 @@ func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error 
 }
 
 var (
-	// ipbft config
+	// neatbyft config
 	Config cfg.Config
 )
 

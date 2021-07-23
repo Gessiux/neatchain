@@ -9,7 +9,7 @@ import (
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
 	"gopkg.in/urfave/cli.v1"

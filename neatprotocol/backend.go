@@ -29,8 +29,8 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft"
-	tendermintBackend "github.com/Gessiux/neatchain/consensus/ipbft"
+	"github.com/Gessiux/neatchain/consensus/neatbyft"
+	neatconBackend "github.com/Gessiux/neatchain/consensus/neatbyft"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/bloombits"
 	"github.com/Gessiux/neatchain/core/datareduction"
@@ -226,8 +226,8 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 	if chainConfig.IPBFT.Epoch != 0 {
 		config.IPBFT.Epoch = chainConfig.IPBFT.Epoch
 	}
-	config.IPBFT.ProposerPolicy = ipbft.ProposerPolicy(chainConfig.IPBFT.ProposerPolicy)
-	return tendermintBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
+	config.IPBFT.ProposerPolicy = neatbyft.ProposerPolicy(chainConfig.IPBFT.ProposerPolicy)
+	return neatconBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
 }
 
 // APIs returns the collection of RPC services the NeatChain package offers.
@@ -312,8 +312,8 @@ func (s *NeatChain) ResetWithGenesisBlock(gb *types.Block) {
 }
 
 func (s *NeatChain) Coinbase() (eb common.Address, err error) {
-	if ipbft, ok := s.engine.(consensus.IPBFT); ok {
-		eb = ipbft.PrivateValidator()
+	if neatbyft, ok := s.engine.(consensus.IPBFT); ok {
+		eb = neatbyft.PrivateValidator()
 		if eb != (common.Address{}) {
 			return eb, nil
 		} else {
@@ -355,8 +355,8 @@ func (self *NeatChain) SetCoinbase(coinbase common.Address) {
 
 func (s *NeatChain) StartMining(local bool) error {
 	var eb common.Address
-	if ipbft, ok := s.engine.(consensus.IPBFT); ok {
-		eb = ipbft.PrivateValidator()
+	if neatbyft, ok := s.engine.(consensus.IPBFT); ok {
+		eb = neatbyft.PrivateValidator()
 		if (eb == common.Address{}) {
 			log.Error("Cannot start mining without private validator")
 			return errors.New("private validator missing")

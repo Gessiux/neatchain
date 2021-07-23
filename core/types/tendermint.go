@@ -24,7 +24,7 @@ var (
 	MagicExtra = []byte("neatchain_tmp_extra")
 
 	// ErrInvalidTendermintHeaderExtra is returned if the length of extra-data is less than 32 bytes
-	ErrInvalidTendermintHeaderExtra = errors.New("invalid ipbft header extra-data")
+	ErrInvalidTendermintHeaderExtra = errors.New("invalid neatbyft header extra-data")
 )
 
 // TendermintFilteredHeader returns a filtered header which some information (like seal, committed seals)

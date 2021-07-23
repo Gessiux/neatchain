@@ -13,7 +13,7 @@ import (
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/math"
-	ep "github.com/Gessiux/neatchain/consensus/ipbft/epoch"
+	ep "github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/log"
 )

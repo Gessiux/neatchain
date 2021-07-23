@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package ipbft
+package neatbyft
 
 import (
 	"errors"
 
 	"github.com/Gessiux/neatchain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
@@ -28,7 +28,7 @@ import (
 
 var (
 	// errDecodeFailed is returned when decode message fails
-	errDecodeFailed = errors.New("fail to decode ipbft message")
+	errDecodeFailed = errors.New("fail to decode neatbyft message")
 )
 
 // Protocol implements consensus.Engine.Protocol

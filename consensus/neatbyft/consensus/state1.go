@@ -5,9 +5,9 @@ import (
 
 	cmn "github.com/Gessiux/go-common"
 	consss "github.com/Gessiux/neatchain/consensus"
-	ep "github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	sm "github.com/Gessiux/neatchain/consensus/ipbft/state"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	ep "github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	sm "github.com/Gessiux/neatchain/consensus/neatbyft/state"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
 )

@@ -14,8 +14,8 @@ import (
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/log"
@@ -301,8 +301,8 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 	cm.mainChain.IntNode.Service(&ethereum)
 
 	var localEtherbase common.Address
-	if ipbft, ok := ethereum.Engine().(consensus.IPBFT); ok {
-		localEtherbase = ipbft.PrivateValidator()
+	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+		localEtherbase = neatbyft.PrivateValidator()
 	}
 
 	for _, v := range cci.JoinedValidators {
@@ -433,8 +433,8 @@ func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool 
 	cm.mainChain.IntNode.Service(&ethereum)
 
 	var localEtherbase common.Address
-	if ipbft, ok := ethereum.Engine().(consensus.IPBFT); ok {
-		localEtherbase = ipbft.PrivateValidator()
+	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+		localEtherbase = neatbyft.PrivateValidator()
 	}
 
 	return childEpoch.Validators.HasAddress(localEtherbase[:])

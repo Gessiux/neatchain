@@ -1,4 +1,4 @@
-package ipbft
+package neatbyft
 
 import (
 	"io/ioutil"
@@ -8,9 +8,9 @@ import (
 	cmn "github.com/Gessiux/go-common"
 	cfg "github.com/Gessiux/go-config"
 	dbm "github.com/Gessiux/go-db"
-	"github.com/Gessiux/neatchain/consensus/ipbft/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/consensus"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
@@ -189,7 +189,7 @@ func (n *Node) GenesisDoc() *types.GenesisDoc {
 // Users wishing to:
 //	* use an external signer for their validators
 //	* supply an in-proc abci app
-// should fork ipbft/ipbft and implement RunNode to
+// should fork neatbyft/neatbyft and implement RunNode to
 // call NewNode with their custom priv validator and/or custom
 // proxy.ClientCreator interface
 /*

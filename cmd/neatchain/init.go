@@ -27,7 +27,7 @@ import (
 	"github.com/Gessiux/neatchain/accounts/keystore"
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/pkg/errors"

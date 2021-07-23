@@ -249,7 +249,7 @@ var DefaultMainnetGenesisJSON = `{
 		"eip155Block": 0,
 		"eip158Block": 0,
 		"byzantiumBlock": 0,
-		"ipbft": {
+		"neatbyft": {
 			"epoch": 30000,
 			"policy": 0
 		}
@@ -282,7 +282,7 @@ var DefaultTestnetGenesisJSON = `{
 		"eip155Block": 0,
 		"eip158Block": 0,
 		"byzantiumBlock": 0,
-		"ipbft": {
+		"neatbyft": {
 			"epoch": 30000,
 			"policy": 0
 		}

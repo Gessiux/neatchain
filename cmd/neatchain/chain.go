@@ -1,14 +1,15 @@
 package main
 
 import (
+	"path/filepath"
+
 	cfg "github.com/Gessiux/go-config"
 	"github.com/Gessiux/neatchain/accounts/keystore"
 	"github.com/Gessiux/neatchain/cmd/utils"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/log"
 	intnode "github.com/Gessiux/neatchain/node"
 	"gopkg.in/urfave/cli.v1"
-	"path/filepath"
 )
 
 const (

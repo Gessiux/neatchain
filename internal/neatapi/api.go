@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 
 	goCrypto "github.com/Gessiux/go-crypto"

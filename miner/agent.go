@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Gessiux/neatchain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/log"
 )

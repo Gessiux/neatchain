@@ -2,8 +2,9 @@ package core
 
 import (
 	"fmt"
+
 	"github.com/Gessiux/neatchain/consensus"
-	tmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/types"
 )
 

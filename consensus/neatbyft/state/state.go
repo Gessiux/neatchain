@@ -2,18 +2,19 @@ package state
 
 import (
 	"bytes"
-	"github.com/Gessiux/neatchain/log"
 	"time"
+
+	"github.com/Gessiux/neatchain/log"
 
 	. "github.com/Gessiux/go-common"
 	//cfg "github.com/Gessiux/go-config"
 	//dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/go-wire"
-	//"github.com/Gessiux/neatchain/consensus/ipbft/state/txindex"
-	//"github.com/Gessiux/neatchain/consensus/ipbft/state/txindex/null"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	//"github.com/Gessiux/neatchain/consensus/neatbyft/state/txindex"
+	//"github.com/Gessiux/neatchain/consensus/neatbyft/state/txindex/null"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	//"fmt"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
 	"github.com/pkg/errors"
 )
 

@@ -16,8 +16,8 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/state"
@@ -322,8 +322,8 @@ func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Trans
 func (cch *CrossChainHelper) GetEpochFromMainChain() (string, *epoch.Epoch) {
 	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	var ep *epoch.Epoch
-	if ipbft, ok := ethereum.Engine().(consensus.IPBFT); ok {
-		ep = ipbft.GetEpoch()
+	if neatbyft, ok := ethereum.Engine().(consensus.IPBFT); ok {
+		ep = neatbyft.GetEpoch()
 	}
 	return ethereum.ChainConfig().NeatChainId, ep
 }

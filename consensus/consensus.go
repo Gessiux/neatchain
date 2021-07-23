@@ -21,7 +21,7 @@ import (
 	"math/big"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/params"

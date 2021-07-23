@@ -98,7 +98,7 @@ type ChainConfig struct {
 	ConstantinopleBlock *big.Int `json:"constantinopleBlock,omitempty"` // Constantinople switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	IPBFT *IPBFTConfig `json:"ipbft,omitempty"`
+	IPBFT *IPBFTConfig `json:"neatbyft,omitempty"`
 
 	ChainLogger log.Logger `json:"-"`
 }
@@ -111,7 +111,7 @@ type IPBFTConfig struct {
 
 // String implements the stringer interface, returning the consensus engine details.
 func (c *IPBFTConfig) String() string {
-	return "ipbft"
+	return "neatbyft"
 }
 
 // Create a new Chain Config based on the Chain ID, for child chain creation purpose

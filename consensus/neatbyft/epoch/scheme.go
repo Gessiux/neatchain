@@ -2,12 +2,13 @@ package epoch
 
 import (
 	"fmt"
-	dbm "github.com/Gessiux/go-db"
-	"github.com/Gessiux/go-wire"
-	tmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
-	"github.com/Gessiux/neatchain/log"
 	"math/big"
 	"sync"
+
+	dbm "github.com/Gessiux/go-db"
+	"github.com/Gessiux/go-wire"
+	tmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/log"
 )
 
 const rewardSchemeKey = "REWARDSCHEME"

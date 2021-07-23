@@ -14,8 +14,8 @@ import (
 	. "github.com/Gessiux/go-common"
 	"github.com/Gessiux/go-wire"
 
-	//sm "github.com/Gessiux/neatchain/consensus/ipbft/state"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	//sm "github.com/Gessiux/neatchain/consensus/neatbyft/state"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 )
 
 const (

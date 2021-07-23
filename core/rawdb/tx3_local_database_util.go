@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Gessiux/neatchain/common"
-	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
+	tdmTypes "github.com/Gessiux/neatchain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/core/types"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/neatdb"

@@ -2,12 +2,13 @@ package consensus
 
 import (
 	"errors"
-	"github.com/Gessiux/neatchain/log"
 	"strings"
 	"sync"
 
+	"github.com/Gessiux/neatchain/log"
+
 	. "github.com/Gessiux/go-common"
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 )
 
 type RoundVoteSet struct {

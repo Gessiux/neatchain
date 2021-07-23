@@ -1,7 +1,7 @@
 package consensus
 
 import (
-	"github.com/Gessiux/neatchain/consensus/ipbft/types"
+	"github.com/Gessiux/neatchain/consensus/neatbyft/types"
 )
 
 // XXX: WARNING: these functions can halt the consensus as firing events is synchronous.

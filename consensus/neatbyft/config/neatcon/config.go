@@ -1,4 +1,4 @@
-package tendermint
+package neatcon
 
 import (
 	"os"
@@ -24,7 +24,7 @@ func getTMRoot(rootDir string) string {
 		rootDir = os.Getenv("TMROOT")
 	}
 	if rootDir == "" {
-		rootDir = os.Getenv("HOME") + "/.ipbft"
+		rootDir = os.Getenv("HOME") + "/.neatbyft"
 	}
 	return rootDir
 }

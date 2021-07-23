@@ -24,7 +24,7 @@ var GenDocKey = []byte("GenDocKey")
 
 var CONSENSUS_POS string = "pos"
 var CONSENSUS_POW string = "pow"
-var CONSENSUS_IPBFT string = "ipbft"
+var CONSENSUS_IPBFT string = "neatbyft"
 
 type GenesisValidator struct {
 	EthAccount     common.Address `json:"address"`
@@ -175,7 +175,7 @@ func GenesisDocFromJSON(jsonBlob []byte) (genDoc *GenesisDoc, err error) {
 
 var MainnetGenesisJSON string = `{
 	"chain_id": "neatchain",
-	"consensus": "ipbft",
+	"consensus": "neatbyft",
 	"genesis_time": "2021-07-20T20:24:48.442620339+02:00",
 	"reward_scheme": {
 		"total_reward": "0xa56fa5b99019a5c8000000",
@@ -202,7 +202,7 @@ var MainnetGenesisJSON string = `{
 
 var TestnetGenesisJSON string = `{
 	"chain_id": "testnet",
-	"consensus": "ipbft",
+	"consensus": "neatbyft",
 	"genesis_time": "2020-11-04T17:47:57.097366+08:00",
 	"reward_scheme": {
 		"total_reward": "0xa56fa5b99019a5c8000000",

@@ -1,4 +1,4 @@
-package ipbft
+package neatbyft
 
 import (
 	"gopkg.in/urfave/cli.v1"
