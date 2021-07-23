@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
@@ -10,7 +12,6 @@ import (
 	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
-	"math/big"
 )
 
 // ApplyTransactionEx attempts to apply a transaction to the given state database
@@ -26,7 +27,7 @@ func ApplyTransactionEx(config *params.ChainConfig, bc *BlockChain, author *comm
 		return nil, 0, err
 	}
 
-	if !intAbi.IsIntChainContractAddr(tx.To()) {
+	if !intAbi.IsNeatChainContractAddr(tx.To()) {
 
 		//log.Debugf("ApplyTransactionEx 1\n")
 

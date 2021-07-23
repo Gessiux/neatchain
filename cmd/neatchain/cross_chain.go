@@ -4,6 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math/big"
+	"regexp"
+	"strings"
+	"sync"
+	"time"
+	"unicode/utf8"
+
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/common"
@@ -24,12 +31,6 @@ import (
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
-	"math/big"
-	"regexp"
-	"strings"
-	"sync"
-	"time"
-	"unicode/utf8"
 )
 
 type CrossChainHelper struct {
@@ -74,7 +75,7 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	if chainId == MainChain || chainId == TestnetChain {
-		return errors.New("you can't create IntChain as a child chain, try use other name instead")
+		return errors.New("you can't create NeatChain as a child chain, try use other name instead")
 	}
 
 	// Check if "chainId" has been created
@@ -111,7 +112,7 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	// Check End Block already passed
-	ethereum := MustGetIntChainFromNode(chainMgr.mainChain.IntNode)
+	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	currentBlock := ethereum.BlockChain().CurrentBlock()
 	if endBlock.Cmp(currentBlock.Number()) <= 0 {
 		return errors.New("end block number has already passed")
@@ -144,7 +145,7 @@ func (cch *CrossChainHelper) ValidateJoinChildChain(from common.Address, consens
 	log.Debug("ValidateJoinChildChain - start")
 
 	if chainId == MainChain || chainId == TestnetChain {
-		return errors.New("you can't join IntChain as a child chain, try use other name instead")
+		return errors.New("you can't join NeatChain as a child chain, try use other name instead")
 	}
 
 	// Check Signature of the PubKey matched against the Address
@@ -306,12 +307,12 @@ func (cch *CrossChainHelper) UpdateNextEpoch(ep *epoch.Epoch, from common.Addres
 }
 
 func (cch *CrossChainHelper) GetHeightFromMainChain() *big.Int {
-	ethereum := MustGetIntChainFromNode(chainMgr.mainChain.IntNode)
+	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	return ethereum.BlockChain().CurrentBlock().Number()
 }
 
 func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Transaction {
-	ethereum := MustGetIntChainFromNode(chainMgr.mainChain.IntNode)
+	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	chainDb := ethereum.ChainDb()
 
 	tx, _, _, _ := rawdb.ReadTransaction(chainDb, txHash)
@@ -319,12 +320,12 @@ func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Trans
 }
 
 func (cch *CrossChainHelper) GetEpochFromMainChain() (string, *epoch.Epoch) {
-	ethereum := MustGetIntChainFromNode(chainMgr.mainChain.IntNode)
+	ethereum := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
 	var ep *epoch.Epoch
 	if ipbft, ok := ethereum.Engine().(consensus.IPBFT); ok {
 		ep = ipbft.GetEpoch()
 	}
-	return ethereum.ChainConfig().IntChainId, ep
+	return ethereum.ChainConfig().NeatChainId, ep
 }
 
 func (cch *CrossChainHelper) ChangeValidators(chainId string) {
@@ -579,7 +580,7 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 
 	var args intAbi.WithdrawFromMainChainArgs
 
-	if !intAbi.IsIntChainContractAddr(tx4.To()) {
+	if !intAbi.IsNeatChainContractAddr(tx4.To()) {
 		return errors.New("invalid TX4: wrong To()")
 	}
 
@@ -824,19 +825,19 @@ func (cch *CrossChainHelper) GetAllTX3ProofData() []*types.TX3ProofData {
 
 // TX3LocalCache end
 
-func MustGetIntChainFromNode(node *node.Node) *intprotocol.IntChain {
-	intChain, err := getIntChainFromNode(node)
+func MustGetNeatChainFromNode(node *node.Node) *intprotocol.NeatChain {
+	neatChain, err := getNeatChainFromNode(node)
 	if err != nil {
-		panic("getIntChainFromNode error: " + err.Error())
+		panic("getNeatChainFromNode error: " + err.Error())
 	}
-	return intChain
+	return neatChain
 }
 
-func getIntChainFromNode(node *node.Node) (*intprotocol.IntChain, error) {
-	var intChain *intprotocol.IntChain
-	if err := node.Service(&intChain); err != nil {
+func getNeatChainFromNode(node *node.Node) (*intprotocol.NeatChain, error) {
+	var neatChain *intprotocol.NeatChain
+	if err := node.Service(&neatChain); err != nil {
 		return nil, err
 	}
 
-	return intChain, nil
+	return neatChain, nil
 }

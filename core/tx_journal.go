@@ -89,7 +89,7 @@ func (journal *txJournal) load(add func(*types.Transaction) error) error {
 		}
 		// TODO: make our own tx to work.
 		// can't pass custom validate logic since Ethereum is still initializing.
-		if intAbi.IsIntChainContractAddr(tx.To()) {
+		if intAbi.IsNeatChainContractAddr(tx.To()) {
 			continue
 		}
 		// Import the transaction and bump the appropriate progress counters

@@ -2,6 +2,8 @@ package ipbft
 
 import (
 	"crypto/ecdsa"
+	"sync"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
 	"github.com/Gessiux/neatchain/consensus/ipbft/types"
@@ -11,7 +13,6 @@ import (
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
 	"gopkg.in/urfave/cli.v1"
-	"sync"
 )
 
 // New creates an Ethereum backend for Tendermint core engine.
@@ -22,7 +23,7 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 	//recentMessages, _ := lru.NewARC(inmemoryPeers)
 	//knownMessages, _ := lru.NewARC(inmemoryMessages)
 
-	config := GetTendermintConfig(chainConfig.IntChainId, cliCtx)
+	config := GetTendermintConfig(chainConfig.NeatChainId, cliCtx)
 
 	backend := &backend{
 		//config:             config,

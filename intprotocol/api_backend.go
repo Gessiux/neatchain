@@ -37,11 +37,11 @@ import (
 	"github.com/Gessiux/neatchain/rpc"
 )
 
-// EthApiBackend implements intapi.Backend for full nodes
+// EthApiBackend implements neatapi.Backend for full nodes
 type EthApiBackend struct {
-	eth *IntChain
+	eth *NeatChain
 	gpo *gasprice.Oracle
-	//apiBridge        intapi.InnerAPIBridge
+	//apiBridge        neatapi.InnerAPIBridge
 	crossChainHelper core.CrossChainHelper
 }
 
@@ -222,11 +222,11 @@ func (b *EthApiBackend) ServiceFilter(ctx context.Context, session *bloombits.Ma
 	}
 }
 
-//func (b *EthApiBackend) SetInnerAPIBridge(inBridge intapi.InnerAPIBridge) {
+//func (b *EthApiBackend) SetInnerAPIBridge(inBridge neatapi.InnerAPIBridge) {
 //	b.apiBridge = inBridge
 //}
 //
-//func (b *EthApiBackend) GetInnerAPIBridge() intapi.InnerAPIBridge {
+//func (b *EthApiBackend) GetInnerAPIBridge() neatapi.InnerAPIBridge {
 //	return b.apiBridge
 //}
 

@@ -20,6 +20,7 @@ import (
 	"math/big"
 	"os"
 	"os/user"
+
 	//"path/filepath"
 	"runtime"
 	"time"
@@ -33,7 +34,7 @@ import (
 	"github.com/Gessiux/neatchain/params"
 )
 
-// DefaultConfig contains default settings for use on the INTChain main net.
+// DefaultConfig contains default settings for use on the NEATChain main net.
 var DefaultConfig = Config{
 	//SyncMode: downloader.FastSync,
 	SyncMode: downloader.FullSync,

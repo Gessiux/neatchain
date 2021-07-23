@@ -20,6 +20,11 @@ package intprotocol
 import (
 	"errors"
 	"fmt"
+	"math/big"
+	"runtime"
+	"sync"
+	"sync/atomic"
+
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
@@ -34,7 +39,7 @@ import (
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/event"
 	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/internal/intapi"
+	"github.com/Gessiux/neatchain/internal/neatapi"
 	"github.com/Gessiux/neatchain/intprotocol/downloader"
 	"github.com/Gessiux/neatchain/intprotocol/filters"
 	"github.com/Gessiux/neatchain/intprotocol/gasprice"
@@ -46,10 +51,6 @@ import (
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/rpc"
 	"gopkg.in/urfave/cli.v1"
-	"math/big"
-	"runtime"
-	"sync"
-	"sync/atomic"
 )
 
 type LesServer interface {
@@ -59,13 +60,13 @@ type LesServer interface {
 	SetBloomBitsIndexer(bbIndexer *core.ChainIndexer)
 }
 
-// IntChain implements the INT Chain full node service.
-type IntChain struct {
+// NeatChain implements the INT Chain full node service.
+type NeatChain struct {
 	config      *Config
 	chainConfig *params.ChainConfig
 
 	// Channel for shutting down the service
-	shutdownChan chan bool // Channel for shutting down the intChain
+	shutdownChan chan bool // Channel for shutting down the neatChain
 
 	// Handlers
 	txPool          *core.TxPool
@@ -91,7 +92,7 @@ type IntChain struct {
 	solcPath string
 
 	networkId     uint64
-	netRPCService *intapi.PublicNetAPI
+	netRPCService *neatapi.PublicNetAPI
 
 	lock sync.RWMutex // Protects the variadic fields (e.g. gas price and etherbase)
 }
@@ -99,7 +100,7 @@ type IntChain struct {
 // New creates a new INT Chain object (including the
 // initialisation of the common INT Chain object)
 func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
-	cch core.CrossChainHelper, logger log.Logger, isTestnet bool) (*IntChain, error) {
+	cch core.CrossChainHelper, logger log.Logger, isTestnet bool) (*NeatChain, error) {
 
 	if !config.SyncMode.IsValid() {
 		return nil, fmt.Errorf("invalid sync mode %d", config.SyncMode)
@@ -122,7 +123,7 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	chainConfig.ChainLogger = logger
 	logger.Info("Initialised chain configuration", "config", chainConfig)
 
-	intChain := &IntChain{
+	neatChain := &NeatChain{
 		config:         config,
 		chainDb:        chainDb,
 		pruneDb:        pruneDb,
@@ -144,7 +145,7 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	if bcVersion != nil {
 		dbVer = fmt.Sprintf("%d", *bcVersion)
 	}
-	//logger.Info("Initialising IntChain protocol", "versions", eth.engine.Protocol().Versions, "network", config.NetworkId, "dbversion", dbVer)
+	//logger.Info("Initialising NeatChain protocol", "versions", eth.engine.Protocol().Versions, "network", config.NetworkId, "dbversion", dbVer)
 	logger.Info("Initialising neatchain protocol", "network", config.NetworkId, "dbversion", dbVer)
 
 	if !config.SkipBcVersionCheck {
@@ -167,7 +168,7 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	)
 	//eth.engine = CreateConsensusEngine(ctx, config, chainConfig, chainDb, cliCtx, cch)
 
-	intChain.blockchain, err = core.NewBlockChain(chainDb, cacheConfig, intChain.chainConfig, intChain.engine, vmConfig, cch)
+	neatChain.blockchain, err = core.NewBlockChain(chainDb, cacheConfig, neatChain.chainConfig, neatChain.engine, vmConfig, cch)
 	if err != nil {
 		return nil, err
 	}
@@ -175,30 +176,30 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	// Rewind the chain in case of an incompatible config upgrade.
 	if compat, ok := genesisErr.(*params.ConfigCompatError); ok {
 		logger.Warn("Rewinding chain to upgrade configuration", "err", compat)
-		intChain.blockchain.SetHead(compat.RewindTo)
+		neatChain.blockchain.SetHead(compat.RewindTo)
 		rawdb.WriteChainConfig(chainDb, genesisHash, chainConfig)
 	}
-	intChain.bloomIndexer.Start(intChain.blockchain)
+	neatChain.bloomIndexer.Start(neatChain.blockchain)
 
 	if config.TxPool.Journal != "" {
 		config.TxPool.Journal = ctx.ResolvePath(config.TxPool.Journal)
 	}
-	intChain.txPool = core.NewTxPool(config.TxPool, intChain.chainConfig, intChain.blockchain, cch)
+	neatChain.txPool = core.NewTxPool(config.TxPool, neatChain.chainConfig, neatChain.blockchain, cch)
 
-	if intChain.protocolManager, err = NewProtocolManager(intChain.chainConfig, config.SyncMode, config.NetworkId, intChain.eventMux, intChain.txPool, intChain.engine, intChain.blockchain, chainDb, cch); err != nil {
+	if neatChain.protocolManager, err = NewProtocolManager(neatChain.chainConfig, config.SyncMode, config.NetworkId, neatChain.eventMux, neatChain.txPool, neatChain.engine, neatChain.blockchain, chainDb, cch); err != nil {
 		return nil, err
 	}
-	intChain.miner = miner.New(intChain, intChain.chainConfig, intChain.EventMux(), intChain.engine, config.MinerGasFloor, config.MinerGasCeil, cch)
-	intChain.miner.SetExtra(makeExtraData(config.ExtraData))
+	neatChain.miner = miner.New(neatChain, neatChain.chainConfig, neatChain.EventMux(), neatChain.engine, config.MinerGasFloor, config.MinerGasCeil, cch)
+	neatChain.miner.SetExtra(makeExtraData(config.ExtraData))
 
-	intChain.ApiBackend = &EthApiBackend{intChain, nil, cch}
+	neatChain.ApiBackend = &EthApiBackend{neatChain, nil, cch}
 	gpoParams := config.GPO
 	if gpoParams.Default == nil {
 		gpoParams.Default = config.MinerGasPrice
 	}
-	intChain.ApiBackend.gpo = gasprice.NewOracle(intChain.ApiBackend, gpoParams)
+	neatChain.ApiBackend.gpo = gasprice.NewOracle(neatChain.ApiBackend, gpoParams)
 
-	return intChain, nil
+	return neatChain, nil
 }
 
 func makeExtraData(extra []byte) []byte {
@@ -218,7 +219,7 @@ func makeExtraData(extra []byte) []byte {
 	return extra
 }
 
-// CreateConsensusEngine creates the required type of consensus engine instance for an IntChain service
+// CreateConsensusEngine creates the required type of consensus engine instance for an NeatChain service
 func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig *params.ChainConfig, db intdb.Database,
 	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.IPBFT {
 	// If Tendermint is requested, set it up
@@ -229,11 +230,11 @@ func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig
 	return tendermintBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
 }
 
-// APIs returns the collection of RPC services the IntChain package offers.
+// APIs returns the collection of RPC services the NeatChain package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
-func (s *IntChain) APIs() []rpc.API {
+func (s *NeatChain) APIs() []rpc.API {
 
-	apis := intapi.GetAPIs(s.ApiBackend, s.solcPath)
+	apis := neatapi.GetAPIs(s.ApiBackend, s.solcPath)
 	// Append any APIs exposed explicitly by the consensus engine
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
 	// Append all the local APIs and return
@@ -306,11 +307,11 @@ func (s *IntChain) APIs() []rpc.API {
 	return apis
 }
 
-func (s *IntChain) ResetWithGenesisBlock(gb *types.Block) {
+func (s *NeatChain) ResetWithGenesisBlock(gb *types.Block) {
 	s.blockchain.ResetWithGenesisBlock(gb)
 }
 
-func (s *IntChain) Coinbase() (eb common.Address, err error) {
+func (s *NeatChain) Coinbase() (eb common.Address, err error) {
 	if ipbft, ok := s.engine.(consensus.IPBFT); ok {
 		eb = ipbft.PrivateValidator()
 		if eb != (common.Address{}) {
@@ -343,7 +344,7 @@ func (s *IntChain) Coinbase() (eb common.Address, err error) {
 }
 
 // set in js console via admin interface or wrapper from cli flags
-func (self *IntChain) SetCoinbase(coinbase common.Address) {
+func (self *NeatChain) SetCoinbase(coinbase common.Address) {
 
 	self.lock.Lock()
 	self.coinbase = coinbase
@@ -352,7 +353,7 @@ func (self *IntChain) SetCoinbase(coinbase common.Address) {
 	self.miner.SetCoinbase(coinbase)
 }
 
-func (s *IntChain) StartMining(local bool) error {
+func (s *NeatChain) StartMining(local bool) error {
 	var eb common.Address
 	if ipbft, ok := s.engine.(consensus.IPBFT); ok {
 		eb = ipbft.PrivateValidator()
@@ -379,36 +380,36 @@ func (s *IntChain) StartMining(local bool) error {
 	return nil
 }
 
-func (s *IntChain) StopMining()         { s.miner.Stop() }
-func (s *IntChain) IsMining() bool      { return s.miner.Mining() }
-func (s *IntChain) Miner() *miner.Miner { return s.miner }
+func (s *NeatChain) StopMining()         { s.miner.Stop() }
+func (s *NeatChain) IsMining() bool      { return s.miner.Mining() }
+func (s *NeatChain) Miner() *miner.Miner { return s.miner }
 
-func (s *IntChain) ChainConfig() *params.ChainConfig   { return s.chainConfig }
-func (s *IntChain) AccountManager() *accounts.Manager  { return s.accountManager }
-func (s *IntChain) BlockChain() *core.BlockChain       { return s.blockchain }
-func (s *IntChain) TxPool() *core.TxPool               { return s.txPool }
-func (s *IntChain) EventMux() *event.TypeMux           { return s.eventMux }
-func (s *IntChain) Engine() consensus.IPBFT            { return s.engine }
-func (s *IntChain) ChainDb() intdb.Database            { return s.chainDb }
-func (s *IntChain) IsListening() bool                  { return true } // Always listening
-func (s *IntChain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
-func (s *IntChain) NetVersion() uint64                 { return s.networkId }
-func (s *IntChain) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
+func (s *NeatChain) ChainConfig() *params.ChainConfig   { return s.chainConfig }
+func (s *NeatChain) AccountManager() *accounts.Manager  { return s.accountManager }
+func (s *NeatChain) BlockChain() *core.BlockChain       { return s.blockchain }
+func (s *NeatChain) TxPool() *core.TxPool               { return s.txPool }
+func (s *NeatChain) EventMux() *event.TypeMux           { return s.eventMux }
+func (s *NeatChain) Engine() consensus.IPBFT            { return s.engine }
+func (s *NeatChain) ChainDb() intdb.Database            { return s.chainDb }
+func (s *NeatChain) IsListening() bool                  { return true } // Always listening
+func (s *NeatChain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
+func (s *NeatChain) NetVersion() uint64                 { return s.networkId }
+func (s *NeatChain) Downloader() *downloader.Downloader { return s.protocolManager.downloader }
 
 // Protocols implements node.Service, returning all the currently configured
 // network protocols to start.
-func (s *IntChain) Protocols() []p2p.Protocol {
+func (s *NeatChain) Protocols() []p2p.Protocol {
 	return s.protocolManager.SubProtocols
 }
 
 // Start implements node.Service, starting all internal goroutines needed by the
-// IntChain protocol implementation.
-func (s *IntChain) Start(srvr *p2p.Server) error {
+// NeatChain protocol implementation.
+func (s *NeatChain) Start(srvr *p2p.Server) error {
 	// Start the bloom bits servicing goroutines
 	s.startBloomHandlers()
 
 	// Start the RPC service
-	s.netRPCService = intapi.NewPublicNetAPI(srvr, s.NetVersion())
+	s.netRPCService = neatapi.NewPublicNetAPI(srvr, s.NetVersion())
 
 	// Figure out a max peers count based on the server limits
 	maxPeers := srvr.MaxPeers
@@ -420,7 +421,7 @@ func (s *IntChain) Start(srvr *p2p.Server) error {
 	go s.loopForMiningEvent()
 
 	// Start the Data Reduction
-	if s.config.PruneStateData && s.chainConfig.IntChainId == "child_0" {
+	if s.config.PruneStateData && s.chainConfig.NeatChainId == "child_0" {
 		go s.StartScanAndPrune(0)
 	}
 
@@ -428,8 +429,8 @@ func (s *IntChain) Start(srvr *p2p.Server) error {
 }
 
 // Stop implements node.Service, terminating all internal goroutines used by the
-// IntChain protocol.
-func (s *IntChain) Stop() error {
+// NeatChain protocol.
+func (s *NeatChain) Stop() error {
 	s.bloomIndexer.Close()
 	s.blockchain.Stop()
 	s.protocolManager.Stop()
@@ -446,7 +447,7 @@ func (s *IntChain) Stop() error {
 	return nil
 }
 
-func (s *IntChain) loopForMiningEvent() {
+func (s *NeatChain) loopForMiningEvent() {
 	// Start/Stop mining Feed
 	startMiningCh := make(chan core.StartMiningEvent, 1)
 	startMiningSub := s.blockchain.SubscribeStartMiningEvent(startMiningCh)
@@ -486,7 +487,7 @@ func (s *IntChain) loopForMiningEvent() {
 	}
 }
 
-func (s *IntChain) StartScanAndPrune(blockNumber uint64) {
+func (s *NeatChain) StartScanAndPrune(blockNumber uint64) {
 
 	if datareduction.StartPruning() {
 		log.Info("Data Reduction - Start")

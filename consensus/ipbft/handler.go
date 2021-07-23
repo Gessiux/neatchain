@@ -18,6 +18,7 @@ package ipbft
 
 import (
 	"errors"
+
 	"github.com/Gessiux/neatchain/consensus"
 	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
 	"github.com/Gessiux/neatchain/core/types"
@@ -36,10 +37,10 @@ func (sb *backend) Protocol() consensus.Protocol {
 	sb.logger.Info("IPBFT backend protocol")
 
 	var protocolName string
-	if sb.chainConfig.IntChainId == params.MainnetChainConfig.IntChainId || sb.chainConfig.IntChainId == params.TestnetChainConfig.IntChainId {
+	if sb.chainConfig.NeatChainId == params.MainnetChainConfig.NeatChainId || sb.chainConfig.NeatChainId == params.TestnetChainConfig.NeatChainId {
 		protocolName = "neatchain" //we also use "neatchain" if the net is "testnet"
 	} else {
-		protocolName = "intchain_" + sb.chainConfig.IntChainId
+		protocolName = "neatchain_" + sb.chainConfig.NeatChainId
 	}
 
 	return consensus.Protocol{

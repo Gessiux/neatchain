@@ -3,11 +3,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/Gessiux/neatchain/log"
 	"os"
 	"runtime"
 	"sort"
 	"time"
+
+	"github.com/Gessiux/neatchain/log"
 
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/console"
@@ -104,7 +105,7 @@ var (
 
 func init() {
 	// Initialize the CLI app and start neatchain
-	app.Action = intchainCmd
+	app.Action = neatchainCmd
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = "Copyright 2018-2020 The INT Chain Authors"
 	app.Commands = []cli.Command{

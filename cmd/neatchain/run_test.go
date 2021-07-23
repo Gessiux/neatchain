@@ -34,7 +34,7 @@ func tmpdir(t *testing.T) string {
 	return dir
 }
 
-type testintchain struct {
+type testneatchain struct {
 	*cmdtest.TestCmd
 
 	// template variables for expect
@@ -43,7 +43,7 @@ type testintchain struct {
 }
 
 func init() {
-	// Run the app if we've been exec'd as "neatchain-test" in runintchain.
+	// Run the app if we've been exec'd as "neatchain-test" in runneatchain.
 	reexec.Register("neatchain-test", func() {
 		if err := app.Run(os.Args); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -63,8 +63,8 @@ func TestMain(m *testing.M) {
 
 // spawns neatchain with the given command line args. If the args don't set --datadir, the
 // child g gets a temporary data directory.
-func runintchain(t *testing.T, args ...string) *testintchain {
-	tt := &testintchain{}
+func runneatchain(t *testing.T, args ...string) *testneatchain {
+	tt := &testneatchain{}
 	tt.TestCmd = cmdtest.NewTestCmd(t, tt)
 	for i, arg := range args {
 		switch {

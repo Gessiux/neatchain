@@ -41,7 +41,7 @@ func TestConsoleWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 
 	// Start a neatchain console, make sure it's cleaned up and terminate the console
-	neatchain := runintchain(t,
+	neatchain := runneatchain(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh",
 		"console")
@@ -50,7 +50,7 @@ func TestConsoleWelcome(t *testing.T) {
 	neatchain.SetTemplateFunc("goos", func() string { return runtime.GOOS })
 	neatchain.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
 	neatchain.SetTemplateFunc("gover", runtime.Version)
-	neatchain.SetTemplateFunc("intchainver", func() string { return params.Version })
+	neatchain.SetTemplateFunc("neatchainver", func() string { return params.Version })
 	neatchain.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	neatchain.SetTemplateFunc("apis", func() string { return ipcAPIs })
 
@@ -58,7 +58,7 @@ func TestConsoleWelcome(t *testing.T) {
 	neatchain.Expect(`
 Welcome to the neatchain JavaScript console!
 
-instance: neatchain/v{{intchainver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: neatchain/v{{neatchainver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -83,7 +83,7 @@ func TestIPCAttachWelcome(t *testing.T) {
 	}
 	// Note: we need --shh because testAttachWelcome checks for default
 	// list of ipc modules and shh is included there.
-	neatchain := runintchain(t,
+	neatchain := runneatchain(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--shh", "--ipcpath", ipc)
 
@@ -97,7 +97,7 @@ func TestIPCAttachWelcome(t *testing.T) {
 func TestHTTPAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
-	neatchain := runintchain(t,
+	neatchain := runneatchain(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--rpc", "--rpcport", port)
 
@@ -112,7 +112,7 @@ func TestWSAttachWelcome(t *testing.T) {
 	coinbase := "0x8605cdbbdb6d264aa742e77020dcbc58fcdce182"
 	port := strconv.Itoa(trulyRandInt(1024, 65536)) // Yeah, sometimes this will fail, sorry :P
 
-	neatchain := runintchain(t,
+	neatchain := runneatchain(t,
 		"--port", "0", "--maxpeers", "0", "--nodiscover", "--nat", "none",
 		"--etherbase", coinbase, "--ws", "--wsport", port)
 
@@ -123,9 +123,9 @@ func TestWSAttachWelcome(t *testing.T) {
 	neatchain.ExpectExit()
 }
 
-func testAttachWelcome(t *testing.T, neatchain *testintchain, endpoint, apis string) {
+func testAttachWelcome(t *testing.T, neatchain *testneatchain, endpoint, apis string) {
 	// Attach to a running neatchain note and terminate immediately
-	attach := runintchain(t, "attach", endpoint)
+	attach := runneatchain(t, "attach", endpoint)
 	defer attach.ExpectExit()
 	attach.CloseStdin()
 
@@ -133,7 +133,7 @@ func testAttachWelcome(t *testing.T, neatchain *testintchain, endpoint, apis str
 	attach.SetTemplateFunc("goos", func() string { return runtime.GOOS })
 	attach.SetTemplateFunc("goarch", func() string { return runtime.GOARCH })
 	attach.SetTemplateFunc("gover", runtime.Version)
-	attach.SetTemplateFunc("intchainver", func() string { return params.Version })
+	attach.SetTemplateFunc("neatchainver", func() string { return params.Version })
 	attach.SetTemplateFunc("etherbase", func() string { return neatchain.Etherbase })
 	attach.SetTemplateFunc("niltime", func() string { return time.Unix(0, 0).Format(time.RFC1123) })
 	attach.SetTemplateFunc("ipc", func() bool { return strings.HasPrefix(endpoint, "ipc") })
@@ -144,7 +144,7 @@ func testAttachWelcome(t *testing.T, neatchain *testintchain, endpoint, apis str
 	attach.Expect(`
 Welcome to the neatchain JavaScript console!
 
-instance: neatchain/v{{intchainver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: neatchain/v{{neatchainver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}

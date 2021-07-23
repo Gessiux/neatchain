@@ -8,12 +8,12 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-type IntChainP2PServer struct {
+type NeatChainP2PServer struct {
 	serverConfig p2p.Config
 	server       *p2p.Server
 }
 
-func NewP2PServer(ctx *cli.Context) *IntChainP2PServer {
+func NewP2PServer(ctx *cli.Context) *NeatChainP2PServer {
 
 	// Load Default P2P config
 	config := &node.Config{
@@ -47,28 +47,28 @@ func NewP2PServer(ctx *cli.Context) *IntChainP2PServer {
 	running := &p2p.Server{Config: serverConfig}
 	log.Info("Create peer-to-peer node", "instance", serverConfig.Name)
 
-	return &IntChainP2PServer{
+	return &NeatChainP2PServer{
 		serverConfig: serverConfig,
 		server:       running,
 	}
 }
 
-func (srv *IntChainP2PServer) Server() *p2p.Server {
+func (srv *NeatChainP2PServer) Server() *p2p.Server {
 	return srv.server
 }
 
-func (srv *IntChainP2PServer) Stop() {
+func (srv *NeatChainP2PServer) Stop() {
 	srv.server.Stop()
 }
 
-func (srv *IntChainP2PServer) BroadcastNewChildChainMsg(childId string) {
+func (srv *NeatChainP2PServer) BroadcastNewChildChainMsg(childId string) {
 	srv.server.BroadcastMsg(p2p.BroadcastNewChildChainMsg, childId)
 }
 
-func (srv *IntChainP2PServer) AddLocalValidator(chainId string, address common.Address) {
+func (srv *NeatChainP2PServer) AddLocalValidator(chainId string, address common.Address) {
 	srv.server.AddLocalValidator(chainId, address)
 }
 
-func (srv *IntChainP2PServer) RemoveLocalValidator(chainId string, address common.Address) {
+func (srv *NeatChainP2PServer) RemoveLocalValidator(chainId string, address common.Address) {
 	srv.server.RemoveLocalValidator(chainId, address)
 }

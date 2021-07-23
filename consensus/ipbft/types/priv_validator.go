@@ -14,11 +14,11 @@ import (
 )
 
 type PrivValidator struct {
-	// IntChain Account Address
+	// NeatChain Account Address
 	Address common.Address `json:"address"`
-	// IntChain Consensus Public Key, in BLS format
+	// NeatChain Consensus Public Key, in BLS format
 	PubKey crypto.PubKey `json:"consensus_pub_key"`
-	// IntChain Consensus Private Key, in BLS format
+	// NeatChain Consensus Private Key, in BLS format
 	// PrivKey should be empty if a Signer other than the default is being used.
 	PrivKey crypto.PrivKey `json:"consensus_priv_key"`
 

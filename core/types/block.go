@@ -28,6 +28,7 @@ import (
 	"unsafe"
 
 	"bytes"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
 	intAbi "github.com/Gessiux/neatchain/intabi/abi"
@@ -498,7 +499,7 @@ func NewTX3ProofData(block *Block) (*TX3ProofData, error) {
 	}
 	// do the Merkle Proof for the specific tx
 	for i, tx := range txs {
-		if intAbi.IsIntChainContractAddr(tx.To()) {
+		if intAbi.IsNeatChainContractAddr(tx.To()) {
 			data := tx.Data()
 			function, err := intAbi.FunctionTypeFromId(data[:4])
 			if err != nil {
@@ -547,7 +548,7 @@ type ChildChainProofDataV1 struct {
 //	}
 //	// do the Merkle Proof for the specific tx
 //	for i, tx := range txs {
-//		if intAbi.IsIntChainContractAddr(tx.To()) {
+//		if intAbi.IsNeatChainContractAddr(tx.To()) {
 //			data := tx.Data()
 //			function, err := intAbi.FunctionTypeFromId(data[:4])
 //			if err != nil {

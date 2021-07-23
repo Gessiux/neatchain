@@ -3,6 +3,7 @@ package rawdb
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/Gessiux/neatchain/common"
 	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
 	"github.com/Gessiux/neatchain/core/types"
@@ -128,7 +129,7 @@ func WriteTX3ProofData(db intdb.Database, proofData *types.TX3ProofData) error {
 	}
 
 	chainId := tdmExtra.ChainID
-	if chainId == "" || chainId == params.MainnetChainConfig.IntChainId || chainId == params.TestnetChainConfig.IntChainId {
+	if chainId == "" || chainId == params.MainnetChainConfig.NeatChainId || chainId == params.TestnetChainConfig.NeatChainId {
 		return fmt.Errorf("invalid child chain id: %s", chainId)
 	}
 
@@ -201,7 +202,7 @@ func WriteTX3(db intdb.Writer, chainId string, header *types.Header, txIndex uin
 		return err
 	}
 
-	if intAbi.IsIntChainContractAddr(tx.To()) {
+	if intAbi.IsNeatChainContractAddr(tx.To()) {
 		data := tx.Data()
 		function, err := intAbi.FunctionTypeFromId(data[:4])
 		if err != nil {

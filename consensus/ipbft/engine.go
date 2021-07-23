@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"math/big"
+	"time"
+
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
@@ -13,9 +16,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rpc"
-	"github.com/hashicorp/golang-lru"
-	"math/big"
-	"time"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 const (
@@ -440,7 +441,7 @@ func (sb *backend) Prepare(chain consensus.ChainReader, header *types.Header) er
 	//}
 
 	// Add Main Chain Height if running on Child Chain
-	if sb.chainConfig.IntChainId != params.MainnetChainConfig.IntChainId && sb.chainConfig.IntChainId != params.TestnetChainConfig.IntChainId {
+	if sb.chainConfig.NeatChainId != params.MainnetChainConfig.NeatChainId && sb.chainConfig.NeatChainId != params.TestnetChainConfig.NeatChainId {
 		header.MainChainNumber = sb.core.cch.GetHeightFromMainChain()
 	}
 
@@ -458,7 +459,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 	sb.logger.Debugf("IPBFT Finalize, receipts are: %v", receipts)
 
 	// Check if any Child Chain need to be launch and Update their account balance accordingly
-	if sb.chainConfig.IntChainId == params.MainnetChainConfig.IntChainId || sb.chainConfig.IntChainId == params.TestnetChainConfig.IntChainId {
+	if sb.chainConfig.NeatChainId == params.MainnetChainConfig.NeatChainId || sb.chainConfig.NeatChainId == params.TestnetChainConfig.NeatChainId {
 		// Check the Child Chain Start
 		readyId, updateBytes, removedId := sb.core.cch.ReadyForLaunchChildChain(header.Number, state)
 		if len(readyId) > 0 || updateBytes != nil || len(removedId) > 0 {
@@ -494,7 +495,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 	// Check the Epoch switch and update their account balance accordingly (Refund the Locked Balance)
 	if ok, newValidators, _ := epoch.ShouldEnterNewEpoch(header.Number.Uint64(), state); ok {
 		ops.Append(&tdmTypes.SwitchEpochOp{
-			ChainId:       sb.chainConfig.IntChainId,
+			ChainId:       sb.chainConfig.NeatChainId,
 			NewValidators: newValidators,
 		})
 
@@ -734,7 +735,7 @@ func writeCommittedSeals(h *types.Header, tdmExtra *tdmTypes.TendermintExtra) er
 func accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, ep *epoch.Epoch, totalGasFee *big.Int) {
 	// Total Reward = Block Reward + Total Gas Fee
 	var coinbaseReward *big.Int
-	if config.IntChainId == params.MainnetChainConfig.IntChainId || config.IntChainId == params.TestnetChainConfig.IntChainId {
+	if config.NeatChainId == params.MainnetChainConfig.NeatChainId || config.NeatChainId == params.TestnetChainConfig.NeatChainId {
 		// Main Chain
 
 		rewardPerBlock := ep.RewardPerBlock

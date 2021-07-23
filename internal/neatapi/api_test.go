@@ -1,15 +1,16 @@
-package intapi
+package neatapi
 
 import (
 	"bytes"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/crypto"
 	intAbi "github.com/Gessiux/neatchain/intabi/abi"
-	"testing"
-	"time"
 )
 
 type MethoadParams struct {

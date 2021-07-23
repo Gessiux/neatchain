@@ -19,11 +19,12 @@ package intprotocol
 import (
 	"errors"
 	"fmt"
-	"github.com/Gessiux/go-wire"
-	"github.com/Gessiux/neatchain/consensus"
 	"math/big"
 	"sync"
 	"time"
+
+	"github.com/Gessiux/go-wire"
+	"github.com/Gessiux/neatchain/consensus"
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
@@ -154,7 +155,7 @@ func (p *peer) MarkTX3ProofData(hash common.Hash) {
 	p.knownTX3ProofDatas.Add(hash)
 }
 
-// ---------- IntChain P2P peer function - Start ----------
+// ---------- NeatChain P2P peer function - Start ----------
 // Send writes an RLP-encoded message with the given code.
 // data should encode as an RLP list.
 func (p *peer) Send(msgcode uint64, data interface{}) error {
@@ -179,7 +180,7 @@ func (p *peer) SetPeerState(ps consensus.PeerState) {
 	p.peerState = ps
 }
 
-// ---------- IntChain P2P peer function - End ----------
+// ---------- NeatChain P2P peer function - End ----------
 
 // SendTransactions sends transactions to the peer and includes the hashes
 // in its transaction hash set for future reference.

@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+
 	"github.com/Gessiux/neatchain/cmd/utils"
 	"github.com/Gessiux/neatchain/consensus/ipbft/consensus"
 	"github.com/Gessiux/neatchain/internal/debug"
 	"github.com/Gessiux/neatchain/log"
 	"gopkg.in/urfave/cli.v1"
-	"os"
-	"os/signal"
-	"strings"
-	"syscall"
 )
 
-func intchainCmd(ctx *cli.Context) error {
+func neatchainCmd(ctx *cli.Context) error {
 
 	if ctx == nil {
 		log.Error("oh, ctx is null, how neatchain works?")

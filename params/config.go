@@ -34,7 +34,7 @@ var (
 var (
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
-		IntChainId:          "neatchain",
+		NeatChainId:         "neatchain",
 		ChainId:             big.NewInt(1),
 		HomesteadBlock:      big.NewInt(0),
 		EIP150Block:         big.NewInt(0),
@@ -51,7 +51,7 @@ var (
 
 	// TestnetChainConfig contains the chain parameters to run a node on the test network.
 	TestnetChainConfig = &ChainConfig{
-		IntChainId:          "testnet",
+		NeatChainId:         "testnet",
 		ChainId:             big.NewInt(2),
 		HomesteadBlock:      big.NewInt(0),
 		EIP150Block:         big.NewInt(0),
@@ -71,7 +71,7 @@ var (
 )
 
 func init() {
-	//digest := crypto.Keccak256([]byte(MainnetChainConfig.IntChainId))
+	//digest := crypto.Keccak256([]byte(MainnetChainConfig.NeatChainId))
 	//MainnetChainConfig.ChainId = new(big.Int).SetBytes(digest[:])
 	//MainnetChainConfig.ChainId = new(big.Int).SetUint64(1)
 }
@@ -82,8 +82,8 @@ func init() {
 // that any network, identified by its genesis block, can have its own
 // set of configuration options.
 type ChainConfig struct {
-	IntChainId string   `json:"intChainId"` //IntChain id identifies the current chain
-	ChainId    *big.Int `json:"chainId"`    // Chain id identifies the current chain and is used for replay protection
+	NeatChainId string   `json:"NeatChainId"` //NeatChain id identifies the current chain
+	ChainId     *big.Int `json:"chainId"`     // Chain id identifies the current chain and is used for replay protection
 
 	HomesteadBlock *big.Int `json:"homesteadBlock,omitempty"` // Homestead switch block (nil = no fork, 0 = already homestead)
 
@@ -117,7 +117,7 @@ func (c *IPBFTConfig) String() string {
 // Create a new Chain Config based on the Chain ID, for child chain creation purpose
 func NewChildChainConfig(childChainID string) *ChainConfig {
 	config := &ChainConfig{
-		IntChainId:     childChainID,
+		NeatChainId:    childChainID,
 		HomesteadBlock: big.NewInt(0),
 		EIP150Block:    big.NewInt(0),
 		EIP150Hash:     common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
@@ -132,7 +132,7 @@ func NewChildChainConfig(childChainID string) *ChainConfig {
 		},
 	}
 
-	digest := crypto.Keccak256([]byte(config.IntChainId))
+	digest := crypto.Keccak256([]byte(config.NeatChainId))
 	config.ChainId = new(big.Int).SetBytes(digest[:])
 
 	return config
@@ -147,8 +147,8 @@ func (c *ChainConfig) String() string {
 	default:
 		engine = "unknown"
 	}
-	return fmt.Sprintf("{IntChainId: %s ChainID: %v Homestead: %v  EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Engine: %v}",
-		c.IntChainId,
+	return fmt.Sprintf("{NeatChainId: %s ChainID: %v Homestead: %v  EIP150: %v EIP155: %v EIP158: %v Byzantium: %v Constantinople: %v Engine: %v}",
+		c.NeatChainId,
 		c.ChainId,
 		c.HomesteadBlock,
 		c.EIP150Block,
@@ -191,12 +191,12 @@ func (c *ChainConfig) IsEWASM(num *big.Int) bool {
 
 // Check whether is on main chain or not
 func (c *ChainConfig) IsMainChain() bool {
-	return c.IntChainId == MainnetChainConfig.IntChainId || c.IntChainId == TestnetChainConfig.IntChainId
+	return c.NeatChainId == MainnetChainConfig.NeatChainId || c.NeatChainId == TestnetChainConfig.NeatChainId
 }
 
 // Check provided chain id is on main chain or not
 func IsMainChain(chainId string) bool {
-	return chainId == MainnetChainConfig.IntChainId || chainId == TestnetChainConfig.IntChainId
+	return chainId == MainnetChainConfig.NeatChainId || chainId == TestnetChainConfig.NeatChainId
 }
 
 // GasTable returns the gas table corresponding to the current phase (homestead or homestead reprice).

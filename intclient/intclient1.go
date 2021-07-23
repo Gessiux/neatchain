@@ -3,6 +3,10 @@ package intclient
 import (
 	"context"
 	"crypto/ecdsa"
+	"math/big"
+	"math/rand"
+	"time"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/core/types"
@@ -11,9 +15,6 @@ import (
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/pkg/errors"
-	"math/big"
-	"math/rand"
-	"time"
 )
 
 func (ec *Client) BlockNumber(ctx context.Context) (*big.Int, error) {
@@ -88,7 +89,7 @@ func (ec *Client) SendDataToMainChain(ctx context.Context, data []byte, prv *ecd
 
 // BroadcastDataToMainChain send tx3 proof data to MainChain via rpc call, then broadcast it via p2p network
 func (ec *Client) BroadcastDataToMainChain(ctx context.Context, chainId string, data []byte) error {
-	if chainId == "" || chainId == params.MainnetChainConfig.IntChainId || chainId == params.TestnetChainConfig.IntChainId {
+	if chainId == "" || chainId == params.MainnetChainConfig.NeatChainId || chainId == params.TestnetChainConfig.NeatChainId {
 		return errors.New("invalid child chainId")
 	}
 

@@ -1,6 +1,10 @@
 package ipbft
 
 import (
+	"io/ioutil"
+	"os"
+	"strings"
+
 	cmn "github.com/Gessiux/go-common"
 	cfg "github.com/Gessiux/go-config"
 	dbm "github.com/Gessiux/go-db"
@@ -10,9 +14,6 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 type Node struct {
@@ -273,9 +274,9 @@ func MakeTendermintNode(backend *backend, config cfg.Config, chainConfig *params
 	genDocFile := config.GetString("genesis_file")
 
 	if !cmn.FileExists(genDocFile) {
-		if chainConfig.IntChainId == params.MainnetChainConfig.IntChainId {
+		if chainConfig.NeatChainId == params.MainnetChainConfig.NeatChainId {
 			genDoc, _ = types.GenesisDocFromJSON([]byte(types.MainnetGenesisJSON))
-		} else if chainConfig.IntChainId == params.TestnetChainConfig.IntChainId {
+		} else if chainConfig.NeatChainId == params.TestnetChainConfig.NeatChainId {
 			genDoc, _ = types.GenesisDocFromJSON([]byte(types.TestnetGenesisJSON))
 		} else {
 			return nil

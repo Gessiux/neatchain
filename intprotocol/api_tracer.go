@@ -33,7 +33,7 @@ import (
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
-	"github.com/Gessiux/neatchain/internal/intapi"
+	"github.com/Gessiux/neatchain/internal/neatapi"
 	"github.com/Gessiux/neatchain/intprotocol/tracers"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/rlp"
@@ -726,11 +726,11 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 	// Depending on the tracer type, format and return the output
 	switch tracer := tracer.(type) {
 	case *vm.StructLogger:
-		return &intapi.ExecutionResult{
+		return &neatapi.ExecutionResult{
 			Gas:         gas,
 			Failed:      failed,
 			ReturnValue: fmt.Sprintf("%x", ret),
-			StructLogs:  intapi.FormatLogs(tracer.StructLogs()),
+			StructLogs:  neatapi.FormatLogs(tracer.StructLogs()),
 		}, nil
 
 	case *tracers.Tracer:

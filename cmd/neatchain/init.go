@@ -2,17 +2,25 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
-	"os"
-	"path/filepath"
 
 	"gopkg.in/urfave/cli.v1"
 
 	"encoding/json"
+	"io/ioutil"
+	"math/big"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	cmn "github.com/Gessiux/go-common"
 	cfg "github.com/Gessiux/go-config"
 	dbm "github.com/Gessiux/go-db"
@@ -23,12 +31,6 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"math/big"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
@@ -405,10 +407,10 @@ func createPriValidators(config cfg.Config, num int) []*types.PrivValidator {
 
 	privValFile := config.GetString("priv_validator_file_root")
 	for i := 0; i < num; i++ {
-		// Create New IntChain Account
+		// Create New NeatChain Account
 		account, err := ks.NewAccount(DefaultAccountPassword)
 		if err != nil {
-			utils.Fatalf("Failed to create IntChain account: %v", err)
+			utils.Fatalf("Failed to create NeatChain account: %v", err)
 		}
 		// Generate Consensus KeyPair
 		validators[i] = types.GenPrivValidatorKey(account.Address)

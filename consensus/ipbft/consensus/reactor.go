@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/consensus"
-	"github.com/Gessiux/neatchain/log"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/Gessiux/neatchain/consensus"
+	"github.com/Gessiux/neatchain/log"
+
 	. "github.com/Gessiux/go-common"
 	"github.com/Gessiux/go-wire"
+
 	//sm "github.com/Gessiux/neatchain/consensus/ipbft/state"
 	"github.com/Gessiux/neatchain/consensus/ipbft/types"
 )
@@ -45,7 +47,7 @@ type ConsensusReactor struct {
 func NewConsensusReactor(consensusState *ConsensusState) *ConsensusReactor {
 	conR := &ConsensusReactor{
 		conS:    consensusState,
-		ChainId: consensusState.chainConfig.IntChainId,
+		ChainId: consensusState.chainConfig.NeatChainId,
 		logger:  consensusState.backend.GetLogger(),
 	}
 

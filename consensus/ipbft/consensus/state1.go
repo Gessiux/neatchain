@@ -1,6 +1,8 @@
 package consensus
 
 import (
+	"time"
+
 	cmn "github.com/Gessiux/go-common"
 	consss "github.com/Gessiux/neatchain/consensus"
 	ep "github.com/Gessiux/neatchain/consensus/ipbft/epoch"
@@ -8,7 +10,6 @@ import (
 	"github.com/Gessiux/neatchain/consensus/ipbft/types"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
-	"time"
 )
 
 // The +2/3 and other Precommit-votes for block at `height`.
@@ -46,7 +47,7 @@ func (cs *ConsensusState) InitState(epoch *ep.Epoch) *sm.State {
 	state.TdmExtra, _ = cs.LoadLastTendermintExtra()
 	if state.TdmExtra == nil { //means it it the first block
 
-		state = sm.MakeGenesisState( /*stateDB, */ cs.chainConfig.IntChainId, cs.logger)
+		state = sm.MakeGenesisState( /*stateDB, */ cs.chainConfig.NeatChainId, cs.logger)
 		//state.Save()
 
 		if state.TdmExtra.EpochNumber != uint64(epoch.Number) {
@@ -109,8 +110,8 @@ func (cs *ConsensusState) UpdateToState(state *sm.State) {
 	cs.updateRoundStep(0, RoundStepNewHeight)
 	//cs.StartTime = cs.timeoutParams.Commit(cs.CommitTime)
 
-	if state.TdmExtra.ChainID == params.MainnetChainConfig.IntChainId ||
-		state.TdmExtra.ChainID == params.TestnetChainConfig.IntChainId {
+	if state.TdmExtra.ChainID == params.MainnetChainConfig.NeatChainId ||
+		state.TdmExtra.ChainID == params.TestnetChainConfig.NeatChainId {
 		cs.StartTime = cs.timeoutParams.Commit(time.Now())
 	} else {
 		if cs.CommitTime.IsZero() {
@@ -128,8 +129,8 @@ func (cs *ConsensusState) UpdateToState(state *sm.State) {
 	// Reset fields based on state.
 	_, validators, _ := state.GetValidators()
 	cs.Validators = validators
-	cs.Votes = NewHeightVoteSet(cs.chainConfig.IntChainId, height, validators, cs.logger)
-	cs.VoteSignAggr = NewHeightVoteSignAggr(cs.chainConfig.IntChainId, height, validators, cs.logger)
+	cs.Votes = NewHeightVoteSet(cs.chainConfig.NeatChainId, height, validators, cs.logger)
+	cs.VoteSignAggr = NewHeightVoteSignAggr(cs.chainConfig.NeatChainId, height, validators, cs.logger)
 
 	cs.vrfValIndex = -1
 	cs.pastRoundStates = make(map[int]int)

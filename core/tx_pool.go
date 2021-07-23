@@ -19,12 +19,13 @@ package core
 import (
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/crypto"
 	"math"
 	"math/big"
 	"sort"
 	"sync"
 	"time"
+
+	"github.com/Gessiux/neatchain/crypto"
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/prque"
@@ -602,7 +603,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInvalidAddress
 	}
 
-	if !intAbi.IsIntChainContractAddr(tx.To()) {
+	if !intAbi.IsNeatChainContractAddr(tx.To()) {
 		intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, true)
 		if err != nil {
 			return err

@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
+	"net"
+	"net/http"
+	"strings"
+
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/rpc"
 	"gopkg.in/urfave/cli.v1"
-	"net"
-	"net/http"
-	"strings"
 )
 
 var (
@@ -110,7 +111,7 @@ func startHTTP(endpoint string, cors []string, vhosts []string, timeouts rpc.HTT
 	}
 
 	var err error
-	httpListener, httpMux, err = startIntChainHTTPEndpoint(endpoint, cors, vhosts, timeouts)
+	httpListener, httpMux, err = startNeatChainHTTPEndpoint(endpoint, cors, vhosts, timeouts)
 	if err != nil {
 		return err
 	}
@@ -120,7 +121,7 @@ func startHTTP(endpoint string, cors []string, vhosts []string, timeouts rpc.HTT
 	return nil
 }
 
-func startIntChainHTTPEndpoint(endpoint string, cors []string, vhosts []string, timeouts rpc.HTTPTimeouts) (net.Listener, *http.ServeMux, error) {
+func startNeatChainHTTPEndpoint(endpoint string, cors []string, vhosts []string, timeouts rpc.HTTPTimeouts) (net.Listener, *http.ServeMux, error) {
 	var (
 		listener net.Listener
 		err      error
@@ -140,7 +141,7 @@ func startWS(endpoint string) error {
 	}
 
 	var err error
-	wsListener, wsMux, err = startIntChainWSEndpoint(endpoint)
+	wsListener, wsMux, err = startNeatChainWSEndpoint(endpoint)
 	if err != nil {
 		return err
 	}
@@ -150,7 +151,7 @@ func startWS(endpoint string) error {
 	return nil
 }
 
-func startIntChainWSEndpoint(endpoint string) (net.Listener, *http.ServeMux, error) {
+func startNeatChainWSEndpoint(endpoint string) (net.Listener, *http.ServeMux, error) {
 	var (
 		listener net.Listener
 		err      error

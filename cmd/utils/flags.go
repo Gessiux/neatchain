@@ -463,12 +463,12 @@ var (
 	}
 
 	// ----------------------------
-	// IntChain Flags
+	// NeatChain Flags
 
 	// Log Folder
 	//LogDirFlag = DirectoryFlag{
 	//	Name:  "logDir",
-	//	Usage: "IntChain Log Data directory",
+	//	Usage: "NeatChain Log Data directory",
 	//	Value: DirectoryString{"log"},
 	//}
 
@@ -511,13 +511,13 @@ var (
 
 	RpcLaddrFlag = cli.StringFlag{
 		Name:  "rpc_laddr",
-		Value: "unix://@intchainrpcunixsock", //"tcp://0.0.0.0:46657",
+		Value: "unix://@neatchainrpcunixsock", //"tcp://0.0.0.0:46657",
 		Usage: "RPC listen address. Port required",
 	}
 
 	AddrFlag = cli.StringFlag{
 		Name:  "addr",
-		Value: "unix://@intchainappunixsock", //"tcp://0.0.0.0:46658",
+		Value: "unix://@neatchainappunixsock", //"tcp://0.0.0.0:46658",
 		Usage: "TMSP app listen address",
 	}
 

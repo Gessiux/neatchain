@@ -18,8 +18,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/Gessiux/neatchain/params"
 	"io/ioutil"
+
+	"github.com/Gessiux/neatchain/params"
 
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/accounts/keystore"
@@ -190,11 +191,11 @@ nodes.
 )
 
 func accountList(ctx *cli.Context) error {
-	ChainId := params.MainnetChainConfig.IntChainId
+	ChainId := params.MainnetChainConfig.NeatChainId
 
 	if ctx.GlobalIsSet(utils.TestnetFlag.Name) {
-		fmt.Printf("testnet: %v\n", params.TestnetChainConfig.IntChainId)
-		ChainId = params.TestnetChainConfig.IntChainId
+		fmt.Printf("testnet: %v\n", params.TestnetChainConfig.NeatChainId)
+		ChainId = params.TestnetChainConfig.NeatChainId
 	}
 
 	stack, _ := makeConfigNode(ctx, ChainId)
@@ -305,11 +306,11 @@ func accountCreate(ctx *cli.Context) error {
 		}
 	}
 
-	cfg.Node.ChainId = params.MainnetChainConfig.IntChainId
+	cfg.Node.ChainId = params.MainnetChainConfig.NeatChainId
 
 	if ctx.GlobalIsSet(utils.TestnetFlag.Name) {
-		fmt.Printf("testnet: %v\n", params.TestnetChainConfig.IntChainId)
-		cfg.Node.ChainId = params.TestnetChainConfig.IntChainId
+		fmt.Printf("testnet: %v\n", params.TestnetChainConfig.NeatChainId)
+		cfg.Node.ChainId = params.TestnetChainConfig.NeatChainId
 	}
 
 	utils.SetNodeConfig(ctx, &cfg.Node)

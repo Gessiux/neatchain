@@ -2,9 +2,10 @@ package types
 
 import (
 	"errors"
+	"math/big"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
-	"math/big"
 )
 
 var (
@@ -20,7 +21,7 @@ var (
 	TendermintEmptyNonce        = BlockNonce{}
 	TendermintNonce             = hexutil.MustDecode("0x88ff88ff88ff88ff") // Magic nonce number to vote on adding a new validator
 
-	MagicExtra = []byte("intchain_tmp_extra")
+	MagicExtra = []byte("neatchain_tmp_extra")
 
 	// ErrInvalidTendermintHeaderExtra is returned if the length of extra-data is less than 32 bytes
 	ErrInvalidTendermintHeaderExtra = errors.New("invalid ipbft header extra-data")

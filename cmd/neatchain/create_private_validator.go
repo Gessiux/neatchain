@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/Gessiux/go-crypto"
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/cmd/utils"
@@ -10,16 +13,14 @@ import (
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/params"
 	"gopkg.in/urfave/cli.v1"
-	"os"
-	"path/filepath"
 )
 
 type PrivValidatorForConsole struct {
-	// IntChain Account Address
+	// NeatChain Account Address
 	Address string `json:"address"`
-	// IntChain Consensus Public Key, in BLS format
+	// NeatChain Consensus Public Key, in BLS format
 	PubKey crypto.PubKey `json:"consensus_pub_key"`
-	// IntChain Consensus Private Key, in BLS format
+	// NeatChain Consensus Private Key, in BLS format
 	// PrivKey should be empty if a Signer other than the default is being used.
 	PrivKey crypto.PrivKey `json:"consensus_priv_key"`
 }
@@ -38,10 +39,10 @@ func CreatePrivateValidatorCmd(ctx *cli.Context) error {
 		return err
 	}
 
-	chainId := params.MainnetChainConfig.IntChainId
+	chainId := params.MainnetChainConfig.NeatChainId
 
 	if ctx.GlobalIsSet(utils.TestnetFlag.Name) {
-		chainId = params.TestnetChainConfig.IntChainId
+		chainId = params.TestnetChainConfig.NeatChainId
 	}
 
 	privValFilePath := filepath.Join(ctx.GlobalString(utils.DataDirFlag.Name), chainId)

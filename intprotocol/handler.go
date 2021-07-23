@@ -20,12 +20,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"math"
 	"math/big"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/Gessiux/neatchain/core/rawdb"
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
@@ -355,7 +356,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 
 	// Handle the message depending on its contents
 	switch {
-	// IntChain Consensus Message
+	// NeatChain Consensus Message
 	case msg.Code >= 0x20 && msg.Code <= 0x23:
 		if handler, ok := pm.engine.(consensus.Handler); ok {
 			var msgBytes []byte

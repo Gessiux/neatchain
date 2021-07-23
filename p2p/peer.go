@@ -48,7 +48,7 @@ const (
 	pingMsg      = 0x02
 	pongMsg      = 0x03
 
-	// IntChain message belonging to neatchain/64
+	// NeatChain message belonging to neatchain/64
 	BroadcastNewChildChainMsg = 0x04
 	ConfirmNewChildChainMsg   = 0x05
 
@@ -399,7 +399,7 @@ func (p *Peer) handle(msg Msg) error {
 
 func (p *Peer) checkAndUpdateProtocol(chainId string) bool {
 
-	childProtocolName := "intchain_" + chainId
+	childProtocolName := "neatchain_" + chainId
 
 	// Check childChainId already added
 	// TODO Protoect the changing of running under multi-thread env

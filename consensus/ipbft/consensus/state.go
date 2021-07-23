@@ -4,17 +4,20 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/log"
 	"math"
 	"reflect"
 	"sync"
 	"time"
 
+	"github.com/Gessiux/neatchain/common"
+	"github.com/Gessiux/neatchain/log"
+
 	"context"
 
 	"crypto/ecdsa"
 	"crypto/sha256"
+	"math/big"
+
 	. "github.com/Gessiux/go-common"
 	cfg "github.com/Gessiux/go-config"
 	tmdcrypto "github.com/Gessiux/go-crypto"
@@ -28,7 +31,6 @@ import (
 	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
-	"math/big"
 )
 
 const ROUND_NOT_PROPOSED int = 0
@@ -985,7 +987,7 @@ func (cs *ConsensusState) enterPropose(height uint64, round int) {
 	// Note!!! This will BLOCK the WHOLE consensus stack since it blocks receiveRoutine.
 	// TODO: what if there're more than one round for a height? 'saveBlockToMainChain' would be called more than once
 	if cs.state.TdmExtra.NeedToSave &&
-		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.IntChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.IntChainId) {
+		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
 		if cs.privValidator != nil && cs.IsProposer() {
 			cs.logger.Infof("enterPropose: saveBlockToMainChain height: %v", cs.state.TdmExtra.Height)
 			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.TdmExtra.Height)
@@ -995,7 +997,7 @@ func (cs *ConsensusState) enterPropose(height uint64, round int) {
 	}
 
 	if cs.state.TdmExtra.NeedToBroadcast &&
-		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.IntChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.IntChainId) {
+		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
 		if cs.privValidator != nil && cs.IsProposer() {
 			cs.logger.Infof("enterPropose: broadcastTX3ProofDataToMainChain height: %v", cs.state.TdmExtra.Height)
 			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.TdmExtra.Height)
@@ -1128,7 +1130,7 @@ func (cs *ConsensusState) createProposalBlock() (*types.TdmBlock, *types.PartSet
 		var tx3ProofData []*ethTypes.TX3ProofData
 		txs := intBlock.Transactions()
 		for _, tx := range txs {
-			if intAbi.IsIntChainContractAddr(tx.To()) {
+			if intAbi.IsNeatChainContractAddr(tx.To()) {
 				data := tx.Data()
 				function, err := intAbi.FunctionTypeFromId(data[:4])
 				if err != nil {
@@ -1519,7 +1521,7 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 		block.TdmExtra.SeenCommitHash = seenCommit.Hash()
 
 		// update 'NeedToSave' field here
-		if block.TdmExtra.ChainID != params.MainnetChainConfig.IntChainId && block.TdmExtra.ChainID != params.TestnetChainConfig.IntChainId {
+		if block.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && block.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId {
 			// check epoch
 			if len(block.TdmExtra.EpochBytes) > 0 {
 				block.TdmExtra.NeedToSave = true
@@ -1528,7 +1530,7 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 			// check special cross-chain tx
 			txs := block.Block.Transactions()
 			for _, tx := range txs {
-				if intAbi.IsIntChainContractAddr(tx.To()) {
+				if intAbi.IsNeatChainContractAddr(tx.To()) {
 					data := tx.Data()
 					function, err := intAbi.FunctionTypeFromId(data[:4])
 					if err != nil {
@@ -1586,14 +1588,14 @@ func (cs *ConsensusState) defaultSetProposal(proposal *types.Proposal) error {
 
 	if proposal.Round == cs.Round {
 		// Verify signature
-		if !cs.GetProposer().PubKey.VerifyBytes(types.SignBytes(cs.chainConfig.IntChainId, proposal), proposal.Signature) {
+		if !cs.GetProposer().PubKey.VerifyBytes(types.SignBytes(cs.chainConfig.NeatChainId, proposal), proposal.Signature) {
 			return ErrInvalidProposalSignature
 		}
 
 	} else /*proposal.Round < cs.Round*/ {
 
 		// Verify signature
-		if !cs.proposerByRound(proposal.Round).Proposer.PubKey.VerifyBytes(types.SignBytes(cs.chainConfig.IntChainId, proposal), proposal.Signature) {
+		if !cs.proposerByRound(proposal.Round).Proposer.PubKey.VerifyBytes(types.SignBytes(cs.chainConfig.NeatChainId, proposal), proposal.Signature) {
 			return ErrInvalidProposalSignature
 		}
 
@@ -2047,7 +2049,7 @@ func (cs *ConsensusState) ValidateTX4(b *types.TdmBlock) error {
 
 	txs := b.Block.Transactions()
 	for _, tx := range txs {
-		if intAbi.IsIntChainContractAddr(tx.To()) {
+		if intAbi.IsNeatChainContractAddr(tx.To()) {
 			data := tx.Data()
 			function, err := intAbi.FunctionTypeFromId(data[:4])
 			if err != nil {

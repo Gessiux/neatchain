@@ -24,7 +24,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/internal/intapi"
+	"github.com/Gessiux/neatchain/internal/neatapi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rpc"
 )
@@ -40,7 +40,7 @@ type Config struct {
 // Oracle recommends gas prices based on the content of recent
 // blocks. Suitable for both light and full clients.
 type Oracle struct {
-	backend   intapi.Backend
+	backend   neatapi.Backend
 	lastHead  common.Hash
 	lastPrice *big.Int
 	cacheLock sync.RWMutex
@@ -51,7 +51,7 @@ type Oracle struct {
 }
 
 // NewOracle returns a new oracle.
-func NewOracle(backend intapi.Backend, params Config) *Oracle {
+func NewOracle(backend neatapi.Backend, params Config) *Oracle {
 	blocks := params.Blocks
 	if blocks < 1 {
 		blocks = 1

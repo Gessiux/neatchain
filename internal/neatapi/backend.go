@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package intapi implements the general INT Chain API functions.
-package intapi
+// Package neatapi implements the general INT Chain API functions.
+package neatapi
 
 import (
 	"context"
@@ -87,7 +87,7 @@ func GetAPIs(apiBackend Backend, solcPath string) []rpc.API {
 		{
 			Namespace: "eth",
 			Version:   "1.0",
-			Service:   NewPublicINTChainAPI(apiBackend),
+			Service:   NewPublicNEATChainAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "eth",
@@ -102,7 +102,7 @@ func GetAPIs(apiBackend Backend, solcPath string) []rpc.API {
 		}, {
 			Namespace: "int",
 			Version:   "1.0",
-			Service:   NewPublicINTChainAPI(apiBackend),
+			Service:   NewPublicNEATChainAPI(apiBackend),
 			Public:    true,
 		}, {
 			Namespace: "int",
@@ -146,7 +146,7 @@ func GetAPIs(apiBackend Backend, solcPath string) []rpc.API {
 		}, {
 			Namespace: "int",
 			Version:   "1.0",
-			Service:   NewPublicINTAPI(apiBackend, nonceLock),
+			Service:   NewPublicNEATAPI(apiBackend, nonceLock),
 			Public:    true,
 		},
 	}

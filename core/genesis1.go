@@ -241,7 +241,7 @@ func DefaultGenesisBlockFromJson(genesisJson string) *Genesis {
 
 var DefaultMainnetGenesisJSON = `{
 	"config": {
-		"intChainId": "neatchain",
+		"NeatChainId": "neatchain",
 		"chainId": 1,
 		"homesteadBlock": 0,
 		"eip150Block": 0,
@@ -274,7 +274,7 @@ var DefaultMainnetGenesisJSON = `{
 
 var DefaultTestnetGenesisJSON = `{
 	"config": {
-		"intChainId": "testnet",
+		"NeatChainId": "testnet",
 		"chainId": 2,
 		"homesteadBlock": 0,
 		"eip150Block": 0,

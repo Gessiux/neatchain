@@ -19,13 +19,14 @@ package node
 import (
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"net"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
+
+	"github.com/Gessiux/neatchain/core/rawdb"
 
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/event"
@@ -34,7 +35,7 @@ import (
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/rpc"
-	"github.com/Gessiux/prometheus-flock"
+	flock "github.com/Gessiux/prometheus-flock"
 )
 
 // Node is a container on which services can be registered.
@@ -46,7 +47,7 @@ type Node struct {
 	ephemeralKeystore string         // if non-empty, the key directory that will be removed by Stop
 	instanceDirLock   flock.Releaser // prevents concurrent use of instance directory
 
-	serverConfig p2p.Config  // Not used in IntChain
+	serverConfig p2p.Config  // Not used in NeatChain
 	server       *p2p.Server // Currently running P2P networking layer
 
 	serviceFuncs []ServiceConstructor     // Service constructors (in dependency order)

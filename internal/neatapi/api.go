@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intapi
+package neatapi
 
 import (
 	"bytes"
@@ -54,25 +54,25 @@ const (
 	updateValidatorThreshold = 100
 )
 
-// PublicINTChainAPI provides an API to access neatchain related information.
+// PublicNEATChainAPI provides an API to access neatchain related information.
 // It offers only methods that operate on public data that is freely available to anyone.
-type PublicINTChainAPI struct {
+type PublicNEATChainAPI struct {
 	b Backend
 }
 
-// NewPublicINTChainAPI creates a new neatchain protocol API.
-func NewPublicINTChainAPI(b Backend) *PublicINTChainAPI {
-	return &PublicINTChainAPI{b}
+// NewPublicNEATChainAPI creates a new neatchain protocol API.
+func NewPublicNEATChainAPI(b Backend) *PublicNEATChainAPI {
+	return &PublicNEATChainAPI{b}
 }
 
 // GasPrice returns a suggestion for a gas price.
-func (s *PublicINTChainAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
+func (s *PublicNEATChainAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	price, err := s.b.SuggestPrice(ctx)
 	return (*hexutil.Big)(price), err
 }
 
 // ProtocolVersion returns the current neatchain protocol version this node supports
-func (s *PublicINTChainAPI) ProtocolVersion() hexutil.Uint {
+func (s *PublicNEATChainAPI) ProtocolVersion() hexutil.Uint {
 	return hexutil.Uint(s.b.ProtocolVersion())
 }
 
@@ -83,7 +83,7 @@ func (s *PublicINTChainAPI) ProtocolVersion() hexutil.Uint {
 // - highestBlock:  block number of the highest block header this node has received from peers
 // - pulledStates:  number of state entries processed until now
 // - knownStates:   number of known state entries that still need to be pulled
-func (s *PublicINTChainAPI) Syncing() (interface{}, error) {
+func (s *PublicNEATChainAPI) Syncing() (interface{}, error) {
 	progress := s.b.Downloader().Progress()
 
 	// Return not syncing if the synchronisation already completed
@@ -1267,7 +1267,7 @@ type SendTxArgs struct {
 func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 
 	var function = intAbi.Unknown
-	if intAbi.IsIntChainContractAddr(args.To) {
+	if intAbi.IsNeatChainContractAddr(args.To) {
 		var input []byte
 		if args.Data != nil {
 			input = *args.Data
@@ -1687,18 +1687,18 @@ var (
 	maxEditValidatorLength = 100
 )
 
-type PublicINTAPI struct {
+type PublicNEATAPI struct {
 	am        *accounts.Manager
 	b         Backend
 	nonceLock *AddrLocker
 }
 
-// NewPublicINTAPI creates a new INT API instance.
-func NewPublicINTAPI(b Backend, nonceLock *AddrLocker) *PublicINTAPI {
-	return &PublicINTAPI{b.AccountManager(), b, nonceLock}
+// NewPublicNEATAPI creates a new INT API instance.
+func NewPublicNEATAPI(b Backend, nonceLock *AddrLocker) *PublicNEATAPI {
+	return &PublicNEATAPI{b.AccountManager(), b, nonceLock}
 }
 
-func (s *PublicINTAPI) SignAddress(from common.Address, consensusPrivateKey hexutil.Bytes) (goCrypto.Signature, error) {
+func (s *PublicNEATAPI) SignAddress(from common.Address, consensusPrivateKey hexutil.Bytes) (goCrypto.Signature, error) {
 	if len(consensusPrivateKey) != 32 {
 		return nil, errors.New("invalid consensus private key")
 	}
@@ -1711,7 +1711,7 @@ func (s *PublicINTAPI) SignAddress(from common.Address, consensusPrivateKey hexu
 	return blsSign, nil
 }
 
-func (api *PublicINTAPI) WithdrawReward(ctx context.Context, from common.Address, delegateAddress common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) WithdrawReward(ctx context.Context, from common.Address, delegateAddress common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
 	input, err := intAbi.ChainABI.Pack(intAbi.WithdrawReward.String(), delegateAddress)
 	if err != nil {
 		return common.Hash{}, err
@@ -1732,7 +1732,7 @@ func (api *PublicINTAPI) WithdrawReward(ctx context.Context, from common.Address
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) Delegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) Delegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
 
 	input, err := intAbi.ChainABI.Pack(intAbi.Delegate.String(), candidate)
 	if err != nil {
@@ -1753,7 +1753,7 @@ func (api *PublicINTAPI) Delegate(ctx context.Context, from, candidate common.Ad
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) UnDelegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) UnDelegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
 
 	input, err := intAbi.ChainABI.Pack(intAbi.UnDelegate.String(), candidate, (*big.Int)(amount))
 	if err != nil {
@@ -1775,7 +1775,7 @@ func (api *PublicINTAPI) UnDelegate(ctx context.Context, from, candidate common.
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) Register(ctx context.Context, from common.Address, registerAmount *hexutil.Big, pubkey goCrypto.BLSPubKey, signature hexutil.Bytes, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) Register(ctx context.Context, from common.Address, registerAmount *hexutil.Big, pubkey goCrypto.BLSPubKey, signature hexutil.Bytes, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
 
 	input, err := intAbi.ChainABI.Pack(intAbi.Register.String(), pubkey.Bytes(), signature, commission)
 	if err != nil {
@@ -1796,7 +1796,7 @@ func (api *PublicINTAPI) Register(ctx context.Context, from common.Address, regi
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) UnRegister(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) UnRegister(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
 
 	input, err := intAbi.ChainABI.Pack(intAbi.UnRegister.String())
 	if err != nil {
@@ -1817,7 +1817,7 @@ func (api *PublicINTAPI) UnRegister(ctx context.Context, from common.Address, ga
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) CheckCandidate(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]interface{}, error) {
+func (api *PublicNEATAPI) CheckCandidate(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]interface{}, error) {
 	state, _, err := api.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
@@ -1830,7 +1830,7 @@ func (api *PublicINTAPI) CheckCandidate(ctx context.Context, address common.Addr
 	return fields, state.Error()
 }
 
-func (api *PublicINTAPI) GetForbiddenStatus(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]interface{}, error) {
+func (api *PublicNEATAPI) GetForbiddenStatus(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (map[string]interface{}, error) {
 	state, _, err := api.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
@@ -1844,7 +1844,7 @@ func (api *PublicINTAPI) GetForbiddenStatus(ctx context.Context, address common.
 	return fields, state.Error()
 }
 
-func (api *PublicINTAPI) SetCommission(ctx context.Context, from common.Address, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) SetCommission(ctx context.Context, from common.Address, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
 	input, err := intAbi.ChainABI.Pack(intAbi.SetCommission.String(), commission)
 	if err != nil {
 		return common.Hash{}, err
@@ -1865,7 +1865,7 @@ func (api *PublicINTAPI) SetCommission(ctx context.Context, from common.Address,
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) EditValidator(ctx context.Context, from common.Address, moniker, website string, identity string, details string, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) EditValidator(ctx context.Context, from common.Address, moniker, website string, identity string, details string, gasPrice *hexutil.Big) (common.Hash, error) {
 	input, err := intAbi.ChainABI.Pack(intAbi.EditValidator.String(), moniker, website, identity, details)
 	if err != nil {
 		return common.Hash{}, err
@@ -1886,7 +1886,7 @@ func (api *PublicINTAPI) EditValidator(ctx context.Context, from common.Address,
 	return SendTransaction(ctx, args, api.am, api.b, api.nonceLock)
 }
 
-func (api *PublicINTAPI) UnForbidden(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
+func (api *PublicNEATAPI) UnForbidden(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
 	input, err := intAbi.ChainABI.Pack(intAbi.UnForbidden.String())
 	if err != nil {
 		return common.Hash{}, err

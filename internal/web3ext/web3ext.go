@@ -32,7 +32,7 @@ var Modules = map[string]string{
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
 	"istanbul":   Istanbul_JS,
-	//// IntChain JS
+	//// NeatChain JS
 	//"chain": Chain_JS,
 	//"tdm":   Tdm_JS,
 	//"del":   Del_JS,
