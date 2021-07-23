@@ -24,7 +24,7 @@ import (
 	"sync"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 )
 
 var (
@@ -123,7 +123,7 @@ func (db *Database) Delete(key []byte) error {
 
 // NewBatch creates a write-only key-value store that buffers changes to its host
 // database until a final write is called.
-func (db *Database) NewBatch() intdb.Batch {
+func (db *Database) NewBatch() neatdb.Batch {
 	return &batch{
 		db: db,
 	}
@@ -131,13 +131,13 @@ func (db *Database) NewBatch() intdb.Batch {
 
 // NewIterator creates a binary-alphabetical iterator over the entire keyspace
 // contained within the memory database.
-func (db *Database) NewIterator() intdb.Iterator {
+func (db *Database) NewIterator() neatdb.Iterator {
 	return db.NewIteratorWithPrefix(nil)
 }
 
 // NewIteratorWithPrefix creates a binary-alphabetical iterator over a subset
 // of database content with a particular key prefix.
-func (db *Database) NewIteratorWithPrefix(prefix []byte) intdb.Iterator {
+func (db *Database) NewIteratorWithPrefix(prefix []byte) neatdb.Iterator {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 
@@ -241,7 +241,7 @@ func (b *batch) Reset() {
 }
 
 // Replay replays the batch contents.
-func (b *batch) Replay(w intdb.Writer) error {
+func (b *batch) Replay(w neatdb.Writer) error {
 	for _, keyvalue := range b.writes {
 		if keyvalue.delete {
 			if err := w.Delete(keyvalue.key); err != nil {

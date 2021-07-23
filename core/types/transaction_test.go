@@ -21,13 +21,14 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
-	"github.com/Gessiux/neatchain/common/hexutil"
 	"math/big"
 	"testing"
 
+	"github.com/Gessiux/neatchain/common/hexutil"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/rlp"
 )
 
@@ -325,7 +326,7 @@ func TestDelegateTx(t *testing.T) {
 	//address := common.StringToAddress("INT3Pkr1zMmk3mnFzihH5F4kNxFavJo4")
 	address := common.StringToAddress("INT3FFFFFFFFFFFFFFFFFFFFFFFFFFFF")
 
-	input, err := intAbi.ChainABI.Pack(intAbi.Delegate.String(), common.StringToAddress("INT3CFVNpTwr3QrykhPWiLP8n9wsyCVa"))
+	input, err := neatAbi.ChainABI.Pack(neatAbi.Delegate.String(), common.StringToAddress("INT3CFVNpTwr3QrykhPWiLP8n9wsyCVa"))
 	fmt.Printf("delegate input %v\n", hexutil.Encode(input))
 	if err != nil {
 		t.Errorf("could not pack data, err %v\n", err)

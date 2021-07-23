@@ -34,9 +34,9 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
@@ -1118,7 +1118,7 @@ func RegisterIntService(stack *node.Node, cfg *neatprotocol.Config, cliCtx *cli.
 //}
 
 // MakeChainDatabase open an LevelDB using the flags passed to the client and will hard crash if it fails.
-func MakeChainDatabase(ctx *cli.Context, stack *node.Node) intdb.Database {
+func MakeChainDatabase(ctx *cli.Context, stack *node.Node) neatdb.Database {
 	var (
 		cache   = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheDatabaseFlag.Name) / 100
 		handles = makeDatabaseHandles()
@@ -1149,7 +1149,7 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 }
 
 // MakeChain creates a chain manager from set command line flags.
-func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb intdb.Database) {
+func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb neatdb.Database) {
 	var err error
 	chainDb = MakeChainDatabase(ctx, stack)
 	config, _, err := core.SetupGenesisBlock(chainDb, MakeGenesis(ctx))

@@ -19,12 +19,13 @@ package filters
 import (
 	"context"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"math/big"
 	"math/rand"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Gessiux/neatchain/core/rawdb"
 
 	ethereum "github.com/Gessiux/neatchain"
 	"github.com/Gessiux/neatchain/common"
@@ -32,14 +33,14 @@ import (
 	"github.com/Gessiux/neatchain/core/bloombits"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rpc"
 )
 
 type testBackend struct {
 	mux        *event.TypeMux
-	db         intdb.Database
+	db         neatdb.Database
 	sections   uint64
 	txFeed     *event.Feed
 	rmLogsFeed *event.Feed
@@ -47,7 +48,7 @@ type testBackend struct {
 	chainFeed  *event.Feed
 }
 
-func (b *testBackend) ChainDb() intdb.Database {
+func (b *testBackend) ChainDb() neatdb.Database {
 	return b.db
 }
 

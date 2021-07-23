@@ -2,16 +2,17 @@ package core
 
 import (
 	"errors"
+	"math/big"
+	"sync"
+
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus/ipbft/epoch"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
-	"github.com/Gessiux/neatchain/intclient"
-	"math/big"
-	"sync"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
+	"github.com/Gessiux/neatchain/neatclient"
 )
 
 type TX3LocalCache interface {
@@ -26,7 +27,7 @@ type TX3LocalCache interface {
 
 type CrossChainHelper interface {
 	GetMutex() *sync.Mutex
-	GetClient() *intclient.Client
+	GetClient() *neatclient.Client
 	GetMainChainId() string
 	GetChainInfoDB() dbm.DB
 
@@ -70,11 +71,11 @@ type NonCrossChainApplyCb = func(tx *types.Transaction, state *state.StateDB, bc
 
 type EtdInsertBlockCb func(bc *BlockChain, block *types.Block)
 
-var validateCbMap = make(map[intAbi.FunctionType]interface{})
-var applyCbMap = make(map[intAbi.FunctionType]interface{})
+var validateCbMap = make(map[neatAbi.FunctionType]interface{})
+var applyCbMap = make(map[neatAbi.FunctionType]interface{})
 var insertBlockCbMap = make(map[string]EtdInsertBlockCb)
 
-func RegisterValidateCb(function intAbi.FunctionType, validateCb interface{}) error {
+func RegisterValidateCb(function neatAbi.FunctionType, validateCb interface{}) error {
 
 	_, ok := validateCbMap[function]
 	if ok {
@@ -85,7 +86,7 @@ func RegisterValidateCb(function intAbi.FunctionType, validateCb interface{}) er
 	return nil
 }
 
-func GetValidateCb(function intAbi.FunctionType) interface{} {
+func GetValidateCb(function neatAbi.FunctionType) interface{} {
 
 	cb, ok := validateCbMap[function]
 	if ok {
@@ -95,7 +96,7 @@ func GetValidateCb(function intAbi.FunctionType) interface{} {
 	return nil
 }
 
-func RegisterApplyCb(function intAbi.FunctionType, applyCb interface{}) error {
+func RegisterApplyCb(function neatAbi.FunctionType, applyCb interface{}) error {
 
 	_, ok := applyCbMap[function]
 	if ok {
@@ -107,7 +108,7 @@ func RegisterApplyCb(function intAbi.FunctionType, applyCb interface{}) error {
 	return nil
 }
 
-func GetApplyCb(function intAbi.FunctionType) interface{} {
+func GetApplyCb(function neatAbi.FunctionType) interface{} {
 
 	cb, ok := applyCbMap[function]
 	if ok {

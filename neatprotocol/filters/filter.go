@@ -25,12 +25,12 @@ import (
 	"github.com/Gessiux/neatchain/core/bloombits"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/rpc"
 )
 
 type Backend interface {
-	ChainDb() intdb.Database
+	ChainDb() neatdb.Database
 	EventMux() *event.TypeMux
 	HeaderByNumber(ctx context.Context, blockNr rpc.BlockNumber) (*types.Header, error)
 	GetReceipts(ctx context.Context, blockHash common.Hash) (types.Receipts, error)
@@ -49,7 +49,7 @@ type Backend interface {
 type Filter struct {
 	backend Backend
 
-	db         intdb.Database
+	db         neatdb.Database
 	begin, end int64
 	addresses  []common.Address
 	topics     [][]common.Hash

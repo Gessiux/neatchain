@@ -28,7 +28,7 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	ethTypes "github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 )
@@ -1130,17 +1130,17 @@ func (cs *ConsensusState) createProposalBlock() (*types.TdmBlock, *types.PartSet
 		var tx3ProofData []*ethTypes.TX3ProofData
 		txs := intBlock.Transactions()
 		for _, tx := range txs {
-			if intAbi.IsNeatChainContractAddr(tx.To()) {
+			if neatAbi.IsNeatChainContractAddr(tx.To()) {
 				data := tx.Data()
-				function, err := intAbi.FunctionTypeFromId(data[:4])
+				function, err := neatAbi.FunctionTypeFromId(data[:4])
 				if err != nil {
 					continue
 				}
 
-				if function == intAbi.WithdrawFromMainChain {
-					var args intAbi.WithdrawFromMainChainArgs
+				if function == neatAbi.WithdrawFromMainChain {
+					var args neatAbi.WithdrawFromMainChainArgs
 					data := tx.Data()
-					if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.WithdrawFromMainChain.String(), data[4:]); err != nil {
+					if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.WithdrawFromMainChain.String(), data[4:]); err != nil {
 						continue
 					}
 
@@ -1530,14 +1530,14 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 			// check special cross-chain tx
 			txs := block.Block.Transactions()
 			for _, tx := range txs {
-				if intAbi.IsNeatChainContractAddr(tx.To()) {
+				if neatAbi.IsNeatChainContractAddr(tx.To()) {
 					data := tx.Data()
-					function, err := intAbi.FunctionTypeFromId(data[:4])
+					function, err := neatAbi.FunctionTypeFromId(data[:4])
 					if err != nil {
 						continue
 					}
 
-					if function == intAbi.WithdrawFromChildChain {
+					if function == neatAbi.WithdrawFromChildChain {
 						block.TdmExtra.NeedToBroadcast = true
 						cs.logger.Infof("NeedToBroadcast set to true due to tx. Tx: %s, Chain: %s, Height: %v", function.String(), block.TdmExtra.ChainID, block.TdmExtra.Height)
 						break
@@ -2049,14 +2049,14 @@ func (cs *ConsensusState) ValidateTX4(b *types.TdmBlock) error {
 
 	txs := b.Block.Transactions()
 	for _, tx := range txs {
-		if intAbi.IsNeatChainContractAddr(tx.To()) {
+		if neatAbi.IsNeatChainContractAddr(tx.To()) {
 			data := tx.Data()
-			function, err := intAbi.FunctionTypeFromId(data[:4])
+			function, err := neatAbi.FunctionTypeFromId(data[:4])
 			if err != nil {
 				continue
 			}
 
-			if function == intAbi.WithdrawFromMainChain {
+			if function == neatAbi.WithdrawFromMainChain {
 				// index of tx4 and tx3ProofData should exactly match one by one.
 				if index >= len(b.TX3ProofData) {
 					return errors.New("tx3 proof data missing")

@@ -20,21 +20,23 @@ import (
 	crand "crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
-	"github.com/Gessiux/neatchain/core/state"
 	"math"
 	"math/big"
 	mrand "math/rand"
 	"time"
 
+	"github.com/Gessiux/neatchain/core/rawdb"
+	"github.com/Gessiux/neatchain/core/state"
+	lru "github.com/hashicorp/golang-lru"
+
+	"sync/atomic"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/consensus"
 	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
-	"github.com/hashicorp/golang-lru"
-	"sync/atomic"
 )
 
 const (
@@ -51,7 +53,7 @@ const (
 type HeaderChain struct {
 	config *params.ChainConfig
 
-	chainDb       intdb.Database
+	chainDb       neatdb.Database
 	genesisHeader *types.Header
 
 	currentHeader     atomic.Value // Current head of the header chain (may be above the block chain!)
@@ -71,7 +73,7 @@ type HeaderChain struct {
 //  getValidator should return the parent's validator
 //  procInterrupt points to the parent's interrupt semaphore
 //  wg points to the parent's shutdown wait group
-func NewHeaderChain(chainDb intdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
+func NewHeaderChain(chainDb neatdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
 	headerCache, _ := lru.New(headerCacheLimit)
 	tdCache, _ := lru.New(tdCacheLimit)
 	numberCache, _ := lru.New(numberCacheLimit)
@@ -409,7 +411,7 @@ func (hc *HeaderChain) SetCurrentHeader(head *types.Header) {
 
 // DeleteCallback is a callback function that is called by SetHead before
 // each header is deleted.
-type DeleteCallback func(intdb.Writer, common.Hash, uint64)
+type DeleteCallback func(neatdb.Writer, common.Hash, uint64)
 
 // SetHead rewinds the local chain to a new head. Everything above the new head
 // will be deleted and the new one set.

@@ -9,13 +9,13 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 )
 
 // WriteGenesisBlock writes the genesis block to the database as block number 0
-//func WriteGenesisBlock(chainDb intdb.Database, reader io.Reader) (*types.Block, error) {
+//func WriteGenesisBlock(chainDb neatdb.Database, reader io.Reader) (*types.Block, error) {
 //	contents, err := ioutil.ReadAll(reader)
 //	if err != nil {
 //		return nil, err
@@ -30,7 +30,7 @@ import (
 //	return SetupGenesisBlockEx(chainDb, &genesis)
 //}
 
-func WriteGenesisBlock(chainDb intdb.Database, reader io.Reader) (*types.Block, error) {
+func WriteGenesisBlock(chainDb neatdb.Database, reader io.Reader) (*types.Block, error) {
 	contents, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func WriteGenesisBlock(chainDb intdb.Database, reader io.Reader) (*types.Block, 
 	return SetupGenesisBlockEx(chainDb, &genesis)
 }
 
-func SetupGenesisBlockEx(db intdb.Database, genesis *Genesis) (*types.Block, error) {
+func SetupGenesisBlockEx(db neatdb.Database, genesis *Genesis) (*types.Block, error) {
 
 	if genesis != nil && genesis.Config == nil {
 		return nil, errGenesisNoConfig
@@ -139,7 +139,7 @@ func SetupGenesisBlockEx(db intdb.Database, genesis *Genesis) (*types.Block, err
 // error is a *params.ConfigCompatError and the new, unwritten config is returned.
 //
 // The returned chain configuration is never nil.
-func SetupGenesisBlockWithDefault(db intdb.Database, genesis *Genesis, isMainChain, isTestnet bool) (*params.ChainConfig, common.Hash, error) {
+func SetupGenesisBlockWithDefault(db neatdb.Database, genesis *Genesis, isMainChain, isTestnet bool) (*params.ChainConfig, common.Hash, error) {
 	if genesis != nil && genesis.Config == nil {
 		//fmt.Printf("core genesis1 SetupGenesisBlockWithDefault 1\n")
 		return nil, common.Hash{}, errGenesisNoConfig

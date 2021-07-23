@@ -25,7 +25,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 )
 
 func init() {

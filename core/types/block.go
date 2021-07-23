@@ -31,7 +31,7 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/hexutil"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
 	"golang.org/x/crypto/sha3"
@@ -499,14 +499,14 @@ func NewTX3ProofData(block *Block) (*TX3ProofData, error) {
 	}
 	// do the Merkle Proof for the specific tx
 	for i, tx := range txs {
-		if intAbi.IsNeatChainContractAddr(tx.To()) {
+		if neatAbi.IsNeatChainContractAddr(tx.To()) {
 			data := tx.Data()
-			function, err := intAbi.FunctionTypeFromId(data[:4])
+			function, err := neatAbi.FunctionTypeFromId(data[:4])
 			if err != nil {
 				continue
 			}
 
-			if function == intAbi.WithdrawFromChildChain {
+			if function == neatAbi.WithdrawFromChildChain {
 				kvSet := MakeBSKeyValueSet()
 				keybuf.Reset()
 				rlp.Encode(keybuf, uint(i))
@@ -548,14 +548,14 @@ type ChildChainProofDataV1 struct {
 //	}
 //	// do the Merkle Proof for the specific tx
 //	for i, tx := range txs {
-//		if intAbi.IsNeatChainContractAddr(tx.To()) {
+//		if neatAbi.IsNeatChainContractAddr(tx.To()) {
 //			data := tx.Data()
-//			function, err := intAbi.FunctionTypeFromId(data[:4])
+//			function, err := neatAbi.FunctionTypeFromId(data[:4])
 //			if err != nil {
 //				continue
 //			}
 //
-//			if function == intAbi.WithdrawFromChildChain {
+//			if function == neatAbi.WithdrawFromChildChain {
 //				kvSet := MakeBSKeyValueSet()
 //				keybuf.Reset()
 //				rlp.Encode(keybuf, uint(i))

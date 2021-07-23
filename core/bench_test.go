@@ -18,11 +18,12 @@ package core
 
 import (
 	"crypto/ecdsa"
+	"math/big"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	"math/big"
 )
 
 //func BenchmarkInsertChain_empty_memdb(b *testing.B) {
@@ -138,7 +139,7 @@ func genUncles(i int, gen *BlockGen) {
 
 //func benchInsertChain(b *testing.B, disk bool, gen func(int, *BlockGen)) {
 //	// Create the database in memory or in a temporary directory.
-//	var db intdb.Database
+//	var db neatdb.Database
 //	if !disk {
 //		db, _ = rawdb.NewMemoryDatabase()
 //	} else {
@@ -147,7 +148,7 @@ func genUncles(i int, gen *BlockGen) {
 //			b.Fatalf("cannot create temporary directory: %v", err)
 //		}
 //		defer os.RemoveAll(dir)
-//		db, err = intdb.NewLDBDatabase(dir, 128, 128)
+//		db, err = neatdb.NewLDBDatabase(dir, 128, 128)
 //		if err != nil {
 //			b.Fatalf("cannot create temporary database: %v", err)
 //		}
@@ -213,7 +214,7 @@ func genUncles(i int, gen *BlockGen) {
 
 // makeChainForBench writes a given number of headers or empty blocks/receipts
 // into a database.
-//func makeChainForBench(db intdb.Database, full bool, count uint64) {
+//func makeChainForBench(db neatdb.Database, full bool, count uint64) {
 //	var hash common.Hash
 //	for n := uint64(0); n < count; n++ {
 //		header := &types.Header{
@@ -243,7 +244,7 @@ func genUncles(i int, gen *BlockGen) {
 //		if err != nil {
 //			b.Fatalf("cannot create temporary directory: %v", err)
 //		}
-//		db, err := intdb.NewLDBDatabase(dir, 128, 1024)
+//		db, err := neatdb.NewLDBDatabase(dir, 128, 1024)
 //		if err != nil {
 //			b.Fatalf("error opening database at %v: %v", dir, err)
 //		}
@@ -260,7 +261,7 @@ func genUncles(i int, gen *BlockGen) {
 //	}
 //	defer os.RemoveAll(dir)
 //
-//	db, err := intdb.NewLDBDatabase(dir, 128, 1024)
+//	db, err := neatdb.NewLDBDatabase(dir, 128, 1024)
 //	if err != nil {
 //		b.Fatalf("error opening database at %v: %v", dir, err)
 //	}
@@ -271,7 +272,7 @@ func genUncles(i int, gen *BlockGen) {
 //	b.ResetTimer()
 //
 //	for i := 0; i < b.N; i++ {
-//		db, err := intdb.NewLDBDatabase(dir, 128, 1024)
+//		db, err := neatdb.NewLDBDatabase(dir, 128, 1024)
 //		if err != nil {
 //			b.Fatalf("error opening database at %v: %v", dir, err)
 //		}

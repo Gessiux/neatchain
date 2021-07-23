@@ -22,10 +22,10 @@ import (
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
-	"github.com/Gessiux/neatchain/intclient"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
+	"github.com/Gessiux/neatchain/neatclient"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/params"
@@ -36,9 +36,9 @@ import (
 type CrossChainHelper struct {
 	mtx             sync.Mutex
 	chainInfoDB     dbm.DB
-	localTX3CacheDB intdb.Database
+	localTX3CacheDB neatdb.Database
 	//the client does only connect to main chain
-	client      *intclient.Client
+	client      *neatclient.Client
 	mainChainId string
 }
 
@@ -50,7 +50,7 @@ func (cch *CrossChainHelper) GetChainInfoDB() dbm.DB {
 	return cch.chainInfoDB
 }
 
-func (cch *CrossChainHelper) GetClient() *intclient.Client {
+func (cch *CrossChainHelper) GetClient() *neatclient.Client {
 	return cch.client
 }
 
@@ -578,23 +578,23 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 		return core.ErrInvalidSender
 	}
 
-	var args intAbi.WithdrawFromMainChainArgs
+	var args neatAbi.WithdrawFromMainChainArgs
 
-	if !intAbi.IsNeatChainContractAddr(tx4.To()) {
+	if !neatAbi.IsNeatChainContractAddr(tx4.To()) {
 		return errors.New("invalid TX4: wrong To()")
 	}
 
 	data := tx4.Data()
-	function, err := intAbi.FunctionTypeFromId(data[:4])
+	function, err := neatAbi.FunctionTypeFromId(data[:4])
 	if err != nil {
 		return err
 	}
 
-	if function != intAbi.WithdrawFromMainChain {
+	if function != neatAbi.WithdrawFromMainChain {
 		return errors.New("invalid TX4: wrong function")
 	}
 
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.WithdrawFromMainChain.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.WithdrawFromMainChain.String(), data[4:]); err != nil {
 		return err
 	}
 
@@ -622,9 +622,9 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 		return core.ErrInvalidSender
 	}
 
-	var tx3Args intAbi.WithdrawFromChildChainArgs
+	var tx3Args neatAbi.WithdrawFromChildChainArgs
 	tx3Data := tx3.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&tx3Args, intAbi.WithdrawFromChildChain.String(), tx3Data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&tx3Args, neatAbi.WithdrawFromChildChain.String(), tx3Data[4:]); err != nil {
 		return err
 	}
 

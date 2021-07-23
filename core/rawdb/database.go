@@ -17,33 +17,33 @@
 package rawdb
 
 import (
-	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intdb/leveldb"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb"
+	"github.com/Gessiux/neatchain/neatdb/leveldb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 )
 
 // NewDatabase creates a high level database on top of a given key-value data
 // store without a freezer moving immutable chain segments into cold storage.
-func NewDatabase(db intdb.KeyValueStore) intdb.Database {
+func NewDatabase(db neatdb.KeyValueStore) neatdb.Database {
 	return db
 }
 
 // NewMemoryDatabase creates an ephemeral in-memory key-value database without a
 // freezer moving immutable chain segments into cold storage.
-func NewMemoryDatabase() intdb.Database {
+func NewMemoryDatabase() neatdb.Database {
 	return NewDatabase(memorydb.New())
 }
 
 // NewMemoryDatabaseWithCap creates an ephemeral in-memory key-value database with
 // an initial starting capacity, but without a freezer moving immutable chain
 // segments into cold storage.
-func NewMemoryDatabaseWithCap(size int) intdb.Database {
+func NewMemoryDatabaseWithCap(size int) neatdb.Database {
 	return NewDatabase(memorydb.NewWithCap(size))
 }
 
 // NewLevelDBDatabase creates a persistent key-value database without a freezer
 // moving immutable chain segments into cold storage.
-func NewLevelDBDatabase(file string, cache int, handles int, namespace string) (intdb.Database, error) {
+func NewLevelDBDatabase(file string, cache int, handles int, namespace string) (neatdb.Database, error) {
 	db, err := leveldb.New(file, cache, handles, namespace)
 	if err != nil {
 		return nil, err

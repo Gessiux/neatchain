@@ -25,9 +25,9 @@ import (
 	"time"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/allegro/bigcache"
 )
@@ -66,7 +66,7 @@ const secureKeyLength = 11 + 32
 // behind this split design is to provide read access to RPC handlers and sync
 // servers even while the trie is executing expensive garbage collection.
 type Database struct {
-	diskdb intdb.KeyValueStore // Persistent storage for matured trie nodes
+	diskdb neatdb.KeyValueStore // Persistent storage for matured trie nodes
 
 	cleans  *bigcache.BigCache          // GC friendly memory cache of clean node RLPs
 	dirties map[common.Hash]*cachedNode // Data and references relationships of dirty nodes
@@ -282,14 +282,14 @@ func (t trienodeHasher) Sum64(key string) uint64 {
 // NewDatabase creates a new trie database to store ephemeral trie content before
 // its written out to disk or garbage collected. No read cache is created, so all
 // data retrievals will hit the underlying disk database.
-func NewDatabase(diskdb intdb.KeyValueStore) *Database {
+func NewDatabase(diskdb neatdb.KeyValueStore) *Database {
 	return NewDatabaseWithCache(diskdb, 0)
 }
 
 // NewDatabaseWithCache creates a new trie database to store ephemeral trie content
 // before its written out to disk or garbage collected. It also acts as a read cache
 // for nodes loaded from disk.
-func NewDatabaseWithCache(diskdb intdb.KeyValueStore, cache int) *Database {
+func NewDatabaseWithCache(diskdb neatdb.KeyValueStore, cache int) *Database {
 	var cleans *bigcache.BigCache
 	if cache > 0 {
 		cleans, _ = bigcache.NewBigCache(bigcache.Config{
@@ -310,7 +310,7 @@ func NewDatabaseWithCache(diskdb intdb.KeyValueStore, cache int) *Database {
 }
 
 // DiskDB retrieves the persistent storage backing the trie database.
-func (db *Database) DiskDB() intdb.Reader {
+func (db *Database) DiskDB() neatdb.Reader {
 	return db.diskdb
 }
 
@@ -599,7 +599,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 				log.Error("Failed to commit preimage from trie database", "err", err)
 				return err
 			}
-			if batch.ValueSize() > intdb.IdealBatchSize {
+			if batch.ValueSize() > neatdb.IdealBatchSize {
 				if err := batch.Write(); err != nil {
 					return err
 				}
@@ -616,7 +616,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 			return err
 		}
 		// If we exceeded the ideal batch size, commit and reset
-		if batch.ValueSize() >= intdb.IdealBatchSize {
+		if batch.ValueSize() >= neatdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				log.Error("Failed to write flush list to disk", "err", err)
 				return err
@@ -688,7 +688,7 @@ func (db *Database) Commit(node common.Hash, report bool) error {
 			return err
 		}
 		// If the batch is too large, flush to disk
-		if batch.ValueSize() > intdb.IdealBatchSize {
+		if batch.ValueSize() > neatdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				return err
 			}
@@ -745,7 +745,7 @@ func (db *Database) Commit(node common.Hash, report bool) error {
 }
 
 // commit is the private locked version of Commit.
-func (db *Database) commit(hash common.Hash, batch intdb.Batch, uncacher *cleaner) error {
+func (db *Database) commit(hash common.Hash, batch neatdb.Batch, uncacher *cleaner) error {
 	// If the node does not exist, it's a previously committed node
 	node, ok := db.dirties[hash]
 	if !ok {
@@ -760,7 +760,7 @@ func (db *Database) commit(hash common.Hash, batch intdb.Batch, uncacher *cleane
 		return err
 	}
 	// If we've reached an optimal batch size, commit and start over
-	if batch.ValueSize() >= intdb.IdealBatchSize {
+	if batch.ValueSize() >= neatdb.IdealBatchSize {
 		if err := batch.Write(); err != nil {
 			return err
 		}

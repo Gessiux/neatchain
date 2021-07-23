@@ -32,7 +32,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 	"golang.org/x/crypto/sha3"
@@ -159,7 +159,7 @@ func (t *StateTest) gasLimit(subtest StateSubtest) uint64 {
 	return t.json.Tx.GasLimit[t.json.Post[subtest.Fork][subtest.Index].Indexes.Gas]
 }
 
-func MakePreState(db intdb.Database, accounts core.GenesisAlloc) *state.StateDB {
+func MakePreState(db neatdb.Database, accounts core.GenesisAlloc) *state.StateDB {
 	sdb := state.NewDatabase(db)
 	statedb, _ := state.New(common.Hash{}, sdb)
 	for addr, a := range accounts {

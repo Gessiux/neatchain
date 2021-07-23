@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

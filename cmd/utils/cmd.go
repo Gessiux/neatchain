@@ -36,8 +36,8 @@ import (
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/Gessiux/neatchain/rlp"
 )
@@ -270,7 +270,7 @@ func ExportAppendChain(blockchain *core.BlockChain, fn string, first uint64, las
 }
 
 // ImportPreimages imports a batch of exported hash preimages into the database.
-func ImportPreimages(db intdb.Database, fn string) error {
+func ImportPreimages(db neatdb.Database, fn string) error {
 	log.Info("Importing preimages", "file", fn)
 
 	// Open the file handle and potentially unwrap the gzip stream
@@ -317,7 +317,7 @@ func ImportPreimages(db intdb.Database, fn string) error {
 
 // ExportPreimages exports all known hash preimages into the specified file,
 // truncating any data already present in the file.
-func ExportPreimages(db intdb.Database, fn string) error {
+func ExportPreimages(db neatdb.Database, fn string) error {
 	log.Info("Exporting preimages", "file", fn)
 
 	// Open the file handle and potentially wrap with a gzip stream

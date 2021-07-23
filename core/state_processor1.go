@@ -9,8 +9,8 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 )
 
@@ -27,7 +27,7 @@ func ApplyTransactionEx(config *params.ChainConfig, bc *BlockChain, author *comm
 		return nil, 0, err
 	}
 
-	if !intAbi.IsNeatChainContractAddr(tx.To()) {
+	if !neatAbi.IsNeatChainContractAddr(tx.To()) {
 
 		//log.Debugf("ApplyTransactionEx 1\n")
 
@@ -85,7 +85,7 @@ func ApplyTransactionEx(config *params.ChainConfig, bc *BlockChain, author *comm
 
 		// the first 4 bytes is the function identifier
 		data := tx.Data()
-		function, err := intAbi.FunctionTypeFromId(data[:4])
+		function, err := neatAbi.FunctionTypeFromId(data[:4])
 		if err != nil {
 			return nil, 0, err
 		}

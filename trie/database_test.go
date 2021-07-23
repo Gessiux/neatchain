@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 )
 
 // Tests that the trie database returns a missing trie node error if attempting

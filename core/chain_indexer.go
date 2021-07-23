@@ -19,16 +19,17 @@ package core
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/Gessiux/neatchain/core/rawdb"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 )
 
 // ChainIndexerBackend defines the methods needed to process chain segments in
@@ -66,8 +67,8 @@ type ChainIndexerChain interface {
 // after an entire section has been finished or in case of rollbacks that might
 // affect already finished sections.
 type ChainIndexer struct {
-	chainDb  intdb.Database      // Chain database to index the data from
-	indexDb  intdb.Database      // Prefixed table-view of the db to write index metadata into
+	chainDb  neatdb.Database     // Chain database to index the data from
+	indexDb  neatdb.Database     // Prefixed table-view of the db to write index metadata into
 	backend  ChainIndexerBackend // Background processor generating the index data content
 	children []*ChainIndexer     // Child indexers to cascade chain updates to
 
@@ -91,7 +92,7 @@ type ChainIndexer struct {
 // NewChainIndexer creates a new chain indexer to do background processing on
 // chain segments of a given size after certain number of confirmations passed.
 // The throttling parameter might be used to prevent database thrashing.
-func NewChainIndexer(chainDb, indexDb intdb.Database, backend ChainIndexerBackend, section, confirm uint64, throttling time.Duration, kind string) *ChainIndexer {
+func NewChainIndexer(chainDb, indexDb neatdb.Database, backend ChainIndexerBackend, section, confirm uint64, throttling time.Duration, kind string) *ChainIndexer {
 	c := &ChainIndexer{
 		chainDb:     chainDb,
 		indexDb:     indexDb,

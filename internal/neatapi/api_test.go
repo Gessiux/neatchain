@@ -10,13 +10,13 @@ import (
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 )
 
 type MethoadParams struct {
 	Input   string
 	Args    interface{}
-	FunType intAbi.FunctionType
+	FunType neatAbi.FunctionType
 }
 
 var inputHex = "0x91e8537e000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000044c696b6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001068747470733a2f2f6c696b652e636f6d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000104531353733453236384138313835303300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c4d792076616c696461746f720000000000000000000000000000000000000000"
@@ -24,18 +24,18 @@ var inputHex = "0x91e8537e000000000000000000000000000000000000000000000000000000
 var inputArray = []*MethoadParams{
 	{
 		Input:   "0x49339f0f494e5433437046756b32634a31746539575a563177385933776b51436341355a",
-		Args:    intAbi.DelegateArgs{},
-		FunType: intAbi.Delegate,
+		Args:    neatAbi.DelegateArgs{},
+		FunType: neatAbi.Delegate,
 	},
 	{
 		Input:   "0x91e8537e000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000044c696b6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001068747470733a2f2f6c696b652e636f6d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000104531353733453236384138313835303300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c4d792076616c696461746f720000000000000000000000000000000000000000",
-		Args:    intAbi.EditValidatorArgs{},
-		FunType: intAbi.EditValidator,
+		Args:    neatAbi.EditValidatorArgs{},
+		FunType: neatAbi.EditValidator,
 	},
 }
 
 func TestMethodId(t *testing.T) {
-	method := intAbi.ChainABI.Methods[intAbi.Delegate.String()]
+	method := neatAbi.ChainABI.Methods[neatAbi.Delegate.String()]
 	methdid := method.ID()
 
 	fmt.Printf("method id, %v", hexutil.Encode(methdid))
@@ -48,17 +48,17 @@ func TestABI_UnpackMethodInputs(t *testing.T) {
 	//	t.Error(err)
 	//}
 	//
-	//function, err := intAbi.FunctionTypeFromId(inputByte[:4])
+	//function, err := neatAbi.FunctionTypeFromId(inputByte[:4])
 	//if err != nil {
 	//	t.Error(err)
 	//}
 	//fmt.Printf("function=%v\n", function)
 	//
-	////var args intAbi.CandidateArgs
-	//var args intAbi.DelegateArgs
-	////var args intAbi.EditValidatorArgs
+	////var args neatAbi.CandidateArgs
+	//var args neatAbi.DelegateArgs
+	////var args neatAbi.EditValidatorArgs
 	//
-	//err = intAbi.ChainABI.UnpackMethodInputs(&args, function.String(), inputByte[4:])
+	//err = neatAbi.ChainABI.UnpackMethodInputs(&args, function.String(), inputByte[4:])
 	//if err != nil {
 	//	t.Error(err)
 	//}
@@ -88,8 +88,8 @@ func TestABI_UnpackMethodInputs(t *testing.T) {
 	}
 }
 
-func checkFunType(input []byte, funType intAbi.FunctionType) error {
-	function, err := intAbi.FunctionTypeFromId(input[:4])
+func checkFunType(input []byte, funType neatAbi.FunctionType) error {
+	function, err := neatAbi.FunctionTypeFromId(input[:4])
 
 	if err != nil {
 		return err
@@ -102,10 +102,10 @@ func checkFunType(input []byte, funType intAbi.FunctionType) error {
 	return nil
 }
 
-func unpackMethod(input []byte, funType intAbi.FunctionType) (unpackArgs intAbi.DelegateArgs, err error) {
-	var args intAbi.DelegateArgs
+func unpackMethod(input []byte, funType neatAbi.FunctionType) (unpackArgs neatAbi.DelegateArgs, err error) {
+	var args neatAbi.DelegateArgs
 
-	err = intAbi.ChainABI.UnpackMethodInputs(&args, funType.String(), input[4:])
+	err = neatAbi.ChainABI.UnpackMethodInputs(&args, funType.String(), input[4:])
 	if err != nil {
 		return unpackArgs, err
 	}

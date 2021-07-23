@@ -30,9 +30,9 @@ import (
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 )
 
@@ -98,7 +98,7 @@ type Downloader struct {
 
 	queue   *queue   // Scheduler for selecting the hashes to download
 	peers   *peerSet // Set of active peers from which download can proceed
-	stateDB intdb.Database
+	stateDB neatdb.Database
 
 	rttEstimate   uint64 // Round trip time to target for download requests
 	rttConfidence uint64 // Confidence in the estimated RTT (unit: millionths to allow atomic ops)
@@ -199,7 +199,7 @@ type BlockChain interface {
 }
 
 // New creates a new downloader to fetch hashes and blocks from remote peers.
-func New(mode SyncMode, stateDb intdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn, logger log.Logger) *Downloader {
+func New(mode SyncMode, stateDb neatdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn, logger log.Logger) *Downloader {
 	if lightchain == nil {
 		lightchain = chain
 	}

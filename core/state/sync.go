@@ -20,13 +20,13 @@ import (
 	"bytes"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.
-func NewStateSync(root common.Hash, database intdb.Reader) *trie.Sync {
+func NewStateSync(root common.Hash, database neatdb.Reader) *trie.Sync {
 	var syncer *trie.Sync
 	callback := func(leaf []byte, parent common.Hash) error {
 		var obj Account

@@ -18,10 +18,11 @@ package core
 
 import (
 	"container/list"
+
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 )
 
 // Implement our EthTest Manager
@@ -29,7 +30,7 @@ type TestManager struct {
 	// stateManager *StateManager
 	eventMux *event.TypeMux
 
-	db         intdb.Database
+	db         neatdb.Database
 	txPool     *TxPool
 	blockChain *BlockChain
 	Blocks     []*types.Block
@@ -71,7 +72,7 @@ func (tm *TestManager) EventMux() *event.TypeMux {
 // 	return nil
 // }
 
-func (tm *TestManager) Db() intdb.Database {
+func (tm *TestManager) Db() neatdb.Database {
 	return tm.db
 }
 

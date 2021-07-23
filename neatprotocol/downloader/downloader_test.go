@@ -31,7 +31,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/trie"
 )
@@ -53,8 +53,8 @@ type downloadTester struct {
 	downloader *Downloader
 
 	genesis *types.Block   // Genesis blocks used by the tester and peers
-	stateDb intdb.Database // Database used by the tester for syncing from peers
-	peerDb  intdb.Database // Database of the peers containing all data
+	stateDb neatdb.Database // Database used by the tester for syncing from peers
+	peerDb  neatdb.Database // Database of the peers containing all data
 
 	ownHashes   []common.Hash                  // Hash chain belonging to the tester
 	ownHeaders  map[common.Hash]*types.Header  // Headers belonging to the tester

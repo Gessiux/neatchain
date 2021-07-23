@@ -40,8 +40,8 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
@@ -1266,8 +1266,8 @@ type SendTxArgs struct {
 // setDefaults is a helper function that fills in default values for unspecified tx fields.
 func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 
-	var function = intAbi.Unknown
-	if intAbi.IsNeatChainContractAddr(args.To) {
+	var function = neatAbi.Unknown
+	if neatAbi.IsNeatChainContractAddr(args.To) {
 		var input []byte
 		if args.Data != nil {
 			input = *args.Data
@@ -1279,14 +1279,14 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 		}
 
 		var err error
-		function, err = intAbi.FunctionTypeFromId(input[:4])
+		function, err = neatAbi.FunctionTypeFromId(input[:4])
 		if err != nil {
 			return err
 		}
 	}
 
 	// force GasLimit to 0 for DepositInChildChain/WithdrawFromMainChain/SaveDataToMainChain in order to avoid being dropped by TxPool.
-	if function == intAbi.DepositInChildChain || function == intAbi.WithdrawFromMainChain || function == intAbi.SaveDataToMainChain {
+	if function == neatAbi.DepositInChildChain || function == neatAbi.WithdrawFromMainChain || function == neatAbi.SaveDataToMainChain {
 		args.Gas = new(hexutil.Uint64)
 		*(*uint64)(args.Gas) = 0
 	} else {
@@ -1712,16 +1712,16 @@ func (s *PublicNEATAPI) SignAddress(from common.Address, consensusPrivateKey hex
 }
 
 func (api *PublicNEATAPI) WithdrawReward(ctx context.Context, from common.Address, delegateAddress common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
-	input, err := intAbi.ChainABI.Pack(intAbi.WithdrawReward.String(), delegateAddress)
+	input, err := neatAbi.ChainABI.Pack(neatAbi.WithdrawReward.String(), delegateAddress)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.WithdrawReward.RequiredGas()
+	defaultGas := neatAbi.WithdrawReward.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1734,16 +1734,16 @@ func (api *PublicNEATAPI) WithdrawReward(ctx context.Context, from common.Addres
 
 func (api *PublicNEATAPI) Delegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
 
-	input, err := intAbi.ChainABI.Pack(intAbi.Delegate.String(), candidate)
+	input, err := neatAbi.ChainABI.Pack(neatAbi.Delegate.String(), candidate)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.Delegate.RequiredGas()
+	defaultGas := neatAbi.Delegate.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    amount,
@@ -1755,16 +1755,16 @@ func (api *PublicNEATAPI) Delegate(ctx context.Context, from, candidate common.A
 
 func (api *PublicNEATAPI) UnDelegate(ctx context.Context, from, candidate common.Address, amount *hexutil.Big, gasPrice *hexutil.Big) (common.Hash, error) {
 
-	input, err := intAbi.ChainABI.Pack(intAbi.UnDelegate.String(), candidate, (*big.Int)(amount))
+	input, err := neatAbi.ChainABI.Pack(neatAbi.UnDelegate.String(), candidate, (*big.Int)(amount))
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.UnDelegate.RequiredGas()
+	defaultGas := neatAbi.UnDelegate.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1777,16 +1777,16 @@ func (api *PublicNEATAPI) UnDelegate(ctx context.Context, from, candidate common
 
 func (api *PublicNEATAPI) Register(ctx context.Context, from common.Address, registerAmount *hexutil.Big, pubkey goCrypto.BLSPubKey, signature hexutil.Bytes, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
 
-	input, err := intAbi.ChainABI.Pack(intAbi.Register.String(), pubkey.Bytes(), signature, commission)
+	input, err := neatAbi.ChainABI.Pack(neatAbi.Register.String(), pubkey.Bytes(), signature, commission)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.Register.RequiredGas()
+	defaultGas := neatAbi.Register.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    registerAmount,
@@ -1798,16 +1798,16 @@ func (api *PublicNEATAPI) Register(ctx context.Context, from common.Address, reg
 
 func (api *PublicNEATAPI) UnRegister(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
 
-	input, err := intAbi.ChainABI.Pack(intAbi.UnRegister.String())
+	input, err := neatAbi.ChainABI.Pack(neatAbi.UnRegister.String())
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.UnRegister.RequiredGas()
+	defaultGas := neatAbi.UnRegister.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1845,16 +1845,16 @@ func (api *PublicNEATAPI) GetForbiddenStatus(ctx context.Context, address common
 }
 
 func (api *PublicNEATAPI) SetCommission(ctx context.Context, from common.Address, commission uint8, gasPrice *hexutil.Big) (common.Hash, error) {
-	input, err := intAbi.ChainABI.Pack(intAbi.SetCommission.String(), commission)
+	input, err := neatAbi.ChainABI.Pack(neatAbi.SetCommission.String(), commission)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.SetCommission.RequiredGas()
+	defaultGas := neatAbi.SetCommission.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1866,16 +1866,16 @@ func (api *PublicNEATAPI) SetCommission(ctx context.Context, from common.Address
 }
 
 func (api *PublicNEATAPI) EditValidator(ctx context.Context, from common.Address, moniker, website string, identity string, details string, gasPrice *hexutil.Big) (common.Hash, error) {
-	input, err := intAbi.ChainABI.Pack(intAbi.EditValidator.String(), moniker, website, identity, details)
+	input, err := neatAbi.ChainABI.Pack(neatAbi.EditValidator.String(), moniker, website, identity, details)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.EditValidator.RequiredGas()
+	defaultGas := neatAbi.EditValidator.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1887,16 +1887,16 @@ func (api *PublicNEATAPI) EditValidator(ctx context.Context, from common.Address
 }
 
 func (api *PublicNEATAPI) UnForbidden(ctx context.Context, from common.Address, gasPrice *hexutil.Big) (common.Hash, error) {
-	input, err := intAbi.ChainABI.Pack(intAbi.UnForbidden.String())
+	input, err := neatAbi.ChainABI.Pack(neatAbi.UnForbidden.String())
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	defaultGas := intAbi.UnForbidden.RequiredGas()
+	defaultGas := neatAbi.UnForbidden.RequiredGas()
 
 	args := SendTxArgs{
 		From:     from,
-		To:       &intAbi.ChainContractMagicAddr,
+		To:       &neatAbi.ChainContractMagicAddr,
 		Gas:      (*hexutil.Uint64)(&defaultGas),
 		GasPrice: gasPrice,
 		Value:    nil,
@@ -1909,35 +1909,35 @@ func (api *PublicNEATAPI) UnForbidden(ctx context.Context, from common.Address, 
 
 func init() {
 	// Withdraw reward
-	core.RegisterValidateCb(intAbi.WithdrawReward, withdrawRewardValidateCb)
-	core.RegisterApplyCb(intAbi.WithdrawReward, withdrawRewardApplyCb)
+	core.RegisterValidateCb(neatAbi.WithdrawReward, withdrawRewardValidateCb)
+	core.RegisterApplyCb(neatAbi.WithdrawReward, withdrawRewardApplyCb)
 
 	// Delegate
-	core.RegisterValidateCb(intAbi.Delegate, delegateValidateCb)
-	core.RegisterApplyCb(intAbi.Delegate, delegateApplyCb)
+	core.RegisterValidateCb(neatAbi.Delegate, delegateValidateCb)
+	core.RegisterApplyCb(neatAbi.Delegate, delegateApplyCb)
 
 	// Cancel Delegate
-	core.RegisterValidateCb(intAbi.UnDelegate, unDelegateValidateCb)
-	core.RegisterApplyCb(intAbi.UnDelegate, unDelegateApplyCb)
+	core.RegisterValidateCb(neatAbi.UnDelegate, unDelegateValidateCb)
+	core.RegisterApplyCb(neatAbi.UnDelegate, unDelegateApplyCb)
 
 	// Register
-	core.RegisterValidateCb(intAbi.Register, registerValidateCb)
-	core.RegisterApplyCb(intAbi.Register, registerApplyCb)
+	core.RegisterValidateCb(neatAbi.Register, registerValidateCb)
+	core.RegisterApplyCb(neatAbi.Register, registerApplyCb)
 
 	// Cancel Register
-	core.RegisterValidateCb(intAbi.UnRegister, unRegisterValidateCb)
-	core.RegisterApplyCb(intAbi.UnRegister, unRegisterApplyCb)
+	core.RegisterValidateCb(neatAbi.UnRegister, unRegisterValidateCb)
+	core.RegisterApplyCb(neatAbi.UnRegister, unRegisterApplyCb)
 
 	// Set Commission
-	core.RegisterValidateCb(intAbi.SetCommission, setCommisstionValidateCb)
-	core.RegisterApplyCb(intAbi.SetCommission, setCommisstionApplyCb)
+	core.RegisterValidateCb(neatAbi.SetCommission, setCommisstionValidateCb)
+	core.RegisterApplyCb(neatAbi.SetCommission, setCommisstionApplyCb)
 
 	// Edit Validator
-	core.RegisterValidateCb(intAbi.EditValidator, editValidatorValidateCb)
+	core.RegisterValidateCb(neatAbi.EditValidator, editValidatorValidateCb)
 
 	// UnForbidden
-	core.RegisterValidateCb(intAbi.UnForbidden, unForbiddenValidateCb)
-	core.RegisterApplyCb(intAbi.UnForbidden, unForbiddenApplyCb)
+	core.RegisterValidateCb(neatAbi.UnForbidden, unForbiddenValidateCb)
+	core.RegisterApplyCb(neatAbi.UnForbidden, unForbiddenApplyCb)
 }
 
 func withdrawRewardValidateCb(tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) error {
@@ -1965,11 +1965,11 @@ func withdrawRewardApplyCb(tx *types.Transaction, state *state.StateDB, bc *core
 	return nil
 }
 
-func withDrawRewardValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*intAbi.WithdrawRewardArgs, error) {
+func withDrawRewardValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*neatAbi.WithdrawRewardArgs, error) {
 
-	var args intAbi.WithdrawRewardArgs
+	var args neatAbi.WithdrawRewardArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.WithdrawReward.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.WithdrawReward.String(), data[4:]); err != nil {
 		return nil, err
 	}
 
@@ -2036,7 +2036,7 @@ func registerApplyCb(tx *types.Transaction, state *state.StateDB, bc *core.Block
 	return nil
 }
 
-func registerValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*intAbi.RegisterArgs, error) {
+func registerValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*neatAbi.RegisterArgs, error) {
 	candidateSet := state.GetCandidateSet()
 	if len(candidateSet) > maxCandidateNumber {
 		return nil, core.ErrMaxCandidate
@@ -2052,9 +2052,9 @@ func registerValidation(from common.Address, tx *types.Transaction, state *state
 		return nil, core.ErrMinimumRegisterAmount
 	}
 
-	var args intAbi.RegisterArgs
+	var args neatAbi.RegisterArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.Register.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.Register.String(), data[4:]); err != nil {
 		return nil, err
 	}
 
@@ -2198,15 +2198,15 @@ func delegateApplyCb(tx *types.Transaction, state *state.StateDB, bc *core.Block
 	return nil
 }
 
-func delegateValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*intAbi.DelegateArgs, error) {
+func delegateValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*neatAbi.DelegateArgs, error) {
 	// Check minimum delegate amount
 	if tx.Value().Sign() == -1 {
 		return nil, core.ErrDelegateAmount
 	}
 
-	var args intAbi.DelegateArgs
+	var args neatAbi.DelegateArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.Delegate.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.Delegate.String(), data[4:]); err != nil {
 		return nil, err
 	}
 
@@ -2293,11 +2293,11 @@ func unDelegateApplyCb(tx *types.Transaction, state *state.StateDB, bc *core.Blo
 	return nil
 }
 
-func unDelegateValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*intAbi.UnDelegateArgs, error) {
+func unDelegateValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*neatAbi.UnDelegateArgs, error) {
 
-	var args intAbi.UnDelegateArgs
+	var args neatAbi.UnDelegateArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.UnDelegate.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.UnDelegate.String(), data[4:]); err != nil {
 		return nil, err
 	}
 
@@ -2364,14 +2364,14 @@ func setCommisstionApplyCb(tx *types.Transaction, state *state.StateDB, bc *core
 	return nil
 }
 
-func setCommissionValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*intAbi.SetCommissionArgs, error) {
+func setCommissionValidation(from common.Address, tx *types.Transaction, state *state.StateDB, bc *core.BlockChain) (*neatAbi.SetCommissionArgs, error) {
 	if !state.IsCandidate(from) {
 		return nil, core.ErrNotCandidate
 	}
 
-	var args intAbi.SetCommissionArgs
+	var args neatAbi.SetCommissionArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.SetCommission.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.SetCommission.String(), data[4:]); err != nil {
 		return nil, err
 	}
 
@@ -2388,9 +2388,9 @@ func editValidatorValidateCb(tx *types.Transaction, state *state.StateDB, bc *co
 		return errors.New("you are not a validator or candidate")
 	}
 
-	var args intAbi.EditValidatorArgs
+	var args neatAbi.EditValidatorArgs
 	data := tx.Data()
-	if err := intAbi.ChainABI.UnpackMethodInputs(&args, intAbi.EditValidator.String(), data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&args, neatAbi.EditValidator.String(), data[4:]); err != nil {
 		return err
 	}
 

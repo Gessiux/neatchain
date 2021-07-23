@@ -25,8 +25,8 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/state"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/trie"
 	"golang.org/x/crypto/sha3"
 )
@@ -318,7 +318,7 @@ func (s *stateSync) loop() error {
 }
 
 func (s *stateSync) commit(force bool) error {
-	if !force && s.bytesUncommitted < intdb.IdealBatchSize {
+	if !force && s.bytesUncommitted < neatdb.IdealBatchSize {
 		return nil
 	}
 	start := time.Now()

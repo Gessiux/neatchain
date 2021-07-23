@@ -7,8 +7,8 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	tdmTypes "github.com/Gessiux/neatchain/consensus/ipbft/types"
 	"github.com/Gessiux/neatchain/core/types"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
-	"github.com/Gessiux/neatchain/intdb"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
@@ -26,7 +26,7 @@ type TX3LookupEntry struct {
 	TxIndex    uint64
 }
 
-func GetTX3(db intdb.Reader, chainId string, txHash common.Hash) *types.Transaction {
+func GetTX3(db neatdb.Reader, chainId string, txHash common.Hash) *types.Transaction {
 	key := append(tx3Prefix, append([]byte(chainId), txHash.Bytes()...)...)
 	bs, err := db.Get(key)
 	if len(bs) == 0 || err != nil {
@@ -41,7 +41,7 @@ func GetTX3(db intdb.Reader, chainId string, txHash common.Hash) *types.Transact
 	return tx
 }
 
-func GetTX3ProofData(db intdb.Reader, chainId string, txHash common.Hash) *types.TX3ProofData {
+func GetTX3ProofData(db neatdb.Reader, chainId string, txHash common.Hash) *types.TX3ProofData {
 	// Retrieve the lookup metadata
 	hash, blockNumber, txIndex := GetTX3LookupEntry(db, chainId, txHash)
 	if hash == (common.Hash{}) {
@@ -82,7 +82,7 @@ func GetTX3ProofData(db intdb.Reader, chainId string, txHash common.Hash) *types
 	return &ret
 }
 
-func GetTX3LookupEntry(db intdb.Reader, chainId string, txHash common.Hash) (common.Hash, uint64, uint64) {
+func GetTX3LookupEntry(db neatdb.Reader, chainId string, txHash common.Hash) (common.Hash, uint64, uint64) {
 	// Load the positional metadata from disk and bail if it fails
 	key := append(tx3LookupPrefix, append([]byte(chainId), txHash.Bytes()...)...)
 	bs, err := db.Get(key)
@@ -98,7 +98,7 @@ func GetTX3LookupEntry(db intdb.Reader, chainId string, txHash common.Hash) (com
 	return txHash, entry.BlockIndex, entry.TxIndex
 }
 
-func GetAllTX3ProofData(db intdb.Database) []*types.TX3ProofData {
+func GetAllTX3ProofData(db neatdb.Database) []*types.TX3ProofData {
 	var ret []*types.TX3ProofData
 	iter := db.NewIteratorWithPrefix(tx3ProofPrefix)
 	for iter.Next() {
@@ -121,7 +121,7 @@ func GetAllTX3ProofData(db intdb.Database) []*types.TX3ProofData {
 }
 
 // WriteTX3ProofData serializes TX3ProofData into the database.
-func WriteTX3ProofData(db intdb.Database, proofData *types.TX3ProofData) error {
+func WriteTX3ProofData(db neatdb.Database, proofData *types.TX3ProofData) error {
 	header := proofData.Header
 	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
 	if err != nil {
@@ -188,7 +188,7 @@ func hasTxIndex(proofData *types.TX3ProofData, target uint) bool {
 	return false
 }
 
-func WriteTX3(db intdb.Writer, chainId string, header *types.Header, txIndex uint, txProofData *types.BSKeyValueSet) error {
+func WriteTX3(db neatdb.Writer, chainId string, header *types.Header, txIndex uint, txProofData *types.BSKeyValueSet) error {
 	keybuf := new(bytes.Buffer)
 	rlp.Encode(keybuf, txIndex)
 	val, _, err := trie.VerifyProof(header.TxHash, keybuf.Bytes(), txProofData)
@@ -202,14 +202,14 @@ func WriteTX3(db intdb.Writer, chainId string, header *types.Header, txIndex uin
 		return err
 	}
 
-	if intAbi.IsNeatChainContractAddr(tx.To()) {
+	if neatAbi.IsNeatChainContractAddr(tx.To()) {
 		data := tx.Data()
-		function, err := intAbi.FunctionTypeFromId(data[:4])
+		function, err := neatAbi.FunctionTypeFromId(data[:4])
 		if err != nil {
 			return err
 		}
 
-		if function == intAbi.WithdrawFromChildChain {
+		if function == neatAbi.WithdrawFromChildChain {
 			txHash := tx.Hash()
 			key1 := append(tx3Prefix, append([]byte(chainId), txHash.Bytes()...)...)
 			bs, _ := rlp.EncodeToBytes(&tx)
@@ -232,7 +232,7 @@ func WriteTX3(db intdb.Writer, chainId string, header *types.Header, txIndex uin
 	return nil
 }
 
-func DeleteTX3(db intdb.Database, chainId string, txHash common.Hash) {
+func DeleteTX3(db neatdb.Database, chainId string, txHash common.Hash) {
 	// Retrieve the lookup metadata
 	hash, blockNumber, txIndex := GetTX3LookupEntry(db, chainId, txHash)
 	if hash == (common.Hash{}) {

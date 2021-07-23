@@ -30,9 +30,9 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
-	"github.com/Gessiux/neatchain/intdb/leveldb"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb"
+	"github.com/Gessiux/neatchain/neatdb/leveldb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/davecgh/go-spew/spew"
 )
@@ -318,7 +318,7 @@ func TestLargeValue(t *testing.T) {
 }
 
 type countingDB struct {
-	intdb.KeyValueStore
+	neatdb.KeyValueStore
 	gets map[string]int
 }
 

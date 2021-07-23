@@ -32,9 +32,9 @@ import (
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 )
 
@@ -603,7 +603,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrInvalidAddress
 	}
 
-	if !intAbi.IsNeatChainContractAddr(tx.To()) {
+	if !neatAbi.IsNeatChainContractAddr(tx.To()) {
 		intrGas, err := IntrinsicGas(tx.Data(), tx.To() == nil, true)
 		if err != nil {
 			return err
@@ -614,7 +614,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	} else {
 		// the first 4 bytes is the function identifier
 		data := tx.Data()
-		function, err := intAbi.FunctionTypeFromId(data[:4])
+		function, err := neatAbi.FunctionTypeFromId(data[:4])
 		if err != nil {
 			return err
 		}

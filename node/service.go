@@ -18,12 +18,13 @@ package node
 
 import (
 	"crypto/ecdsa"
-	"github.com/Gessiux/neatchain/core/rawdb"
 	"reflect"
+
+	"github.com/Gessiux/neatchain/core/rawdb"
 
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/rpc"
 )
@@ -41,7 +42,7 @@ type ServiceContext struct {
 // OpenDatabase opens an existing database with the given name (or creates one
 // if no previous can be found) from within the node's data directory. If the
 // node is an ephemeral one, a memory database is returned.
-func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int, namespace string) (intdb.Database, error) {
+func (ctx *ServiceContext) OpenDatabase(name string, cache int, handles int, namespace string) (neatdb.Database, error) {
 	if ctx.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil
 	}

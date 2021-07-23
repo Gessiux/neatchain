@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package intclient
+package neatclient
 
-import "github.com/Gessiux/neatchain"
+import "github.com/ethereum/go-ethereum"
 
 // Verify that Client implements the ethereum interfaces.
 var (

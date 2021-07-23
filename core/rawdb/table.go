@@ -17,18 +17,18 @@
 package rawdb
 
 import (
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 )
 
 // table is a wrapper around a database that prefixes each key access with a pre-
 // configured string.
 type table struct {
-	db     intdb.Database
+	db     neatdb.Database
 	prefix string
 }
 
 // NewTable returns a database object that prefixes all keys with a given string.
-func NewTable(db intdb.Database, prefix string) intdb.Database {
+func NewTable(db neatdb.Database, prefix string) neatdb.Database {
 	return &table{
 		db:     db,
 		prefix: prefix,
@@ -63,13 +63,13 @@ func (t *table) Delete(key []byte) error {
 
 // NewIterator creates a binary-alphabetical iterator over the entire keyspace
 // contained within the database.
-func (t *table) NewIterator() intdb.Iterator {
+func (t *table) NewIterator() neatdb.Iterator {
 	return t.NewIteratorWithPrefix(nil)
 }
 
 // NewIteratorWithPrefix creates a binary-alphabetical iterator over a subset
 // of database content with a particular key prefix.
-func (t *table) NewIteratorWithPrefix(prefix []byte) intdb.Iterator {
+func (t *table) NewIteratorWithPrefix(prefix []byte) neatdb.Iterator {
 	return t.db.NewIteratorWithPrefix(append([]byte(t.prefix), prefix...))
 }
 
@@ -113,14 +113,14 @@ func (t *table) Compact(start []byte, limit []byte) error {
 // NewBatch creates a write-only database that buffers changes to its host db
 // until a final write is called, each operation prefixing all keys with the
 // pre-configured string.
-func (t *table) NewBatch() intdb.Batch {
+func (t *table) NewBatch() neatdb.Batch {
 	return &tableBatch{t.db.NewBatch(), t.prefix}
 }
 
 // tableBatch is a wrapper around a database batch that prefixes each key access
 // with a pre-configured string.
 type tableBatch struct {
-	batch  intdb.Batch
+	batch  neatdb.Batch
 	prefix string
 }
 
@@ -150,6 +150,6 @@ func (b *tableBatch) Reset() {
 }
 
 // Replay replays the batch contents.
-func (b *tableBatch) Replay(w intdb.Writer) error {
+func (b *tableBatch) Replay(w neatdb.Writer) error {
 	return b.batch.Replay(w)
 }

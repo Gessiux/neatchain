@@ -3,17 +3,18 @@ package datareduction
 import (
 	"bytes"
 	"fmt"
+	"sort"
+	"sync/atomic"
+	"time"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/state"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
-	"sort"
-	"sync/atomic"
-	"time"
 )
 
 var (
@@ -30,11 +31,11 @@ var (
 type NodeCount map[common.Hash]uint64
 
 type PruneProcessor struct {
-	db      intdb.Database // Low level persistent database to store prune counting statistics
+	db      neatdb.Database // Low level persistent database to store prune counting statistics
 	prunedb PruneDatabase
 
 	bc      *core.BlockChain
-	chainDb intdb.Database // database instance to delete the state/block data
+	chainDb neatdb.Database // database instance to delete the state/block data
 
 	pruneBodyData bool
 
@@ -58,7 +59,7 @@ func StopPruning() bool {
 	return atomic.CompareAndSwapInt32(&pruning, 1, 0)
 }
 
-func NewPruneProcessor(chaindb, prunedb intdb.Database, bc *core.BlockChain, pruneBodyData bool) *PruneProcessor {
+func NewPruneProcessor(chaindb, prunedb neatdb.Database, bc *core.BlockChain, pruneBodyData bool) *PruneProcessor {
 	return &PruneProcessor{
 		db:            prunedb,
 		prunedb:       NewDatabase(prunedb),
@@ -343,7 +344,7 @@ func (nc NodeCount) String() string {
 	return result
 }
 
-func GetLatestStatus(prunedb intdb.Database) *PruneStatus {
+func GetLatestStatus(prunedb neatdb.Database) *PruneStatus {
 	var scanNo, pruneNo uint64
 	if ps := rawdb.ReadHeadScanNumber(prunedb); ps != nil {
 		scanNo = *ps

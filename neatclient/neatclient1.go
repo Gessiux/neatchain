@@ -1,4 +1,4 @@
-package intclient
+package neatclient
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/pkg/errors"
 )
@@ -32,7 +32,7 @@ func (ec *Client) BlockNumber(ctx context.Context) (*big.Int, error) {
 func (ec *Client) SendDataToMainChain(ctx context.Context, data []byte, prv *ecdsa.PrivateKey, mainChainId string) (common.Hash, error) {
 
 	// data
-	bs, err := intAbi.ChainABI.Pack(intAbi.SaveDataToMainChain.String(), data)
+	bs, err := neatAbi.ChainABI.Pack(neatAbi.SaveDataToMainChain.String(), data)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -60,7 +60,7 @@ func (ec *Client) SendDataToMainChain(ctx context.Context, data []byte, prv *ecd
 
 	SendTX:
 		// tx
-		tx := types.NewTransaction(nonce, intAbi.ChainContractMagicAddr, nil, 0, gasPrice, bs)
+		tx := types.NewTransaction(nonce, neatAbi.ChainContractMagicAddr, nil, 0, gasPrice, bs)
 
 		// sign the tx
 		signedTx, err := types.SignTx(tx, signer, prv)

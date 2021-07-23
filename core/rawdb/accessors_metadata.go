@@ -20,14 +20,14 @@ import (
 	"encoding/json"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 )
 
 // ReadDatabaseVersion retrieves the version number of the database.
-func ReadDatabaseVersion(db intdb.Reader) *uint64 {
+func ReadDatabaseVersion(db neatdb.Reader) *uint64 {
 	var version uint64
 
 	enc, _ := db.Get(databaseVerisionKey)
@@ -42,7 +42,7 @@ func ReadDatabaseVersion(db intdb.Reader) *uint64 {
 }
 
 // WriteDatabaseVersion stores the version number of the database
-func WriteDatabaseVersion(db intdb.Writer, version uint64) {
+func WriteDatabaseVersion(db neatdb.Writer, version uint64) {
 	enc, err := rlp.EncodeToBytes(version)
 	if err != nil {
 		log.Crit("Failed to encode database version", "err", err)
@@ -53,7 +53,7 @@ func WriteDatabaseVersion(db intdb.Writer, version uint64) {
 }
 
 // ReadChainConfig retrieves the consensus settings based on the given genesis hash.
-func ReadChainConfig(db intdb.Reader, hash common.Hash) *params.ChainConfig {
+func ReadChainConfig(db neatdb.Reader, hash common.Hash) *params.ChainConfig {
 	data, _ := db.Get(configKey(hash))
 	if len(data) == 0 {
 		return nil
@@ -67,7 +67,7 @@ func ReadChainConfig(db intdb.Reader, hash common.Hash) *params.ChainConfig {
 }
 
 // WriteChainConfig writes the chain config settings to the database.
-func WriteChainConfig(db intdb.Writer, hash common.Hash, cfg *params.ChainConfig) {
+func WriteChainConfig(db neatdb.Writer, hash common.Hash, cfg *params.ChainConfig) {
 	if cfg == nil {
 		return
 	}
@@ -81,13 +81,13 @@ func WriteChainConfig(db intdb.Writer, hash common.Hash, cfg *params.ChainConfig
 }
 
 // ReadPreimage retrieves a single preimage of the provided hash.
-func ReadPreimage(db intdb.Reader, hash common.Hash) []byte {
+func ReadPreimage(db neatdb.Reader, hash common.Hash) []byte {
 	data, _ := db.Get(preimageKey(hash))
 	return data
 }
 
 // WritePreimages writes the provided set of preimages to the database.
-func WritePreimages(db intdb.Writer, preimages map[common.Hash][]byte) {
+func WritePreimages(db neatdb.Writer, preimages map[common.Hash][]byte) {
 	for hash, preimage := range preimages {
 		if err := db.Put(preimageKey(hash), preimage); err != nil {
 			log.Crit("Failed to store trie preimage", "err", err)
@@ -98,7 +98,7 @@ func WritePreimages(db intdb.Writer, preimages map[common.Hash][]byte) {
 }
 
 // DeletePreimage delete a single preimage of the provided hash. (Use carefully)
-func DeletePreimage(db intdb.Writer, hash common.Hash) {
+func DeletePreimage(db neatdb.Writer, hash common.Hash) {
 	if err := db.Delete(preimageKey(hash)); err != nil {
 		log.Crit("Failed to delete trie preimage", "err", err)
 	}

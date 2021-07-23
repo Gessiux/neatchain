@@ -38,9 +38,9 @@ import (
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rlp"
 	"github.com/Gessiux/neatchain/trie"
@@ -97,9 +97,9 @@ type BlockChain struct {
 	chainConfig *params.ChainConfig // Chain & network configuration
 	cacheConfig *CacheConfig        // Cache configuration for pruning
 
-	db     intdb.Database // Low level persistent database to store final content in
-	triegc *prque.Prque   // Priority queue mapping block numbers to tries to gc
-	gcproc time.Duration  // Accumulates canonical block processing for trie dumping
+	db     neatdb.Database // Low level persistent database to store final content in
+	triegc *prque.Prque    // Priority queue mapping block numbers to tries to gc
+	gcproc time.Duration   // Accumulates canonical block processing for trie dumping
 
 	hc                   *HeaderChain
 	rmLogsFeed           event.Feed
@@ -146,7 +146,7 @@ type BlockChain struct {
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator and
 // Processor.
-func NewBlockChain(db intdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, cch CrossChainHelper) (*BlockChain, error) {
+func NewBlockChain(db neatdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, cch CrossChainHelper) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = &CacheConfig{
 			TrieCleanLimit: 256,
@@ -286,7 +286,7 @@ func (bc *BlockChain) SetHead(head uint64) error {
 	defer bc.chainmu.Unlock()
 
 	// Rewind the header chain, deleting all block bodies until then
-	delFn := func(db intdb.Writer, hash common.Hash, num uint64) {
+	delFn := func(db neatdb.Writer, hash common.Hash, num uint64) {
 		rawdb.DeleteBody(db, hash, num)
 	}
 	bc.hc.SetHead(head, delFn)
@@ -890,7 +890,7 @@ func (bc *BlockChain) InsertReceiptChain(blockChain types.Blocks, receiptChain [
 
 		stats.processed++
 
-		if batch.ValueSize() >= intdb.IdealBatchSize {
+		if batch.ValueSize() >= neatdb.IdealBatchSize {
 			if err := batch.Write(); err != nil {
 				return 0, err
 			}
@@ -1021,7 +1021,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 				limit       = common.StorageSize(bc.cacheConfig.TrieDirtyLimit) * 1024 * 1024
 			)
 			if nodes > limit || imgs > 4*1024*1024 {
-				triedb.Cap(limit - intdb.IdealBatchSize)
+				triedb.Cap(limit - neatdb.IdealBatchSize)
 			}
 			// Find the next state trie we need to commit
 			chosen := current - triesInMemory

@@ -30,9 +30,9 @@ import (
 
 	"github.com/Gessiux/neatchain/accounts"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/internal/debug"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/p2p"
 	"github.com/Gessiux/neatchain/rpc"
 	flock "github.com/Gessiux/prometheus-flock"
@@ -591,7 +591,7 @@ func (n *Node) EventMux() *event.TypeMux {
 // OpenDatabase opens an existing database with the given name (or creates one if no
 // previous can be found) from within the node's instance directory. If the node is
 // ephemeral, a memory database is returned.
-func (n *Node) OpenDatabase(name string, cache, handles int, namespace string) (intdb.Database, error) {
+func (n *Node) OpenDatabase(name string, cache, handles int, namespace string) (neatdb.Database, error) {
 	if n.config.DataDir == "" {
 		return rawdb.NewMemoryDatabase(), nil
 	}

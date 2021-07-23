@@ -30,7 +30,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
 	"github.com/Gessiux/neatchain/params"
@@ -199,7 +199,7 @@ func (b *EthApiBackend) SuggestPrice(ctx context.Context) (*big.Int, error) {
 	return b.gpo.SuggestPrice(ctx)
 }
 
-func (b *EthApiBackend) ChainDb() intdb.Database {
+func (b *EthApiBackend) ChainDb() neatdb.Database {
 	return b.eth.ChainDb()
 }
 

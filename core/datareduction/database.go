@@ -2,9 +2,10 @@ package datareduction
 
 import (
 	"fmt"
+
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/state"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/trie"
 )
 
@@ -23,14 +24,14 @@ type PruneDatabase interface {
 // NewDatabase creates a backing store for prune trie. The returned database is safe for
 // concurrent use, but does not retain any recent trie nodes in memory. To keep some
 // historical state in memory, use the NewDatabaseWithCache constructor.
-func NewDatabase(db intdb.Database) PruneDatabase {
+func NewDatabase(db neatdb.Database) PruneDatabase {
 	return NewDatabaseWithCache(db, 0)
 }
 
 // NewDatabaseWithCache creates a backing store for prune trie. The returned database
 // is safe for concurrent use and retains a lot of collapsed RLP trie nodes in a
 // large memory cache.
-func NewDatabaseWithCache(db intdb.Database, cache int) PruneDatabase {
+func NewDatabaseWithCache(db neatdb.Database, cache int) PruneDatabase {
 	return &pruneDB{
 		db: trie.NewDatabaseWithCache(db, cache),
 	}

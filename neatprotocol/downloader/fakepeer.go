@@ -23,7 +23,7 @@ import (
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 )
 
 // FakePeer is a mock downloader peer that operates on a local database instance
@@ -31,13 +31,13 @@ import (
 // sync commands from an existing local database.
 type FakePeer struct {
 	id string
-	db intdb.Database
+	db neatdb.Database
 	hc *core.HeaderChain
 	dl *Downloader
 }
 
 // NewFakePeer creates a new mock downloader peer with the given data sources.
-func NewFakePeer(id string, db intdb.Database, hc *core.HeaderChain, dl *Downloader) *FakePeer {
+func NewFakePeer(id string, db neatdb.Database, hc *core.HeaderChain, dl *Downloader) *FakePeer {
 	return &FakePeer{id: id, db: db, hc: hc, dl: dl}
 }
 

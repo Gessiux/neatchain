@@ -21,8 +21,8 @@ import (
 	"fmt"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/rlp"
 )
 
@@ -33,7 +33,7 @@ import (
 // If the trie does not contain a value for key, the returned proof contains all
 // nodes of the longest existing prefix of the key (at least the root node), ending
 // with the node that proves the absence of the key.
-func (t *Trie) Prove(key []byte, fromLevel uint, proofDb intdb.Writer) error {
+func (t *Trie) Prove(key []byte, fromLevel uint, proofDb neatdb.Writer) error {
 	// Collect all nodes on the path to key.
 	key = keybytesToHex(key)
 	var nodes []node
@@ -96,7 +96,7 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb intdb.Writer) error {
 // If the trie does not contain a value for key, the returned proof contains all
 // nodes of the longest existing prefix of the key (at least the root node), ending
 // with the node that proves the absence of the key.
-func (t *SecureTrie) Prove(key []byte, fromLevel uint, proofDb intdb.Writer) error {
+func (t *SecureTrie) Prove(key []byte, fromLevel uint, proofDb neatdb.Writer) error {
 	return t.trie.Prove(key, fromLevel, proofDb)
 }
 
@@ -105,7 +105,7 @@ func (t *SecureTrie) Prove(key []byte, fromLevel uint, proofDb intdb.Writer) err
 // proof contains invalid trie nodes or the wrong value.
 //
 // Note, the method assumes that all key-values in proofDb satisfy key = hash(value).
-func VerifyProof(rootHash common.Hash, key []byte, proofDb intdb.Reader) (value []byte, nodes int, err error) {
+func VerifyProof(rootHash common.Hash, key []byte, proofDb neatdb.Reader) (value []byte, nodes int, err error) {
 	key = keybytesToHex(key)
 	wantHash := rootHash
 	for i := 0; ; i++ {

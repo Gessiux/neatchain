@@ -28,7 +28,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/rpc"
@@ -41,7 +41,7 @@ type Backend interface {
 	Downloader() *downloader.Downloader
 	ProtocolVersion() int
 	SuggestPrice(ctx context.Context) (*big.Int, error)
-	ChainDb() intdb.Database
+	ChainDb() neatdb.Database
 	EventMux() *event.TypeMux
 	AccountManager() *accounts.Manager
 

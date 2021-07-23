@@ -34,8 +34,8 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/neatprotocol/fetcher"
 	"github.com/Gessiux/neatchain/p2p"
@@ -117,7 +117,7 @@ type ProtocolManager struct {
 
 // NewProtocolManager returns a new NEAT Chain sub protocol manager. The NEAT Chain sub protocol manages peers capable
 // with the NEAT Chain network.
-func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, networkId uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb intdb.Database, cch core.CrossChainHelper) (*ProtocolManager, error) {
+func NewProtocolManager(config *params.ChainConfig, mode downloader.SyncMode, networkId uint64, mux *event.TypeMux, txpool txPool, engine consensus.Engine, blockchain *core.BlockChain, chaindb neatdb.Database, cch core.CrossChainHelper) (*ProtocolManager, error) {
 	// Create the protocol manager with the base fields
 	manager := &ProtocolManager{
 		networkId:      networkId,
@@ -747,7 +747,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 			preimagesMap[crypto.Keccak256Hash(preimage)] = common.CopyBytes(preimage)
 		}
 		if len(preimagesMap) > 0 {
-			db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(intdb.Database)
+			db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(neatdb.Database)
 			rawdb.WritePreimages(db, preimagesMap)
 			pm.preimageLogger.Info("PreImages wrote into database")
 		}
@@ -760,7 +760,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 		pm.logger.Debugf("%d TrieNodeData received", len(trienodes))
 
-		db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(intdb.Database)
+		db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(neatdb.Database)
 		for _, tnode := range trienodes {
 			thash := crypto.Keccak256Hash(tnode)
 			if has, herr := db.Has(thash.Bytes()); !has && herr == nil {
@@ -854,7 +854,7 @@ func (pm *ProtocolManager) TryFixBadPreimages() {
 	var hashes []common.Hash
 
 	// Iterate the entire sha3 preimages for checking
-	db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(intdb.Database)
+	db, _ := pm.blockchain.StateCache().TrieDB().DiskDB().(neatdb.Database)
 	it := db.NewIteratorWithPrefix([]byte("secure-key-"))
 	for it.Next() {
 		keyHash := common.BytesToHash(it.Key())

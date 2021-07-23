@@ -25,7 +25,7 @@ import (
 	"github.com/Gessiux/neatchain/core/bloombits"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 )
 
@@ -94,7 +94,7 @@ const (
 type BloomIndexer struct {
 	size uint64 // section size to generate bloombits for
 
-	db  intdb.Database       // database instance to write index data and metadata into
+	db  neatdb.Database      // database instance to write index data and metadata into
 	gen *bloombits.Generator // generator to rotate the bloom bits crating the bloom index
 
 	section uint64      // Section is the section number being processed currently
@@ -103,7 +103,7 @@ type BloomIndexer struct {
 
 // NewBloomIndexer returns a chain indexer that generates bloom bits data for the
 // canonical chain for fast logs filtering.
-func NewBloomIndexer(db intdb.Database, size uint64) *core.ChainIndexer {
+func NewBloomIndexer(db neatdb.Database, size uint64) *core.ChainIndexer {
 	backend := &BloomIndexer{
 		db:   db,
 		size: size,

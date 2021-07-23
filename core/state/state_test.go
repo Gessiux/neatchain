@@ -24,12 +24,12 @@ import (
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/rawdb"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	checker "gopkg.in/check.v1"
 )
 
 type StateSuite struct {
-	db    intdb.Database
+	db    neatdb.Database
 	state *StateDB
 }
 

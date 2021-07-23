@@ -38,10 +38,10 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/internal/neatapi"
 	"github.com/Gessiux/neatchain/log"
 	"github.com/Gessiux/neatchain/miner"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/neatprotocol/filters"
 	"github.com/Gessiux/neatchain/neatprotocol/gasprice"
@@ -74,8 +74,8 @@ type NeatChain struct {
 	protocolManager *ProtocolManager
 
 	// DB interfaces
-	chainDb intdb.Database // Block chain database
-	pruneDb intdb.Database // Prune data database
+	chainDb neatdb.Database // Block chain database
+	pruneDb neatdb.Database // Prune data database
 
 	eventMux       *event.TypeMux
 	engine         consensus.IPBFT
@@ -220,7 +220,7 @@ func makeExtraData(extra []byte) []byte {
 }
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an NeatChain service
-func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig *params.ChainConfig, db intdb.Database,
+func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig *params.ChainConfig, db neatdb.Database,
 	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.IPBFT {
 	// If Tendermint is requested, set it up
 	if chainConfig.IPBFT.Epoch != 0 {
@@ -390,7 +390,7 @@ func (s *NeatChain) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *NeatChain) TxPool() *core.TxPool               { return s.txPool }
 func (s *NeatChain) EventMux() *event.TypeMux           { return s.eventMux }
 func (s *NeatChain) Engine() consensus.IPBFT            { return s.engine }
-func (s *NeatChain) ChainDb() intdb.Database            { return s.chainDb }
+func (s *NeatChain) ChainDb() neatdb.Database           { return s.chainDb }
 func (s *NeatChain) IsListening() bool                  { return true } // Always listening
 func (s *NeatChain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
 func (s *NeatChain) NetVersion() uint64                 { return s.networkId }

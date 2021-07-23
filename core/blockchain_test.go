@@ -18,12 +18,13 @@ package core
 
 import (
 	"fmt"
-	"github.com/Gessiux/neatchain/consensus"
 	"math/big"
 	"math/rand"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/Gessiux/neatchain/consensus"
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/rawdb"
@@ -31,14 +32,14 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/core/vm"
 	"github.com/Gessiux/neatchain/crypto"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 )
 
 // newCanonical creates a chain database, and injects a deterministic canonical
 // chain. Depending on the full flag, if creates either a full block chain or a
 // header only chain.
-func newCanonical(engine consensus.Engine, n int, full bool) (intdb.Database, *BlockChain, error) {
+func newCanonical(engine consensus.Engine, n int, full bool) (neatdb.Database, *BlockChain, error) {
 	var (
 		db      = rawdb.NewMemoryDatabase()
 		genesis = new(Genesis).MustCommit(db)

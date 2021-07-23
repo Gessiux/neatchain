@@ -8,8 +8,8 @@ import (
 	"github.com/Gessiux/neatchain/common/hexutil"
 	"github.com/Gessiux/neatchain/common/math"
 	"github.com/Gessiux/neatchain/core/rawdb"
-	"github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatabi/abi"
 
 	"gopkg.in/urfave/cli.v1"
 

@@ -18,8 +18,9 @@ package state
 
 import (
 	"bytes"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
 	"testing"
+
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 
 	"github.com/Gessiux/neatchain/common"
 )

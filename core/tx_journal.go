@@ -23,8 +23,8 @@ import (
 
 	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/core/types"
-	intAbi "github.com/Gessiux/neatchain/intabi/abi"
 	"github.com/Gessiux/neatchain/log"
+	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/rlp"
 )
 
@@ -89,7 +89,7 @@ func (journal *txJournal) load(add func(*types.Transaction) error) error {
 		}
 		// TODO: make our own tx to work.
 		// can't pass custom validate logic since Ethereum is still initializing.
-		if intAbi.IsNeatChainContractAddr(tx.To()) {
+		if neatAbi.IsNeatChainContractAddr(tx.To()) {
 			continue
 		}
 		// Import the transaction and bump the appropriate progress counters

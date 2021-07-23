@@ -28,8 +28,8 @@ import (
 	"github.com/Gessiux/neatchain/core/state"
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatprotocol/downloader"
 	"github.com/Gessiux/neatchain/params"
 )
@@ -39,7 +39,7 @@ type Backend interface {
 	AccountManager() *accounts.Manager
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
-	ChainDb() intdb.Database
+	ChainDb() neatdb.Database
 }
 
 type Pending interface {

@@ -28,7 +28,7 @@ import (
 	"github.com/Gessiux/neatchain/core/types"
 	"github.com/Gessiux/neatchain/crypto"
 	"github.com/Gessiux/neatchain/event"
-	"github.com/Gessiux/neatchain/intdb"
+	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
 )
 
@@ -49,7 +49,7 @@ func BenchmarkFilters(b *testing.B) {
 	defer os.RemoveAll(dir)
 
 	var (
-		//db, _      = intdb.Database(dir, 0, 0)
+		//db, _      = neatdb.Database(dir, 0, 0)
 		mux        = new(event.TypeMux)
 		txFeed     = new(event.Feed)
 		rmLogsFeed = new(event.Feed)
@@ -114,7 +114,7 @@ func TestFilters(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	var (
-		db, _      = intdb.NewLDBDatabase(dir, 0, 0)
+		db, _      = neatdb.NewLDBDatabase(dir, 0, 0)
 		mux        = new(event.TypeMux)
 		txFeed     = new(event.Feed)
 		rmLogsFeed = new(event.Feed)

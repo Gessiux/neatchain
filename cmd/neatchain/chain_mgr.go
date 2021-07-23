@@ -18,8 +18,8 @@ import (
 	"github.com/Gessiux/neatchain/consensus/ipbft/types"
 	"github.com/Gessiux/neatchain/core"
 	"github.com/Gessiux/neatchain/core/rawdb"
-	"github.com/Gessiux/neatchain/intclient"
 	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/neatclient"
 	"github.com/Gessiux/neatchain/neatprotocol"
 	"github.com/Gessiux/neatchain/node"
 	"github.com/pkg/errors"
@@ -147,7 +147,7 @@ func (cm *ChainManager) InitCrossChainHelper() {
 		port := cm.ctx.GlobalInt(utils.RPCPortFlag.Name)
 		url := net.JoinHostPort(host, strconv.Itoa(port))
 		url = "http://" + url + "/" + chainId
-		client, err := intclient.Dial(url)
+		client, err := neatclient.Dial(url)
 		if err != nil {
 			log.Errorf("can't connect to %s, err: %v, exit", url, err)
 			os.Exit(0)

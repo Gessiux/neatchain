@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/intdb/memorydb"
+	"github.com/Gessiux/neatchain/neatdb/memorydb"
 )
 
 func TestIterator(t *testing.T) {
