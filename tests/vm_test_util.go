@@ -22,15 +22,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/common/hexutil"
-	"github.com/Gessiux/neatchain/common/math"
-	"github.com/Gessiux/neatchain/core"
-	"github.com/Gessiux/neatchain/core/rawdb"
-	"github.com/Gessiux/neatchain/core/state"
-	"github.com/Gessiux/neatchain/core/vm"
-	"github.com/Gessiux/neatchain/crypto"
+	"github.com/Gessiux/neatchain/blockchain/core"
+	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
+	"github.com/Gessiux/neatchain/blockchain/core/state"
+	"github.com/Gessiux/neatchain/blockchain/core/vm"
 	"github.com/Gessiux/neatchain/params"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/common/hexutil"
+	"github.com/Gessiux/neatchain/utilities/common/math"
+	"github.com/Gessiux/neatchain/utilities/crypto"
 )
 
 // VMTest checks EVM execution without block or transaction context.

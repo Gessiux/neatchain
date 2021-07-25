@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/common/hexutil"
-	"github.com/Gessiux/neatchain/common/math"
-	"github.com/Gessiux/neatchain/core/types"
+	"github.com/Gessiux/neatchain/blockchain/core/types"
 	"github.com/Gessiux/neatchain/params"
-	"github.com/Gessiux/neatchain/rlp"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/common/hexutil"
+	"github.com/Gessiux/neatchain/utilities/common/math"
+	"github.com/Gessiux/neatchain/utilities/rlp"
 )
 
 // TransactionTest checks RLP decoding and sender derivation of transactions.

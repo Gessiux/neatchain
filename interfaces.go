@@ -6,8 +6,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/core/types"
+	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/utilities/common"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

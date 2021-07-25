@@ -30,8 +30,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gessiux/neatchain/accounts/keystore"
-	"github.com/Gessiux/neatchain/core/types"
+	"github.com/Gessiux/neatchain/blockchain/accounts/keystore"
+	"github.com/Gessiux/neatchain/blockchain/core/types"
 )
 
 // Tests that the account management snippets work correctly.

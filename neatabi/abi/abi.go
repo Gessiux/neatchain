@@ -4,8 +4,8 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/Gessiux/neatchain/accounts/abi"
-	"github.com/Gessiux/neatchain/common"
+	"github.com/Gessiux/neatchain/blockchain/accounts/abi"
+	"github.com/Gessiux/neatchain/utilities/common"
 )
 
 type FunctionType struct {

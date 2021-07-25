@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/common/hexutil"
-	"github.com/Gessiux/neatchain/common/math"
-	"github.com/Gessiux/neatchain/core/types"
+	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/common/hexutil"
+	"github.com/Gessiux/neatchain/utilities/common/math"
 )
 
 var _ = (*btHeaderMarshaling)(nil)

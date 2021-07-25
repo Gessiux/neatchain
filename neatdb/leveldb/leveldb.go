@@ -26,10 +26,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/log"
-	"github.com/Gessiux/neatchain/metrics"
+	"github.com/Gessiux/neatchain/blockchain/log"
 	"github.com/Gessiux/neatchain/neatdb"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"

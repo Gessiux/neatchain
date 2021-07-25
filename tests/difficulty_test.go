@@ -21,8 +21,8 @@ import (
 
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/params"
+	"github.com/Gessiux/neatchain/utilities/common"
 )
 
 var (

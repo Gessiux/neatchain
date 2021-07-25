@@ -6,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/common/hexutil"
-	"github.com/Gessiux/neatchain/common/math"
-	"github.com/Gessiux/neatchain/crypto"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/common/hexutil"
+	"github.com/Gessiux/neatchain/utilities/common/math"
+	"github.com/Gessiux/neatchain/utilities/crypto"
 )
 
 type MethoadParams struct {

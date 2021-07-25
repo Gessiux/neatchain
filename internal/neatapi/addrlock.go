@@ -19,7 +19,7 @@ package neatapi
 import (
 	"sync"
 
-	"github.com/Gessiux/neatchain/common"
+	"github.com/Gessiux/neatchain/utilities/common"
 )
 
 type AddrLocker struct {

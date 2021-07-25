@@ -20,14 +20,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/blockchain/log"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/crypto"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/crypto"
 )
 
 var (
-	MainnetGenesisHash = common.HexToHash("0x4a0f288a9d567bc6a9160bb0c2740a6611c7bf997d571a0bed23c82b5b91d1d5") // Mainnet genesis hash to enforce below configs on
+	MainnetGenesisHash = common.HexToHash("0x379b516819fb4d18988fc0b86196b66a7c2021dd20aa5ba4cff768e74e9892e5") // Mainnet genesis hash to enforce below configs on
 	TestnetGenesisHash = common.HexToHash("0x1cbef527b5e69640b795df3b76437741e7fd4c98be557c6ead9be5f38ae7febc") // Testnet genesis hash to enforce below configs on
 )
 

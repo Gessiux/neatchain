@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/Gessiux/neatchain/rlp"
+	"github.com/Gessiux/neatchain/utilities/rlp"
 )
 
 // RLPTest is the JSON structure of a single RLP test.

@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/neatdb"
+	"github.com/Gessiux/neatchain/utilities/common"
 )
 
 var (

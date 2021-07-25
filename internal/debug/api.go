@@ -33,7 +33,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/blockchain/log"
 )
 
 // Handler is the global debugging handler.

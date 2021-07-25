@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/common/math"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/common/math"
 )
 
 var _ = (*stEnvMarshaling)(nil)

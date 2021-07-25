@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Gessiux/neatchain/core/vm"
+	"github.com/Gessiux/neatchain/blockchain/core/vm"
 )
 
 func TestState(t *testing.T) {

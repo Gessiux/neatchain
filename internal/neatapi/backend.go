@@ -21,17 +21,17 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/accounts"
-	"github.com/Gessiux/neatchain/common"
-	"github.com/Gessiux/neatchain/core"
-	"github.com/Gessiux/neatchain/core/state"
-	"github.com/Gessiux/neatchain/core/types"
-	"github.com/Gessiux/neatchain/core/vm"
-	"github.com/Gessiux/neatchain/event"
+	"github.com/Gessiux/neatchain/blockchain/accounts"
+	"github.com/Gessiux/neatchain/blockchain/core"
+	"github.com/Gessiux/neatchain/blockchain/core/state"
+	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/blockchain/core/vm"
 	"github.com/Gessiux/neatchain/neatdb"
-	"github.com/Gessiux/neatchain/neatprotocol/downloader"
+	"github.com/Gessiux/neatchain/neatptc/downloader"
+	"github.com/Gessiux/neatchain/network/rpc"
 	"github.com/Gessiux/neatchain/params"
-	"github.com/Gessiux/neatchain/rpc"
+	"github.com/Gessiux/neatchain/utilities/common"
+	"github.com/Gessiux/neatchain/utilities/event"
 )
 
 // Backend interface provides the common API services (that are provided by

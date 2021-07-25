@@ -19,8 +19,8 @@ package neatapi
 import (
 	"sync"
 
-	"github.com/Gessiux/neatchain/common/compiler"
-	"github.com/Gessiux/neatchain/rpc"
+	"github.com/Gessiux/neatchain/network/rpc"
+	"github.com/Gessiux/neatchain/utilities/common/compiler"
 )
 
 func makeCompilerAPIs(solcPath string) []rpc.API {

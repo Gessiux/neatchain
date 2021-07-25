@@ -5231,7 +5231,7 @@ module.exports = DB;
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file neatprotocol.js
+ * @file neatptc.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @author Fabian Vogelsteller <fabian@ethdev.com>
  * @date 2015
@@ -5586,7 +5586,7 @@ module.exports = Eth;
     You should have received a copy of the GNU Lesser General Public License
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-/** @file neatprotocol.js
+/** @file neatptc.js
  * @authors:
  *   Marek Kotewicz <marek@ethdev.com>
  * @date 2015
@@ -5606,7 +5606,7 @@ var Net = function (web3) {
     });
 };
 
-/// @returns an array of objects describing web3.neatprotocol api properties
+/// @returns an array of objects describing web3.neatptc api properties
 var properties = function () {
     return [
         new Property({
@@ -5641,7 +5641,7 @@ module.exports = Net;
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file neatprotocol.js
+ * @file neatptc.js
  * @author Marek Kotewicz <marek@ethdev.com>
  * @author Fabian Vogelsteller <fabian@ethdev.com>
  * @date 2015
@@ -6058,7 +6058,7 @@ module.exports = Swarm;
 
 var Method = require('../method');
 
-/// @returns an array of objects describing web3.neatprotocol.filter api methods
+/// @returns an array of objects describing web3.neatptc.filter api methods
 var eth = function () {
     var newFilterCall = function (args) {
         var type = args[0];

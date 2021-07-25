@@ -70,10 +70,14 @@ github.com/Gessiux/ed25519 v1.0.0 h1:VM+O9VzM13uc8C4hp3FEJWdYrtmYx6fnaqZ8XXKABbI
 github.com/Gessiux/ed25519 v1.0.0/go.mod h1:a4MM3DywIVT4ctDuag7FD4hHMxs+7WVwuV28eXyznNM=
 github.com/Gessiux/go-common v1.0.2 h1:drflpXRc8oRiJ2Ns9onyGPyIUaPv61TaoXUA3Vufr8o=
 github.com/Gessiux/go-common v1.0.2/go.mod h1:KA72BfIcRshPhjLJpUmaSLCwAWrl6e1E6RTVCo+TCT0=
+github.com/Gessiux/go-common v1.0.3 h1:75pslOtvhh4lu3DHx+EvDu02LPPczRzkKOXQ2yd92vw=
+github.com/Gessiux/go-common v1.0.3/go.mod h1:KA72BfIcRshPhjLJpUmaSLCwAWrl6e1E6RTVCo+TCT0=
 github.com/Gessiux/go-config v1.0.0 h1:egqRuNzTBD0TjG1sstUYxXkxv9RLapepCBGGmlikiKM=
 github.com/Gessiux/go-config v1.0.0/go.mod h1:ejY/niJfx7HzzaaaBxNTsbAK4a8g4Qk8VShIzY5x2iQ=
 github.com/Gessiux/go-crypto v1.0.1 h1:q4dyWCQiGGQKvQXT7XdEXbRqYjCGMzkkOQbeHoqfLsA=
 github.com/Gessiux/go-crypto v1.0.1/go.mod h1:EL242NMAtY02rMIGM9RU28o8sy4pdHXCnb/jKdSsTRc=
+github.com/Gessiux/go-crypto v1.0.2 h1:Gn/zhhSj0SehPUnqO9FdVp7HgKtnyBxigS0fWzNV06E=
+github.com/Gessiux/go-crypto v1.0.2/go.mod h1:EL242NMAtY02rMIGM9RU28o8sy4pdHXCnb/jKdSsTRc=
 github.com/Gessiux/go-data v1.0.0 h1:hyWUy8ELis1B11DYxkl2Jfv1a+vj4Bdt0Y/fXf29CG8=
 github.com/Gessiux/go-data v1.0.0/go.mod h1:9pXUaGdq0kTX23nIg7OnQPiSTKLlygmvEO+ltrdhMCM=
 github.com/Gessiux/go-db v1.0.0 h1:Ql8BJSrFJrEWO/p+BGNBc3nCPaYCh7RyZ4ZznWymTC8=

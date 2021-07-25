@@ -23,7 +23,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"github.com/Gessiux/neatchain/log"
+	"github.com/Gessiux/neatchain/blockchain/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

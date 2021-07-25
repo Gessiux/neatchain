@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/Gessiux/neatchain/common"
 	"github.com/Gessiux/neatchain/internal/jsre/deps"
+	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/robertkrimen/otto"
 )
 
