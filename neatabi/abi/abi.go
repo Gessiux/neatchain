@@ -526,10 +526,10 @@ const jsonChainABI = `
 ]`
 
 // NeatChain Child Chain Token Incentive Address
-var ChildChainTokenIncentiveAddr = common.StringToAddress("INT3EEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+var ChildChainTokenIncentiveAddr = common.StringToAddress("NEATCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
 
 // NeatChain Internal Contract Address
-var ChainContractMagicAddr = common.StringToAddress("INT3FFFFFFFFFFFFFFFFFFFFFFFFFFFF") // don't conflict with neatchain/core/vm/contracts.go
+var ChainContractMagicAddr = common.StringToAddress("NEATBBBBBBBBBBBBBBBBBBBBBBBBBBBB") // don't conflict with neatchain/core/vm/contracts.go
 
 var ChainABI abi.ABI
 

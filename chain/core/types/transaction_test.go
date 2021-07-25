@@ -250,7 +250,7 @@ func TestNewTransactionJSON(t *testing.T) {
 	var tx *Transaction
 	//switch i % 2 {
 	//case 0:
-	tx = NewTransaction(0, common.StringToAddress("INT3Pkr1zMmk3mnFzihH5F4kNxFavJo4"), big.NewInt(1000000000000000000), 30000, big.NewInt(20000000000), []byte("0x"))
+	tx = NewTransaction(0, common.StringToAddress("NEATtWX5FxpBddhwxzde47H7dWorB6AA"), big.NewInt(1000000000000000000), 30000, big.NewInt(20000000000), []byte("0x"))
 	//case 1:
 	//	tx = NewContractCreation(i, common.Big0, 1, common.Big2, []byte("abcdef"))
 	//}
@@ -287,7 +287,7 @@ func TestSignTx(t *testing.T) {
 		t.Fatalf("could not decode key: %v", err)
 	}
 	signer := NewEIP155Signer(common.Big2) // mainnet 1，testnet 2
-	address := common.StringToAddress("INT3Pkr1zMmk3mnFzihH5F4kNxFavJo4")
+	address := common.StringToAddress("NEATtWX5FxpBddhwxzde47H7dWorB6AA")
 
 	d := txdata{
 		AccountNonce: 0,
@@ -323,10 +323,10 @@ func TestDelegateTx(t *testing.T) {
 		t.Fatalf("could not decode key: %v", err)
 	}
 	signer := NewEIP155Signer(common.Big2) // mainnet 1，testnet 2
-	//address := common.StringToAddress("INT3Pkr1zMmk3mnFzihH5F4kNxFavJo4")
-	address := common.StringToAddress("INT3FFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+	//address := common.StringToAddress("NEATtWX5FxpBddhwxzde47H7dWorB6AA")
+	address := common.StringToAddress("NEATBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
 
-	input, err := neatAbi.ChainABI.Pack(neatAbi.Delegate.String(), common.StringToAddress("INT3CFVNpTwr3QrykhPWiLP8n9wsyCVa"))
+	input, err := neatAbi.ChainABI.Pack(neatAbi.Delegate.String(), common.StringToAddress("NEATfxRkRYDgG5gjaJSTpwZz9cZQsMEr"))
 	fmt.Printf("delegate input %v\n", hexutil.Encode(input))
 	if err != nil {
 		t.Errorf("could not pack data, err %v\n", err)

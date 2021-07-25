@@ -38,7 +38,7 @@ var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"
 var testINTAddrHex = "3334536a7873394177526a356d437978374166784a755a783566393142714a353333"
 
 //var testINTAddrHex = "00000000000000000000000000000000000000000000000000000000000000000000"
-var testINTAddr = "INT34Sjxs9AwRj5mCyx7AfxJuZx5f91B" // 34Sjxs9AwRj5mCyx7AfxJuZx5f91BqJ533
+var testINTAddr = "NEATb437dSzaqRGxhTgW4qCq877ytYxb" // 34Sjxs9AwRj5mCyx7AfxJuZx5f91BqJ533
 var testPrivHex = "289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032"
 
 // These tests are sanity checks.
@@ -374,22 +374,22 @@ type addressTest struct {
 }
 
 var addressList = []*addressTest{
-	{Address: "INT34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: true},
-	{Address: "INT34Sjxs9AwRj5mCyx7AfxJuZx5f91", Valid: false},
-	{Address: "INT44Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "iNT34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "InT34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "INt34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "int34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "inT34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "Int34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "iNt34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "34Sjxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "INT", Valid: false},
-	{Address: "INT34Slxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "INT34SIxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "INT34S0xs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
-	{Address: "INT34SOxs9AwRj5mCyx7AfxJuZx5f91B", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: true},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEAT", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
 }
 
 func TestValidateINTAddress(t *testing.T) {

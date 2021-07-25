@@ -102,7 +102,7 @@ func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) erro
 		GasLimit:   0x7270e00,
 		Difficulty: new(big.Int).SetUint64(0x01),
 		Mixhash:    common.Hash{},
-		Coinbase:   "INT3AAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+		Coinbase:   "NEATAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
 		Alloc:      core.GenesisAllocWrite{},
 	}
 	for i, validator := range validators {

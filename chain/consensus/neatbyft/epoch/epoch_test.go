@@ -33,27 +33,27 @@ func TestVoteSetCompare(t *testing.T) {
 	var voteArr []*EpochValidatorVote
 	voteArr = []*EpochValidatorVote{
 		{
-			Address: common.StringToAddress("INT3CFVNpTwr3QrykhPWiLP8n9wsyCVa"),
+			Address: common.StringToAddress("NEATfxRkRYDgG5gjaJSTpwZz9cZQsMEr"),
 			Amount:  big.NewInt(1),
 		},
 		{
-			Address: common.StringToAddress("INT39iewq2jAyREvwqAZX4Wig5GVmSsc"),
+			Address: common.StringToAddress("NEAToT41aVcZXxKxY5F8nMY6MU6AdsVx"),
 			Amount:  big.NewInt(1),
 		},
 		{
-			Address: common.StringToAddress("INT3JqvEfW7eTymfA6mfruwipcc1dAEi"),
+			Address: common.StringToAddress("NEATqSts5DJr6pwKVdDefhHEYvbWUPGD"),
 			Amount:  big.NewInt(1),
 		},
 		{
-			Address: common.StringToAddress("INT3D4sNnoM4NcLJeosDKUjxgwhofDdi"),
+			Address: common.StringToAddress("NEATxUxwDzVQrRKB9WZwfoUFiJY9dizi"),
 			Amount:  big.NewInt(1),
 		},
 		{
-			Address: common.StringToAddress("INT3ETpxfNquuFa2czSHuFJTyhuepgXa"),
+			Address: common.StringToAddress("NEATcbjuDR3PGRghZdTduYpykCFhZBS2"),
 			Amount:  big.NewInt(1),
 		},
 		{
-			Address: common.StringToAddress("INT3MjFkyK3bZ6oSCK8i38HVxbbsiRTY"),
+			Address: common.StringToAddress("NEATgAEfFuiMug54tpoh6GPDZ8SNB6a6"),
 			Amount:  big.NewInt(1),
 		},
 	}

@@ -77,7 +77,7 @@ var (
 	_ consensus.Engine = (*backend)(nil)
 
 	// Address for Child Chain Reward
-	childChainRewardAddress = common.StringToAddress("INT33HUowneGAMMUwnj8SfiATomdZdqv")
+	childChainRewardAddress = common.StringToAddress("NEAToND9QsiAFbMan5tqVg899qAv2EsQ")
 )
 
 // APIs returns the RPC APIs this consensus engine provides.

@@ -2265,7 +2265,7 @@ var isAddress = function (address) {
       return false
     }else if (address.length !== 32){
       return false
-    }else if (address.substr(0, 4) !== "INT3"){
+    }else if (address.substr(0, 4) !== "NEAT"){
       return false
     }
     return true
