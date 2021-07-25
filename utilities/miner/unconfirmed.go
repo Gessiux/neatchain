@@ -20,8 +20,8 @@ import (
 	"container/ring"
 	"sync"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/core/types"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/utilities/common"
 )
 

@@ -25,7 +25,7 @@ import (
 	"math/big"
 
 	"github.com/Gessiux/neatchain"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/network/rpc"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/common/hexutil"

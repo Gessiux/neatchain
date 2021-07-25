@@ -20,8 +20,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
-	"github.com/Gessiux/neatchain/blockchain/core/state"
+	"github.com/Gessiux/neatchain/chain/core/rawdb"
+	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/davecgh/go-spew/spew"
 )

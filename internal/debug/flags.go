@@ -24,8 +24,8 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
-	"github.com/Gessiux/neatchain/blockchain/log/term"
+	"github.com/Gessiux/neatchain/chain/log"
+	"github.com/Gessiux/neatchain/chain/log/term"
 	"github.com/Gessiux/neatchain/utilities/metrics"
 	"github.com/Gessiux/neatchain/utilities/metrics/exp"
 	colorable "github.com/mattn/go-colorable"

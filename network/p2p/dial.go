@@ -24,7 +24,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/network/p2p/discover"
 	"github.com/Gessiux/neatchain/network/p2p/netutil"
 )

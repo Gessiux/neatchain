@@ -26,12 +26,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
+	"github.com/Gessiux/neatchain/chain/core/rawdb"
 
-	"github.com/Gessiux/neatchain/blockchain/consensus"
-	"github.com/Gessiux/neatchain/blockchain/core"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/consensus"
+	"github.com/Gessiux/neatchain/chain/core"
+	"github.com/Gessiux/neatchain/chain/core/types"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/neatptc/downloader"
 	"github.com/Gessiux/neatchain/neatptc/fetcher"

@@ -72,6 +72,8 @@ github.com/Gessiux/go-common v1.0.2 h1:drflpXRc8oRiJ2Ns9onyGPyIUaPv61TaoXUA3Vufr
 github.com/Gessiux/go-common v1.0.2/go.mod h1:KA72BfIcRshPhjLJpUmaSLCwAWrl6e1E6RTVCo+TCT0=
 github.com/Gessiux/go-common v1.0.3 h1:75pslOtvhh4lu3DHx+EvDu02LPPczRzkKOXQ2yd92vw=
 github.com/Gessiux/go-common v1.0.3/go.mod h1:KA72BfIcRshPhjLJpUmaSLCwAWrl6e1E6RTVCo+TCT0=
+github.com/Gessiux/go-common v1.0.4 h1:/W6mK3UWkGOFQE61d2XNNMq+jrxgUud7VORKIb8peQA=
+github.com/Gessiux/go-common v1.0.4/go.mod h1:KA72BfIcRshPhjLJpUmaSLCwAWrl6e1E6RTVCo+TCT0=
 github.com/Gessiux/go-config v1.0.0 h1:egqRuNzTBD0TjG1sstUYxXkxv9RLapepCBGGmlikiKM=
 github.com/Gessiux/go-config v1.0.0/go.mod h1:ejY/niJfx7HzzaaaBxNTsbAK4a8g4Qk8VShIzY5x2iQ=
 github.com/Gessiux/go-crypto v1.0.1 h1:q4dyWCQiGGQKvQXT7XdEXbRqYjCGMzkkOQbeHoqfLsA=

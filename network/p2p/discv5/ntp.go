@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 )
 
 const (

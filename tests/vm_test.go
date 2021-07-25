@@ -19,7 +19,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/Gessiux/neatchain/blockchain/core/vm"
+	"github.com/Gessiux/neatchain/chain/core/vm"
 )
 
 func TestVM(t *testing.T) {

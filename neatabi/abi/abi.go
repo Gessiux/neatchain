@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts/abi"
+	"github.com/Gessiux/neatchain/chain/accounts/abi"
 	"github.com/Gessiux/neatchain/utilities/common"
 )
 

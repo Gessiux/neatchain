@@ -27,7 +27,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 )
 
 var (

@@ -22,7 +22,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/internal/neatapi"
 	"github.com/Gessiux/neatchain/network/rpc"
 	"github.com/Gessiux/neatchain/params"

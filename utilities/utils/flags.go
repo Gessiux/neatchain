@@ -26,12 +26,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts"
-	"github.com/Gessiux/neatchain/blockchain/accounts/keystore"
-	"github.com/Gessiux/neatchain/blockchain/consensus"
-	"github.com/Gessiux/neatchain/blockchain/core"
-	"github.com/Gessiux/neatchain/blockchain/core/vm"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/accounts"
+	"github.com/Gessiux/neatchain/chain/accounts/keystore"
+	"github.com/Gessiux/neatchain/chain/consensus"
+	"github.com/Gessiux/neatchain/chain/core"
+	"github.com/Gessiux/neatchain/chain/core/vm"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/neatdb"
 	neatptc "github.com/Gessiux/neatchain/neatptc"
 	"github.com/Gessiux/neatchain/neatptc/downloader"
@@ -50,7 +50,7 @@ import (
 
 	// import neatcon config
 	cfg "github.com/Gessiux/go-config"
-	tmcfg "github.com/Gessiux/neatchain/blockchain/consensus/neatbyft/config/neatcon"
+	tmcfg "github.com/Gessiux/neatchain/chain/consensus/neatbyft/config/neatcon"
 )
 
 var (

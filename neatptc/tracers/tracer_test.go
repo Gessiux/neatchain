@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/core/vm"
+	"github.com/Gessiux/neatchain/chain/core/vm"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/common"
 )

@@ -21,7 +21,7 @@ import (
 	"io"
 	"sync/atomic"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	mapset "github.com/deckarep/golang-set"
 )
 

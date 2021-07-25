@@ -5,7 +5,7 @@ package neatptc
 import (
 	"math/big"
 
-	"github.com/Gessiux/neatchain/blockchain/core"
+	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/neatptc/downloader"
 	"github.com/Gessiux/neatchain/neatptc/gasprice"
 	"github.com/Gessiux/neatchain/utilities/common"

@@ -27,7 +27,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/network/node"
 	"github.com/Gessiux/neatchain/network/p2p/discover"
 	"github.com/docker/docker/pkg/reexec"

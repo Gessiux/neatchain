@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Gessiux/bls v1.0.0
 	github.com/Gessiux/ed25519 v1.0.0 // indirect
-	github.com/Gessiux/go-common v1.0.3
+	github.com/Gessiux/go-common v1.0.4
 	github.com/Gessiux/go-config v1.0.0
 	github.com/Gessiux/go-crypto v1.0.2
 	github.com/Gessiux/go-data v1.0.0 // indirect

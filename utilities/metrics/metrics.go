@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

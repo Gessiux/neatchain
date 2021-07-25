@@ -26,10 +26,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
+	"github.com/Gessiux/neatchain/chain/core/rawdb"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/accounts"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/internal/debug"
 	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/network/p2p"

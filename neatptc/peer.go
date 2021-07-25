@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/Gessiux/go-wire"
-	"github.com/Gessiux/neatchain/blockchain/consensus"
+	"github.com/Gessiux/neatchain/chain/consensus"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/network/p2p"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/rlp"

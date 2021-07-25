@@ -21,8 +21,8 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/Gessiux/neatchain/blockchain/core"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/event"
 	"github.com/Gessiux/neatchain/utilities/rlp"

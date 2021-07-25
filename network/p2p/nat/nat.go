@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	natpmp "github.com/jackpal/go-nat-pmp"
 )
 

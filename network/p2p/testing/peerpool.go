@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/network/p2p/discover"
 )
 

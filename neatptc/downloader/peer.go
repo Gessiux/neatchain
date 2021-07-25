@@ -29,7 +29,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/event"
 )

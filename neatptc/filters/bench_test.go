@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/core"
-	"github.com/Gessiux/neatchain/blockchain/core/bloombits"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core"
+	"github.com/Gessiux/neatchain/chain/core/bloombits"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/network/node"
 	"github.com/Gessiux/neatchain/utilities/common"

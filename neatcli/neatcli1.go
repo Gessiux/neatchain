@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/core/types"
+	"github.com/Gessiux/neatchain/chain/log"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/common"

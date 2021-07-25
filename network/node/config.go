@@ -27,10 +27,10 @@ import (
 
 	"github.com/Gessiux/neatchain/network/rpc"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts"
-	"github.com/Gessiux/neatchain/blockchain/accounts/keystore"
-	"github.com/Gessiux/neatchain/blockchain/accounts/usbwallet"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/accounts"
+	"github.com/Gessiux/neatchain/chain/accounts/keystore"
+	"github.com/Gessiux/neatchain/chain/accounts/usbwallet"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/network/p2p"
 	"github.com/Gessiux/neatchain/network/p2p/discover"
 	"github.com/Gessiux/neatchain/utilities/common"

@@ -26,14 +26,14 @@ import (
 	"time"
 
 	"github.com/Gessiux/neatchain/utilities/common"
-	"github.com/Gessiux/neatchain/blockchain/core"
-	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core"
+	"github.com/Gessiux/neatchain/chain/core/rawdb"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/utilities/crypto"
 	"github.com/Gessiux/neatchain/utilities/event"
 	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/params"
-	"github.com/Gessiux/neatchain/blockchain/trie"
+	"github.com/Gessiux/neatchain/chain/trie"
 )
 
 var (

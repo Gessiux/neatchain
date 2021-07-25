@@ -31,7 +31,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/rs/cors"
 )
 

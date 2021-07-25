@@ -22,9 +22,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/consensus"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/consensus"
+	"github.com/Gessiux/neatchain/chain/core/types"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/common/prque"
 )

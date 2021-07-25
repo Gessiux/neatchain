@@ -23,8 +23,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts/usbwallet"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/accounts/usbwallet"
+	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/network/rpc"
 	"github.com/robertkrimen/otto"
 )

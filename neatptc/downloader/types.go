@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.

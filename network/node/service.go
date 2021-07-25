@@ -20,9 +20,9 @@ import (
 	"crypto/ecdsa"
 	"reflect"
 
-	"github.com/Gessiux/neatchain/blockchain/core/rawdb"
+	"github.com/Gessiux/neatchain/chain/core/rawdb"
 
-	"github.com/Gessiux/neatchain/blockchain/accounts"
+	"github.com/Gessiux/neatchain/chain/accounts"
 	"github.com/Gessiux/neatchain/neatdb"
 	"github.com/Gessiux/neatchain/network/p2p"
 	"github.com/Gessiux/neatchain/network/rpc"

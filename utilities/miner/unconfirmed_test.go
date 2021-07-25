@@ -19,7 +19,7 @@ package miner
 import (
 	"testing"
 
-	"github.com/Gessiux/neatchain/blockchain/core/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/utilities/common"
 )
 

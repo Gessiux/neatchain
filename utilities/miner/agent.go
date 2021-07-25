@@ -21,10 +21,10 @@ import (
 
 	"sync/atomic"
 
-	"github.com/Gessiux/neatchain/blockchain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/blockchain/consensus/neatbyft/types"
-	"github.com/Gessiux/neatchain/blockchain/core/types"
-	"github.com/Gessiux/neatchain/blockchain/log"
+	"github.com/Gessiux/neatchain/chain/consensus"
+	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/chain/core/types"
+	"github.com/Gessiux/neatchain/chain/log"
 )
 
 type CpuAgent struct {

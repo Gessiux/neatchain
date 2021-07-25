@@ -17,7 +17,7 @@
 package neatptc
 
 import (
-	"github.com/Gessiux/neatchain/blockchain/consensus"
+	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/network/p2p"
 	"github.com/Gessiux/neatchain/utilities/metrics"
 )
