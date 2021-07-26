@@ -72,7 +72,7 @@ func initIntGenesis(ctx *cli.Context) error {
 	}
 	log.Infof("this is init-neatchain chainId %v", chainId)
 	log.Info("this is init-neatchain" + ctx.GlobalString(utils.DataDirFlag.Name) + "--" + ctx.Args()[0])
-	return init_int_genesis(utils.GetTendermintConfig(chainId, ctx), balance_str, isMainnet)
+	return init_int_genesis(utils.GetNeatConConfig(chainId, ctx), balance_str, isMainnet)
 }
 
 func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) error {
@@ -117,10 +117,10 @@ func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) erro
 		utils.Fatalf("marshal coreGenesis failed")
 		return err
 	}
-	intGenesisPath := config.GetString("int_genesis_file")
+	intGenesisPath := config.GetString("neat_genesis_file")
 
 	if err = ioutil.WriteFile(intGenesisPath, contents, 0654); err != nil {
-		utils.Fatalf("write int_genesis_file failed")
+		utils.Fatalf("write neat_genesis_file failed")
 		return err
 	}
 	return nil
@@ -143,7 +143,7 @@ func initCmd(ctx *cli.Context) error {
 		}
 	}
 
-	return init_cmd(ctx, utils.GetTendermintConfig(chainId, ctx), chainId, intGenesisPath)
+	return init_cmd(ctx, utils.GetNeatConConfig(chainId, ctx), chainId, intGenesisPath)
 }
 
 func InitChildChainCmd(ctx *cli.Context) error {
@@ -167,17 +167,17 @@ func InitChildChainCmd(ctx *cli.Context) error {
 			return errors.New(fmt.Sprintf("unable to retrieve the genesis file for child chain %s", chainId))
 		}
 
-		childConfig := utils.GetTendermintConfig(chainId, ctx)
+		childConfig := utils.GetNeatConConfig(chainId, ctx)
 
 		// Write down genesis and get the genesis path
-		ethGenesisPath := childConfig.GetString("int_genesis_file")
+		ethGenesisPath := childConfig.GetString("neat_genesis_file")
 		if err := ioutil.WriteFile(ethGenesisPath, ethGenesis, 0644); err != nil {
-			utils.Fatalf("write int_genesis_file failed")
+			utils.Fatalf("write neat_genesis_file failed")
 			return err
 		}
 
 		// Init the blockchain from genesis path
-		init_int_blockchain(chainId, ethGenesisPath, ctx)
+		init_neatchain(chainId, ethGenesisPath, ctx)
 
 		// Write down TDM Genesis directly
 		if err := ioutil.WriteFile(childConfig.GetString("genesis_file"), tdmGenesis, 0644); err != nil {
@@ -192,17 +192,17 @@ func InitChildChainCmd(ctx *cli.Context) error {
 
 func init_cmd(ctx *cli.Context, config cfg.Config, chainId string, intGenesisPath string) error {
 
-	init_int_blockchain(chainId, intGenesisPath, ctx)
+	init_neatchain(chainId, intGenesisPath, ctx)
 
 	init_em_files(config, chainId, intGenesisPath, nil)
 
 	return nil
 }
 
-func init_int_blockchain(chainId string, intGenesisPath string, ctx *cli.Context) {
+func init_neatchain(chainId string, intGenesisPath string, ctx *cli.Context) {
 
 	dbPath := filepath.Join(utils.MakeDataDir(ctx), chainId, clientIdentifier, "/chaindata")
-	log.Infof("init_int_blockchain 0 with dbPath: %s", dbPath)
+	log.Infof("init_neatchain 0 with dbPath: %s", dbPath)
 
 	chainDb, err := rawdb.NewLevelDBDatabase(filepath.Join(utils.MakeDataDir(ctx), chainId, clientIdentifier, "/chaindata"), 0, 0, "neatchain/db/chaindata/")
 	if err != nil {
@@ -210,20 +210,20 @@ func init_int_blockchain(chainId string, intGenesisPath string, ctx *cli.Context
 	}
 	defer chainDb.Close()
 
-	log.Info("init_int_blockchain 1")
+	log.Info("init_neatchain 1")
 	genesisFile, err := os.Open(intGenesisPath)
 	if err != nil {
 		utils.Fatalf("failed to read genesis file: %v", err)
 	}
 	defer genesisFile.Close()
 
-	log.Info("init_int_blockchain 2")
+	log.Info("init_neatchain 2")
 	block, err := core.WriteGenesisBlock(chainDb, genesisFile)
 	if err != nil {
 		utils.Fatalf("failed to write genesis block: %v", err)
 	}
 
-	log.Info("init_int_blockchain end")
+	log.Info("init_neatchain end")
 	log.Infof("successfully wrote genesis block and/or chain rule set: %x", block.Hash())
 }
 
@@ -319,7 +319,7 @@ func createGenesisDoc(config cfg.Config, chainId string, coreGenesis *core.Genes
 		fmt.Printf("init reward block %v\n", rewardPerBlock)
 		genDoc := types.GenesisDoc{
 			ChainID:      chainId,
-			Consensus:    types.CONSENSUS_IPBFT,
+			Consensus:    types.CONSENSUS_NeatByFT,
 			GenesisTime:  time.Now(),
 			RewardScheme: rewardScheme,
 			CurrentEpoch: types.OneEpochDoc{
@@ -361,7 +361,7 @@ func generateTDMGenesis(childChainID string, validators []types.GenesisValidator
 
 	genDoc := types.GenesisDoc{
 		ChainID:      childChainID,
-		Consensus:    types.CONSENSUS_IPBFT,
+		Consensus:    types.CONSENSUS_NeatByFT,
 		GenesisTime:  time.Now(),
 		RewardScheme: rewardScheme,
 		CurrentEpoch: types.OneEpochDoc{
@@ -462,9 +462,9 @@ func initEthGenesisFromExistValidator(childChainID string, childConfig cfg.Confi
 	if err != nil {
 		return err
 	}
-	ethGenesisPath := childConfig.GetString("int_genesis_file")
+	ethGenesisPath := childConfig.GetString("neat_genesis_file")
 	if err = ioutil.WriteFile(ethGenesisPath, contents, 0654); err != nil {
-		utils.Fatalf("write int_genesis_file failed")
+		utils.Fatalf("write neat_genesis_file failed")
 		return err
 	}
 	return nil

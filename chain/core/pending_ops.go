@@ -28,21 +28,21 @@ func ApplyOp(op types.PendingOp, bc *BlockChain, cch CrossChainHelper) error {
 		}
 		return nil
 	case *types.VoteNextEpochOp:
-		ep := bc.engine.(consensus.IPBFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.VoteNextEpoch(ep, op.From, op.VoteHash, op.TxHash)
 	case *types.RevealVoteOp:
-		ep := bc.engine.(consensus.IPBFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.RevealVote(ep, op.From, op.Pubkey, op.Amount, op.Salt, op.TxHash)
 	case *types.UpdateNextEpochOp:
-		ep := bc.engine.(consensus.IPBFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.UpdateNextEpoch(ep, op.From, op.PubKey, op.Amount, op.Salt, op.TxHash)
 	case *types.SaveDataToMainChainOp:
 		return cch.SaveChildChainProofDataToMainChain(op.Data)
 	case *tmTypes.SwitchEpochOp:
-		eng := bc.engine.(consensus.IPBFT)
+		eng := bc.engine.(consensus.NeatByFT)
 		nextEp, err := eng.GetEpoch().EnterNewEpoch(op.NewValidators)
 		if err == nil {
 			// Stop the Engine if we are not in the new validators

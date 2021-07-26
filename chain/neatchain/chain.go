@@ -5,9 +5,9 @@ import (
 
 	cfg "github.com/Gessiux/go-config"
 	"github.com/Gessiux/neatchain/chain/accounts/keystore"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/log"
-	intnode "github.com/Gessiux/neatchain/network/node"
+	neatnode "github.com/Gessiux/neatchain/network/node"
 	"github.com/Gessiux/neatchain/utilities/utils"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -19,20 +19,20 @@ const (
 )
 
 type Chain struct {
-	Id      string
-	Config  cfg.Config
-	IntNode *intnode.Node
+	Id       string
+	Config   cfg.Config
+	NeatNode *neatnode.Node
 }
 
 func LoadMainChain(ctx *cli.Context, chainId string) *Chain {
 
 	chain := &Chain{Id: chainId}
-	config := utils.GetTendermintConfig(chainId, ctx)
+	config := utils.GetNeatConConfig(chainId, ctx)
 	chain.Config = config
 
 	log.Info("Make full node")
 	stack := makeFullNode(ctx, GetCMInstance(ctx).cch, chainId)
-	chain.IntNode = stack
+	chain.NeatNode = stack
 
 	return chain
 }
@@ -49,7 +49,7 @@ func LoadChildChain(ctx *cli.Context, chainId string) *Chain {
 	//	return nil
 	//}
 	chain := &Chain{Id: chainId}
-	config := utils.GetTendermintConfig(chainId, ctx)
+	config := utils.GetNeatConConfig(chainId, ctx)
 	chain.Config = config
 
 	log.Infof("chainId: %s, makeFullNode", chainId)
@@ -58,7 +58,7 @@ func LoadChildChain(ctx *cli.Context, chainId string) *Chain {
 	if stack == nil {
 		return nil
 	} else {
-		chain.IntNode = stack
+		chain.NeatNode = stack
 		return chain
 	}
 }
@@ -67,7 +67,7 @@ func StartChain(ctx *cli.Context, chain *Chain, startDone chan<- struct{}) error
 
 	log.Infof("Start Chain: %s", chain.Id)
 	go func() {
-		utils.StartNode(ctx, chain.IntNode)
+		utils.StartNode(ctx, chain.NeatNode)
 
 		if startDone != nil {
 			startDone <- struct{}{}
@@ -77,10 +77,10 @@ func StartChain(ctx *cli.Context, chain *Chain, startDone chan<- struct{}) error
 	return nil
 }
 
-func CreateChildChain(ctx *cli.Context, chainId string, validator tdmTypes.PrivValidator, keyJson []byte, validators []tdmTypes.GenesisValidator) error {
+func CreateChildChain(ctx *cli.Context, chainId string, validator ncTypes.PrivValidator, keyJson []byte, validators []ncTypes.GenesisValidator) error {
 
-	// Get Tendermint config base on chain id
-	config := utils.GetTendermintConfig(chainId, ctx)
+	// Get NeatCon config base on chain id
+	config := utils.GetNeatConConfig(chainId, ctx)
 
 	// Save the KeyStore File (Optional)
 	if len(keyJson) > 0 {
@@ -97,17 +97,17 @@ func CreateChildChain(ctx *cli.Context, chainId string, validator tdmTypes.PrivV
 	validator.SetFile(privValFile + ".json")
 	validator.Save()
 
-	// Init the INT Genesis
+	// Init the NEAT Genesis
 	err := initEthGenesisFromExistValidator(chainId, config, validators)
 	if err != nil {
 		return err
 	}
 
-	// Init the INT Blockchain
-	init_int_blockchain(chainId, config.GetString("int_genesis_file"), ctx)
+	// Init the NEAT Blockchain
+	init_neatchain(chainId, config.GetString("neat_genesis_file"), ctx)
 
-	// Init the Tendermint Genesis
-	init_em_files(config, chainId, config.GetString("int_genesis_file"), validators)
+	// Init the NeatCon Genesis
+	init_em_files(config, chainId, config.GetString("neat_genesis_file"), validators)
 
 	return nil
 }

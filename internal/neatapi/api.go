@@ -485,13 +485,13 @@ func (s *PrivateAccountAPI) SignAndSendTransaction(ctx context.Context, args Sen
 	return s.SendTransaction(ctx, args, passwd)
 }
 
-// PublicBlockChainAPI provides an API to access the INT blockchain.
+// PublicBlockChainAPI provides an API to access the NEAT blockchain.
 // It offers only methods that operate on public data that is freely available to anyone.
 type PublicBlockChainAPI struct {
 	b Backend
 }
 
-// NewPublicBlockChainAPI creates a new INT blockchain API.
+// NewPublicBlockChainAPI creates a new NEAT blockchain API.
 func NewPublicBlockChainAPI(b Backend) *PublicBlockChainAPI {
 	return &PublicBlockChainAPI{b}
 }
@@ -1320,7 +1320,7 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 		if len(input) == 0 {
 			return errors.New(`contract creation without any data provided`)
 		}
-	} else if !crypto.ValidateINTAddr(string(args.To[:])) { // added on 2019年11月02日
+	} else if !crypto.ValidateNEATAddr(string(args.To[:])) { // added on 2019年11月02日
 		return errors.New(`invalid address`)
 	}
 
@@ -1693,7 +1693,7 @@ type PublicNEATAPI struct {
 	nonceLock *AddrLocker
 }
 
-// NewPublicNEATAPI creates a new INT API instance.
+// NewPublicNEATAPI creates a new NEAT API instance.
 func NewPublicNEATAPI(b Backend, nonceLock *AddrLocker) *PublicNEATAPI {
 	return &PublicNEATAPI{b.AccountManager(), b, nonceLock}
 }
@@ -2069,7 +2069,7 @@ func registerValidation(from common.Address, tx *types.Transaction, state *state
 
 	// Annual/SemiAnnual supernode can not become candidate
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.IPBFT); ok {
+	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
 		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(from.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
@@ -2140,7 +2140,7 @@ func unRegisterValidation(from common.Address, tx *types.Transaction, state *sta
 
 	// Super node can't unregister
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.IPBFT); ok {
+	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
 		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(from.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
@@ -2227,7 +2227,7 @@ func delegateValidation(from common.Address, tx *types.Transaction, state *state
 
 	// If Candidate is supernode, only allow to increase the stack(whitelist proxied list), not allow to create the new stack
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.IPBFT); ok {
+	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
 		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(args.Candidate.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
@@ -2308,7 +2308,7 @@ func unDelegateValidation(from common.Address, tx *types.Transaction, state *sta
 
 	// Super node Candidate can't decrease balance
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.IPBFT); ok {
+	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
 		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(args.Candidate.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
@@ -2476,12 +2476,12 @@ func concatCopyPreAllocate(slices [][]byte) []byte {
 
 func getEpoch(bc *core.BlockChain) (*epoch.Epoch, error) {
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.IPBFT); ok {
+	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
 		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 
 	if ep == nil {
-		return nil, errors.New("epoch is nil, are you running on IPBFT Consensus Engine")
+		return nil, errors.New("epoch is nil, are you running on NeatByFT Consensus Engine")
 	}
 
 	return ep, nil

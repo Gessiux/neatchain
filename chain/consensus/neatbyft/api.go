@@ -8,13 +8,13 @@ import (
 	"github.com/Gessiux/go-crypto"
 	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/utilities/common"
 	"github.com/Gessiux/neatchain/utilities/common/hexutil"
 	intCrypto "github.com/Gessiux/neatchain/utilities/crypto"
 )
 
-// API is a user facing RPC API of Tendermint
+// API is a user facing RPC API of NeatCon
 type API struct {
 	chain   consensus.ChainReader
 	neatcon *backend
@@ -26,7 +26,7 @@ func (api *API) GetCurrentEpochNumber() (hexutil.Uint64, error) {
 }
 
 // GetEpoch retrieves the Epoch Detail by Number
-func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, error) {
+func (api *API) GetEpoch(num hexutil.Uint64) (*ncTypes.EpochApiForConsole, error) {
 
 	number := uint64(num)
 	var resultEpoch *epoch.Epoch
@@ -41,9 +41,9 @@ func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, erro
 		resultEpoch = epoch.LoadOneEpoch(curEpoch.GetDB(), number, nil)
 	}
 
-	validators := make([]*tdmTypes.EpochValidatorForConsole, len(resultEpoch.Validators.Validators))
+	validators := make([]*ncTypes.EpochValidatorForConsole, len(resultEpoch.Validators.Validators))
 	for i, val := range resultEpoch.Validators.Validators {
-		validators[i] = &tdmTypes.EpochValidatorForConsole{
+		validators[i] = &ncTypes.EpochValidatorForConsole{
 			Address:        common.BytesToAddress(val.Address).String(),
 			PubKey:         val.PubKey.KeyString(),
 			Amount:         (*hexutil.Big)(val.VotingPower),
@@ -51,7 +51,7 @@ func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, erro
 		}
 	}
 
-	return &tdmTypes.EpochApiForConsole{
+	return &ncTypes.EpochApiForConsole{
 		Number:         hexutil.Uint64(resultEpoch.Number),
 		RewardPerBlock: (*hexutil.Big)(resultEpoch.RewardPerBlock),
 		StartBlock:     hexutil.Uint64(resultEpoch.StartBlock),
@@ -63,7 +63,7 @@ func (api *API) GetEpoch(num hexutil.Uint64) (*tdmTypes.EpochApiForConsole, erro
 }
 
 // GetEpochVote
-func (api *API) GetNextEpochVote() (*tdmTypes.EpochVotesApiForConsole, error) {
+func (api *API) GetNextEpochVote() (*ncTypes.EpochVotesApiForConsole, error) {
 
 	ep := api.neatcon.core.consensusState.Epoch
 	if ep.GetNextEpoch() != nil {
@@ -72,15 +72,15 @@ func (api *API) GetNextEpochVote() (*tdmTypes.EpochVotesApiForConsole, error) {
 		if ep.GetNextEpoch().GetEpochValidatorVoteSet() != nil {
 			votes = ep.GetNextEpoch().GetEpochValidatorVoteSet().Votes
 		}
-		votesApi := make([]*tdmTypes.EpochValidatorVoteApiForConsole, 0, len(votes))
+		votesApi := make([]*ncTypes.EpochValidatorVoteApiForConsole, 0, len(votes))
 		for _, v := range votes {
 			var pkstring string
 			if v.PubKey != nil {
 				pkstring = v.PubKey.KeyString()
 			}
 
-			votesApi = append(votesApi, &tdmTypes.EpochValidatorVoteApiForConsole{
-				EpochValidatorForConsole: tdmTypes.EpochValidatorForConsole{
+			votesApi = append(votesApi, &ncTypes.EpochValidatorVoteApiForConsole{
+				EpochValidatorForConsole: ncTypes.EpochValidatorForConsole{
 					Address: v.Address.String(),
 					PubKey:  pkstring,
 					Amount:  (*hexutil.Big)(v.Amount),
@@ -91,7 +91,7 @@ func (api *API) GetNextEpochVote() (*tdmTypes.EpochVotesApiForConsole, error) {
 			})
 		}
 
-		return &tdmTypes.EpochVotesApiForConsole{
+		return &ncTypes.EpochVotesApiForConsole{
 			EpochNumber: hexutil.Uint64(ep.GetNextEpoch().Number),
 			StartBlock:  hexutil.Uint64(ep.GetNextEpoch().StartBlock),
 			EndBlock:    hexutil.Uint64(ep.GetNextEpoch().EndBlock),
@@ -101,7 +101,7 @@ func (api *API) GetNextEpochVote() (*tdmTypes.EpochVotesApiForConsole, error) {
 	return nil, errors.New("next epoch has not been proposed")
 }
 
-func (api *API) GetNextEpochValidators() ([]*tdmTypes.EpochValidatorForConsole, error) {
+func (api *API) GetNextEpochValidators() ([]*ncTypes.EpochValidatorForConsole, error) {
 
 	//height := api.chain.CurrentBlock().NumberU64()
 
@@ -121,13 +121,13 @@ func (api *API) GetNextEpochValidators() ([]*tdmTypes.EpochValidatorForConsole, 
 			return nil, err
 		}
 
-		validators := make([]*tdmTypes.EpochValidatorForConsole, 0, len(nextValidators.Validators))
+		validators := make([]*ncTypes.EpochValidatorForConsole, 0, len(nextValidators.Validators))
 		for _, val := range nextValidators.Validators {
 			var pkstring string
 			if val.PubKey != nil {
 				pkstring = val.PubKey.KeyString()
 			}
-			validators = append(validators, &tdmTypes.EpochValidatorForConsole{
+			validators = append(validators, &ncTypes.EpochValidatorForConsole{
 				Address:        common.BytesToAddress(val.Address).String(),
 				PubKey:         pkstring,
 				Amount:         (*hexutil.Big)(val.VotingPower),
@@ -140,9 +140,9 @@ func (api *API) GetNextEpochValidators() ([]*tdmTypes.EpochValidatorForConsole, 
 }
 
 // CreateValidator
-func (api *API) CreateValidator(from common.Address) (*tdmTypes.PrivV, error) {
-	validator := tdmTypes.GenPrivValidatorKey(from)
-	privV := &tdmTypes.PrivV{
+func (api *API) CreateValidator(from common.Address) (*ncTypes.PrivV, error) {
+	validator := ncTypes.GenPrivValidatorKey(from)
+	privV := &ncTypes.PrivV{
 		Address: validator.Address.String(),
 		PubKey:  validator.PubKey,
 		PrivKey: validator.PrivKey,
@@ -151,47 +151,47 @@ func (api *API) CreateValidator(from common.Address) (*tdmTypes.PrivV, error) {
 }
 
 // decode extra data
-func (api *API) DecodeExtraData(extra string) (extraApi *tdmTypes.TendermintExtraApi, err error) {
-	tdmExtra, err := tdmTypes.DecodeExtraData(extra)
+func (api *API) DecodeExtraData(extra string) (extraApi *ncTypes.NeatConExtraApi, err error) {
+	ncExtra, err := ncTypes.DecodeExtraData(extra)
 	if err != nil {
 		return nil, err
 	}
-	extraApi = &tdmTypes.TendermintExtraApi{
-		ChainID:         tdmExtra.ChainID,
-		Height:          hexutil.Uint64(tdmExtra.Height),
-		Time:            tdmExtra.Time,
-		NeedToSave:      tdmExtra.NeedToSave,
-		NeedToBroadcast: tdmExtra.NeedToBroadcast,
-		EpochNumber:     hexutil.Uint64(tdmExtra.EpochNumber),
-		SeenCommitHash:  hexutil.Encode(tdmExtra.SeenCommitHash),
-		ValidatorsHash:  hexutil.Encode(tdmExtra.ValidatorsHash),
-		SeenCommit: &tdmTypes.CommitApi{
-			BlockID: tdmTypes.BlockIDApi{
-				Hash: hexutil.Encode(tdmExtra.SeenCommit.BlockID.Hash),
-				PartsHeader: tdmTypes.PartSetHeaderApi{
-					Total: hexutil.Uint64(tdmExtra.SeenCommit.BlockID.PartsHeader.Total),
-					Hash:  hexutil.Encode(tdmExtra.SeenCommit.BlockID.PartsHeader.Hash),
+	extraApi = &ncTypes.NeatConExtraApi{
+		ChainID:         ncExtra.ChainID,
+		Height:          hexutil.Uint64(ncExtra.Height),
+		Time:            ncExtra.Time,
+		NeedToSave:      ncExtra.NeedToSave,
+		NeedToBroadcast: ncExtra.NeedToBroadcast,
+		EpochNumber:     hexutil.Uint64(ncExtra.EpochNumber),
+		SeenCommitHash:  hexutil.Encode(ncExtra.SeenCommitHash),
+		ValidatorsHash:  hexutil.Encode(ncExtra.ValidatorsHash),
+		SeenCommit: &ncTypes.CommitApi{
+			BlockID: ncTypes.BlockIDApi{
+				Hash: hexutil.Encode(ncExtra.SeenCommit.BlockID.Hash),
+				PartsHeader: ncTypes.PartSetHeaderApi{
+					Total: hexutil.Uint64(ncExtra.SeenCommit.BlockID.PartsHeader.Total),
+					Hash:  hexutil.Encode(ncExtra.SeenCommit.BlockID.PartsHeader.Hash),
 				},
 			},
-			Height:   hexutil.Uint64(tdmExtra.SeenCommit.Height),
-			Round:    tdmExtra.SeenCommit.Round,
-			SignAggr: tdmExtra.SeenCommit.SignAggr,
-			BitArray: tdmExtra.SeenCommit.BitArray,
+			Height:   hexutil.Uint64(ncExtra.SeenCommit.Height),
+			Round:    ncExtra.SeenCommit.Round,
+			SignAggr: ncExtra.SeenCommit.SignAggr,
+			BitArray: ncExtra.SeenCommit.BitArray,
 		},
-		EpochBytes: tdmExtra.EpochBytes,
+		EpochBytes: ncExtra.EpochBytes,
 	}
 	return extraApi, nil
 }
 
 // get consensus publickey of the block
 func (api *API) GetConsensusPublicKey(extra string) ([]string, error) {
-	tdmExtra, err := tdmTypes.DecodeExtraData(extra)
+	ncExtra, err := ncTypes.DecodeExtraData(extra)
 	if err != nil {
 		return nil, err
 	}
 
-	//fmt.Printf("GetConsensusPublicKey tdmExtra %v\n", tdmExtra)
-	number := uint64(tdmExtra.EpochNumber)
+	//fmt.Printf("GetConsensusPublicKey ncExtra %v\n", ncExtra)
+	number := uint64(ncExtra.EpochNumber)
 	var resultEpoch *epoch.Epoch
 	curEpoch := api.neatcon.core.consensusState.Epoch
 	if number < 0 || number > curEpoch.Number {
@@ -208,7 +208,7 @@ func (api *API) GetConsensusPublicKey(extra string) ([]string, error) {
 	validatorSet := resultEpoch.Validators
 	//fmt.Printf("GetConsensusPublicKey validatorset %v\n", validatorSet)
 
-	aggr, err := validatorSet.GetAggrPubKeyAndAddress(tdmExtra.SeenCommit.BitArray)
+	aggr, err := validatorSet.GetAggrPubKeyAndAddress(ncExtra.SeenCommit.BitArray)
 	if err != nil {
 		return nil, err
 	}
@@ -235,19 +235,19 @@ func (api *API) GetVoteHash(from common.Address, pubkey crypto.BLSPubKey, amount
 	return intCrypto.Keccak256Hash(ConcatCopyPreAllocate(byteData))
 }
 
-func (api *API) GetValidatorStatus(from common.Address) (*tdmTypes.ValidatorStatus, error) {
+func (api *API) GetValidatorStatus(from common.Address) (*ncTypes.ValidatorStatus, error) {
 	state, err := api.chain.State()
 	if state == nil || err != nil {
 		return nil, err
 	}
-	status := &tdmTypes.ValidatorStatus{
+	status := &ncTypes.ValidatorStatus{
 		IsForbidden: state.GetOrNewStateObject(from).IsForbidden(),
 	}
 
 	return status, nil
 }
 
-func (api *API) GetCandidateList() (*tdmTypes.CandidateApi, error) {
+func (api *API) GetCandidateList() (*ncTypes.CandidateApi, error) {
 	state, err := api.chain.State()
 
 	if state == nil || err != nil {
@@ -261,14 +261,14 @@ func (api *API) GetCandidateList() (*tdmTypes.CandidateApi, error) {
 		candidateList = append(candidateList, addr.String())
 	}
 
-	candidates := &tdmTypes.CandidateApi{
+	candidates := &ncTypes.CandidateApi{
 		CandidateList: candidateList,
 	}
 
 	return candidates, nil
 }
 
-func (api *API) GetForbiddenList() (*tdmTypes.ForbiddenApi, error) {
+func (api *API) GetForbiddenList() (*ncTypes.ForbiddenApi, error) {
 	state, err := api.chain.State()
 
 	if state == nil || err != nil {
@@ -282,7 +282,7 @@ func (api *API) GetForbiddenList() (*tdmTypes.ForbiddenApi, error) {
 		forbiddenList = append(forbiddenList, addr.String())
 	}
 
-	forbiddenAddresses := &tdmTypes.ForbiddenApi{
+	forbiddenAddresses := &ncTypes.ForbiddenApi{
 		ForbiddenList: forbiddenList,
 	}
 

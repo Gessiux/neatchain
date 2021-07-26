@@ -107,11 +107,11 @@ type headerMarshaling struct {
 // Hash returns the block hash of the header, which is simply the keccak256 hash of its
 // RLP encoding.
 func (h *Header) Hash() common.Hash {
-	// If the mix digest is equivalent to the predefined Tendermint digest, use Tendermint
+	// If the mix digest is equivalent to the predefined NeatCon digest, use NeatCon
 	// specific hash calculation.
-	if h.MixDigest == TendermintDigest {
+	if h.MixDigest == NeatConDigest {
 		// Seal is reserved in extra-data. To prove block is signed by the proposer.
-		if tdmHeader := TendermintFilteredHeader(h, true); tdmHeader != nil {
+		if tdmHeader := NeatConFilteredHeader(h, true); tdmHeader != nil {
 			return rlpHash(tdmHeader)
 		}
 	}

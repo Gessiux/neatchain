@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/Gessiux/neatchain/chain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/chain/core/types"
@@ -83,7 +83,7 @@ type Work struct {
 type Result struct {
 	Work         *Work
 	Block        *types.Block
-	Intermediate *tdmTypes.IntermediateBlockResult
+	Intermediate *ncTypes.IntermediateBlockResult
 }
 
 // worker is the main object which takes care of applying messages to the new state
@@ -220,10 +220,10 @@ func (self *worker) start() {
 	//	istanbul.Start(self.chain, self.chain.CurrentBlock, self.chain.HasBadBlock)
 	//}
 
-	if neatbyft, ok := self.engine.(consensus.IPBFT); ok {
+	if neatbyft, ok := self.engine.(consensus.NeatByFT); ok {
 		err := neatbyft.Start(self.chain, self.chain.CurrentBlock, self.chain.HasBadBlock)
 		if err != nil {
-			self.logger.Error("Starting IPBFT failed", "err", err)
+			self.logger.Error("Starting NeatByFT failed", "err", err)
 		}
 	}
 

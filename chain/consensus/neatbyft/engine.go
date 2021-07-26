@@ -10,7 +10,7 @@ import (
 	"github.com/Gessiux/go-wire"
 	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/network/rpc"
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	// fetcherID is the ID indicates the block is from Tendermint engine
+	// fetcherID is the ID indicates the block is from NeatCon engine
 	fetcherID = "neatbyft"
 )
 
@@ -40,7 +40,7 @@ var (
 	// errInvalidExtraDataFormat is returned when the extra data format is incorrect
 	errInvalidExtraDataFormat = errors.New("invalid extra data format")
 	// errInvalidMixDigest is returned if a block's mix digest is not Istanbul digest.
-	errInvalidMixDigest = errors.New("invalid Tendermint mix digest")
+	errInvalidMixDigest = errors.New("invalid NeatCon mix digest")
 	// errInvalidNonce is returned if a block's nonce is invalid
 	errInvalidNonce = errors.New("invalid nonce")
 	// errInvalidUncleHash is returned if a block contains an non-empty uncle list.
@@ -90,10 +90,10 @@ func (sb *backend) APIs(chain consensus.ChainReader) []rpc.API {
 	}}
 }
 
-// Start implements consensus.Tendermint.Start
+// Start implements consensus.NeatCon.Start
 func (sb *backend) Start(chain consensus.ChainReader, currentBlock func() *types.Block, hasBadBlock func(hash common.Hash) bool) error {
 
-	sb.logger.Info("IPBFT backend Start")
+	sb.logger.Info("NeatByFT backend Start")
 
 	sb.coreMu.Lock()
 	defer sb.coreMu.Unlock()
@@ -110,7 +110,7 @@ func (sb *backend) Start(chain consensus.ChainReader, currentBlock func() *types
 	if sb.vcommitCh != nil {
 		close(sb.vcommitCh)
 	}
-	sb.vcommitCh = make(chan *tdmTypes.IntermediateBlockResult, 1)
+	sb.vcommitCh = make(chan *ncTypes.IntermediateBlockResult, 1)
 
 	sb.chain = chain
 	fmt.Printf("neatbyft backend start chain %v\n", chain)
@@ -126,10 +126,10 @@ func (sb *backend) Start(chain consensus.ChainReader, currentBlock func() *types
 	return nil
 }
 
-// Stop implements consensus.Tendermint.Stop
+// Stop implements consensus.NeatCon.Stop
 func (sb *backend) Stop() error {
 
-	sb.logger.Info("IPBFT backend stop")
+	sb.logger.Info("NeatByFT backend stop")
 
 	//debug.PrintStack()
 
@@ -163,7 +163,7 @@ func (sb *backend) Author(header *types.Header) (common.Address, error) {
 // via the VerifySeal method.
 func (sb *backend) VerifyHeader(chain consensus.ChainReader, header *types.Header, seal bool) error {
 
-	sb.logger.Info("IPBFT backend verify header")
+	sb.logger.Info("NeatByFT backend verify header")
 
 	return sb.verifyHeader(chain, header, nil)
 }
@@ -190,24 +190,24 @@ func (sb *backend) verifyHeader(chain consensus.ChainReader, header *types.Heade
 	}
 
 	// Ensure that the extra data format is satisfied
-	if _, err := tdmTypes.ExtractTendermintExtra(header); err != nil {
+	if _, err := ncTypes.ExtractNeatConExtra(header); err != nil {
 		return errInvalidExtraDataFormat
 	}
 
 	// Ensure that the coinbase is valid
-	if header.Nonce != (types.TendermintEmptyNonce) && !bytes.Equal(header.Nonce[:], types.TendermintNonce) {
+	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
 		return errInvalidNonce
 	}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
-	if header.MixDigest != types.TendermintDigest {
+	if header.MixDigest != types.NeatConDigest {
 		return errInvalidMixDigest
 	}
 	// Ensure that the block doesn't contain any uncles which are meaningless in Istanbul
-	if header.UncleHash != types.TendermintNilUncleHash {
+	if header.UncleHash != types.NeatConNilUncleHash {
 		return errInvalidUncleHash
 	}
 	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	if header.Difficulty == nil || header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+	if header.Difficulty == nil || header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 		return errInvalidDifficulty
 	}
 
@@ -215,7 +215,7 @@ func (sb *backend) verifyHeader(chain consensus.ChainReader, header *types.Heade
 	if header.Number.Uint64() > sb.GetEpoch().EndBlock {
 		for {
 			duration := 2 * time.Second
-			sb.logger.Infof("IPBFT VerifyHeader, Epoch Switch, wait for %v then try again", duration)
+			sb.logger.Infof("NeatByFT VerifyHeader, Epoch Switch, wait for %v then try again", duration)
 			time.Sleep(duration)
 
 			if header.Number.Uint64() <= sb.GetEpoch().EndBlock {
@@ -243,14 +243,14 @@ func (sb *backend) verifyHeader(chain consensus.ChainReader, header *types.Heade
 			}
 
 			if tried == 10 {
-				sb.logger.Warnf("IPBFT VerifyHeader, Main Chain Number mismatch, after retried %d times", tried)
+				sb.logger.Warnf("NeatByFT VerifyHeader, Main Chain Number mismatch, after retried %d times", tried)
 				return errMainChainNotCatchup
 			}
 
 			// Sleep for a while and check again
 			duration := 30 * time.Second
 			tried++
-			sb.logger.Infof("IPBFT VerifyHeader, Main Chain Number mismatch, wait for %v then try again (count %d)", duration, tried)
+			sb.logger.Infof("NeatByFT VerifyHeader, Main Chain Number mismatch, wait for %v then try again (count %d)", duration, tried)
 			time.Sleep(duration)
 		}
 	}
@@ -285,7 +285,7 @@ func (sb *backend) verifyCascadingFields(chain consensus.ChainReader, header *ty
 }
 
 func (sb *backend) VerifyHeaderBeforeConsensus(chain consensus.ChainReader, header *types.Header, seal bool) error {
-	sb.logger.Info("IPBFT backend verify header before consensus")
+	sb.logger.Info("NeatByFT backend verify header before consensus")
 
 	if header.Number == nil {
 		return errUnknownBlock
@@ -299,19 +299,19 @@ func (sb *backend) VerifyHeaderBeforeConsensus(chain consensus.ChainReader, head
 	}
 
 	// Ensure that the coinbase is valid
-	if header.Nonce != (types.TendermintEmptyNonce) && !bytes.Equal(header.Nonce[:], types.TendermintNonce) {
+	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
 		return errInvalidNonce
 	}
 	// Ensure that the mix digest is zero as we don't have fork protection currently
-	if header.MixDigest != types.TendermintDigest {
+	if header.MixDigest != types.NeatConDigest {
 		return errInvalidMixDigest
 	}
 	// Ensure that the block doesn't contain any uncles which are meaningless in Istanbul
-	if header.UncleHash != types.TendermintNilUncleHash {
+	if header.UncleHash != types.NeatConNilUncleHash {
 		return errInvalidUncleHash
 	}
 	// Ensure that the block's difficulty is meaningful (may not be correct at this point)
-	if header.Difficulty == nil || header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+	if header.Difficulty == nil || header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 		return errInvalidDifficulty
 	}
 
@@ -326,7 +326,7 @@ func (sb *backend) VerifyHeaders(chain consensus.ChainReader, headers []*types.H
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
-	sb.logger.Info("IPBFT backend verify headers")
+	sb.logger.Info("NeatByFT backend verify headers")
 
 	go func() {
 		for i, header := range headers {
@@ -355,7 +355,7 @@ func (sb *backend) VerifyUncles(chain consensus.ChainReader, block *types.Block)
 // verifyCommittedSeals checks whether every committed seal is signed by one of the parent's validators
 func (sb *backend) verifyCommittedSeals(chain consensus.ChainReader, header *types.Header, parents []*types.Header) error {
 
-	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return errInvalidExtraDataFormat
 	}
@@ -373,20 +373,20 @@ func (sb *backend) verifyCommittedSeals(chain consensus.ChainReader, header *typ
 	}
 
 	valSet := epoch.Validators
-	if !bytes.Equal(valSet.Hash(), tdmExtra.ValidatorsHash) {
-		sb.logger.Errorf("verifyCommittedSeals error. Our Validator Set %x, tdmExtra Valdiator %x", valSet.Hash(), tdmExtra.ValidatorsHash)
-		sb.logger.Errorf("verifyCommittedSeals error. epoch validator set %v, extra data %v", valSet.String(), tdmExtra.String())
+	if !bytes.Equal(valSet.Hash(), ncExtra.ValidatorsHash) {
+		sb.logger.Errorf("verifyCommittedSeals error. Our Validator Set %x, ncExtra Valdiator %x", valSet.Hash(), ncExtra.ValidatorsHash)
+		sb.logger.Errorf("verifyCommittedSeals error. epoch validator set %v, extra data %v", valSet.String(), ncExtra.String())
 		return errInconsistentValidatorSet
 	}
 
-	seenCommit := tdmExtra.SeenCommit
-	if !bytes.Equal(tdmExtra.SeenCommitHash, seenCommit.Hash()) {
+	seenCommit := ncExtra.SeenCommit
+	if !bytes.Equal(ncExtra.SeenCommitHash, seenCommit.Hash()) {
 		sb.logger.Errorf("verifyCommittedSeals SeenCommit is %#+v", seenCommit)
-		sb.logger.Errorf("verifyCommittedSeals error. Our SeenCommitHash %x, tdmExtra SeenCommitHash %x", seenCommit.Hash(), tdmExtra.SeenCommitHash)
+		sb.logger.Errorf("verifyCommittedSeals error. Our SeenCommitHash %x, ncExtra SeenCommitHash %x", seenCommit.Hash(), ncExtra.SeenCommitHash)
 		return errInvalidCommittedSeals
 	}
 
-	if err = valSet.VerifyCommit(tdmExtra.ChainID, tdmExtra.Height, seenCommit); err != nil {
+	if err = valSet.VerifyCommit(ncExtra.ChainID, ncExtra.Height, seenCommit); err != nil {
 		sb.logger.Errorf("verifyCommittedSeals verify commit err %v", err)
 		return errInvalidSignature
 	}
@@ -404,7 +404,7 @@ func (sb *backend) VerifySeal(chain consensus.ChainReader, header *types.Header)
 	}
 
 	// ensure that the difficulty equals to defaultDifficulty
-	if header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+	if header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 		return errInvalidDifficulty
 	}
 
@@ -415,8 +415,8 @@ func (sb *backend) VerifySeal(chain consensus.ChainReader, header *types.Header)
 // rules of a particular engine. The changes are executed inline.
 func (sb *backend) Prepare(chain consensus.ChainReader, header *types.Header) error {
 
-	header.Nonce = types.TendermintEmptyNonce
-	header.MixDigest = types.TendermintDigest
+	header.Nonce = types.NeatConEmptyNonce
+	header.MixDigest = types.NeatConDigest
 
 	// copy the parent extra data as the header extra data
 	number := header.Number.Uint64()
@@ -425,7 +425,7 @@ func (sb *backend) Prepare(chain consensus.ChainReader, header *types.Header) er
 		return consensus.ErrUnknownAncestor
 	}
 	// use the same difficulty for all blocks
-	header.Difficulty = types.TendermintDefaultDifficulty
+	header.Difficulty = types.NeatConDefaultDifficulty
 
 	// add validators in snapshot to extraData's validators section
 	extra, err := prepareExtra(header, nil)
@@ -456,7 +456,7 @@ func (sb *backend) Prepare(chain consensus.ChainReader, header *types.Header) er
 func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
 	totalGasFee *big.Int, uncles []*types.Header, receipts []*types.Receipt, ops *types.PendingOps) (*types.Block, error) {
 
-	sb.logger.Debugf("IPBFT Finalize, receipts are: %v", receipts)
+	sb.logger.Debugf("NeatByFT Finalize, receipts are: %v", receipts)
 
 	// Check if any Child Chain need to be launch and Update their account balance accordingly
 	if sb.chainConfig.NeatChainId == params.MainnetChainConfig.NeatChainId || sb.chainConfig.NeatChainId == params.TestnetChainConfig.NeatChainId {
@@ -469,7 +469,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 				DeleteChildChainIds: removedId,
 			}); !ok {
 				// This should not happened
-				sb.logger.Error("IPBFT Finalize, Fail to append LaunchChildChainsOp, only one LaunchChildChainsOp is allowed in each block")
+				sb.logger.Error("NeatByFT Finalize, Fail to append LaunchChildChainsOp, only one LaunchChildChainsOp is allowed in each block")
 			}
 		}
 	}
@@ -485,7 +485,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 		//TODO use chain instead of sb.chain
 		prevHeader := chain.GetHeaderByNumber(header.Number.Uint64() - 1)
 		if prevHeader != nil {
-			extra, err := tdmTypes.ExtractTendermintExtra(prevHeader)
+			extra, err := ncTypes.ExtractNeatConExtra(prevHeader)
 			if err == nil {
 				epoch.UpdateForbiddenState(header, prevHeader, extra.SeenCommit, state)
 			}
@@ -494,7 +494,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 
 	// Check the Epoch switch and update their account balance accordingly (Refund the Locked Balance)
 	if ok, newValidators, _ := epoch.ShouldEnterNewEpoch(header.Number.Uint64(), state); ok {
-		ops.Append(&tdmTypes.SwitchEpochOp{
+		ops.Append(&ncTypes.SwitchEpochOp{
 			ChainId:       sb.chainConfig.NeatChainId,
 			NewValidators: newValidators,
 		})
@@ -502,7 +502,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 	}
 
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	header.UncleHash = types.TendermintNilUncleHash
+	header.UncleHash = types.NeatConNilUncleHash
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil
 }
@@ -511,7 +511,7 @@ func (sb *backend) Finalize(chain consensus.ChainReader, header *types.Header, s
 // seal place on top.
 func (sb *backend) Seal(chain consensus.ChainReader, block *types.Block, stop <-chan struct{}) (interface{}, error) {
 
-	sb.logger.Info("IPBFT backend seal")
+	sb.logger.Info("NeatByFT backend seal")
 	// update the block header timestamp and signature and propose the block to core engine
 	header := block.Header()
 	number := header.Number.Uint64()
@@ -539,10 +539,10 @@ func (sb *backend) Seal(chain consensus.ChainReader, block *types.Block, stop <-
 	}
 	defer clear()
 
-	// post block into IPBFT engine
-	sb.logger.Infof("IPBFT Seal, before fire event with block height: %d", block.NumberU64())
-	go tdmTypes.FireEventRequest(sb.core.EventSwitch(), tdmTypes.EventDataRequest{Proposal: block})
-	//go sb.EventMux().Post(tdmTypes.RequestEvent{
+	// post block into NeatByFT engine
+	sb.logger.Infof("NeatByFT Seal, before fire event with block height: %d", block.NumberU64())
+	go ncTypes.FireEventRequest(sb.core.EventSwitch(), ncTypes.EventDataRequest{Proposal: block})
+	//go sb.EventMux().Post(ncTypes.RequestEvent{
 	//	Proposal: block,
 	//})
 
@@ -551,33 +551,33 @@ func (sb *backend) Seal(chain consensus.ChainReader, block *types.Block, stop <-
 		case result, ok := <-sb.commitCh:
 
 			if ok {
-				sb.logger.Debugf("IPBFT Seal, got result with block.Hash: %x, result.Hash: %x", block.Hash(), result.Hash())
+				sb.logger.Debugf("NeatByFT Seal, got result with block.Hash: %x, result.Hash: %x", block.Hash(), result.Hash())
 				// if the block hash and the hash from channel are the same,
 				// return the result. Otherwise, keep waiting the next hash.
 				if block.Hash() == result.Hash() {
 					return result, nil
 				}
-				sb.logger.Debug("IPBFT Seal, hash are different")
+				sb.logger.Debug("NeatByFT Seal, hash are different")
 			} else {
-				sb.logger.Debug("IPBFT Seal, has been restart, just return")
+				sb.logger.Debug("NeatByFT Seal, has been restart, just return")
 				return nil, nil
 			}
 
 		case iresult, ok := <-sb.vcommitCh:
 
 			if ok {
-				sb.logger.Debugf("IPBFT Seal, v got result with block.Hash: %x, result.Hash: %x", block.Hash(), iresult.Block.Hash())
+				sb.logger.Debugf("NeatByFT Seal, v got result with block.Hash: %x, result.Hash: %x", block.Hash(), iresult.Block.Hash())
 				if block.Hash() != iresult.Block.Hash() {
 					return iresult, nil
 				}
-				sb.logger.Debug("IPBFT Seal, v hash are the same")
+				sb.logger.Debug("NeatByFT Seal, v hash are the same")
 			} else {
-				sb.logger.Debug("IPBFT Seal, v has been restart, just return")
+				sb.logger.Debug("NeatByFT Seal, v has been restart, just return")
 				return nil, nil
 			}
 
 		case <-stop:
-			sb.logger.Debug("IPBFT Seal, stop")
+			sb.logger.Debug("NeatByFT Seal, stop")
 			return nil, nil
 		}
 	}
@@ -590,25 +590,25 @@ func (sb *backend) Seal(chain consensus.ChainReader, block *types.Block, stop <-
 // current signer.
 func (sb *backend) CalcDifficulty(chain consensus.ChainReader, time uint64, parent *types.Header) *big.Int {
 
-	return types.TendermintDefaultDifficulty
+	return types.NeatConDefaultDifficulty
 }
 
 // Commit implements istanbul.Backend.Commit
-func (sb *backend) Commit(proposal *tdmTypes.TdmBlock, seals [][]byte, isProposer func() bool) error {
+func (sb *backend) Commit(proposal *ncTypes.NCBlock, seals [][]byte, isProposer func() bool) error {
 	// Check if the proposal is a valid block
 	block := proposal.Block
 
 	h := block.Header()
 	// Append seals into extra-data
-	err := writeCommittedSeals(h, proposal.TdmExtra)
+	err := writeCommittedSeals(h, proposal.NCExtra)
 	if err != nil {
 		return err
 	}
 	// update block's header
 	block = block.WithSeal(h)
 
-	sb.logger.Debugf("IPBFT Commit, hash: %x, number: %v", block.Hash(), block.Number().Int64())
-	sb.logger.Debugf("IPBFT Commit, block: %s", block.String())
+	sb.logger.Debugf("NeatByFT Commit, hash: %x, number: %v", block.Hash(), block.Number().Int64())
+	sb.logger.Debugf("NeatByFT Commit, block: %s", block.String())
 
 	// - if the proposed and committed blocks are the same, send the proposed hash
 	//   to commit channel, which is being watched inside the engine.Seal() function.
@@ -618,16 +618,16 @@ func (sb *backend) Commit(proposal *tdmTypes.TdmBlock, seals [][]byte, isPropose
 	// -- otherwise, a error will be returned and a round change event will be fired.
 	if isProposer() && (sb.proposedBlockHash == block.Hash()) { // for proposer
 		// feed block hash to Seal() and wait the Seal() result
-		sb.logger.Debugf("IPBFT Commit, proposer | feed to Seal: %x", block.Hash())
+		sb.logger.Debugf("NeatByFT Commit, proposer | feed to Seal: %x", block.Hash())
 		sb.commitCh <- block
 		return nil
 	} else { // for other validators
 		if proposal.IntermediateResult != nil {
-			sb.logger.Debugf("IPBFT Commit, validator | feed to Seal: %x", block.Hash())
+			sb.logger.Debugf("NeatByFT Commit, validator | feed to Seal: %x", block.Hash())
 			proposal.IntermediateResult.Block = block
 			sb.vcommitCh <- proposal.IntermediateResult
 		} else {
-			sb.logger.Debugf("IPBFT Commit, validator | fetcher enqueue: %x", block.Hash())
+			sb.logger.Debugf("NeatByFT Commit, validator | fetcher enqueue: %x", block.Hash())
 			if sb.broadcaster != nil {
 				sb.broadcaster.Enqueue(fetcherID, block)
 			}
@@ -658,12 +658,12 @@ func (sb *backend) ForceStart() {
 	sb.shouldStart = true
 }
 
-// GetEpoch Get Epoch from Tendermint Engine
+// GetEpoch Get Epoch from NeatCon Engine
 func (sb *backend) GetEpoch() *epoch.Epoch {
 	return sb.core.consensusState.Epoch
 }
 
-// SetEpoch Set Epoch to Tendermint Engine
+// SetEpoch Set Epoch to NeatCon Engine
 func (sb *backend) SetEpoch(ep *epoch.Epoch) {
 	sb.core.consensusState.Epoch = ep
 }
@@ -679,7 +679,7 @@ func (sb *backend) PrivateValidator() common.Address {
 // update timestamp and signature of the block based on its number of transactions
 func (sb *backend) updateBlock(parent *types.Header, block *types.Block) (*types.Block, error) {
 
-	sb.logger.Debug("IPBFT backend update block")
+	sb.logger.Debug("NeatByFT backend update block")
 
 	header := block.Header()
 	/*
@@ -701,7 +701,7 @@ func (sb *backend) updateBlock(parent *types.Header, block *types.Block) (*types
 // prepareExtra returns a extra-data of the given header and validators
 func prepareExtra(header *types.Header, vals []common.Address) ([]byte, error) {
 
-	//logger.Info("IPBFT (backend) prepare extra ")
+	//logger.Info("NeatByFT (backend) prepare extra ")
 
 	header.Extra = types.MagicExtra
 	return nil, nil
@@ -711,17 +711,17 @@ func prepareExtra(header *types.Header, vals []common.Address) ([]byte, error) {
 // suggest to rename to writeSeal.
 func writeSeal(h *types.Header, seal []byte) error {
 
-	//logger.Info("IPBFT backend write seal")
+	//logger.Info("NeatByFT backend write seal")
 	payload := types.MagicExtra
 	h.Extra = payload
 	return nil
 }
 
 // writeCommittedSeals writes the extra-data field of a block header with given committed seals.
-func writeCommittedSeals(h *types.Header, tdmExtra *tdmTypes.TendermintExtra) error {
+func writeCommittedSeals(h *types.Header, ncExtra *ncTypes.NeatConExtra) error {
 
-	//logger.Info("IPBFT backend write committed seals")
-	h.Extra = wire.BinaryBytes(*tdmExtra)
+	//logger.Info("NeatByFT backend write committed seals")
+	h.Extra = wire.BinaryBytes(*ncExtra)
 	return nil
 }
 

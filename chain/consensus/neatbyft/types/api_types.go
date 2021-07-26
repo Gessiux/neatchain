@@ -73,7 +73,7 @@ type EpochValidatorForConsole struct {
 	RemainingEpoch hexutil.Uint64 `json:"remainEpoch"`
 }
 
-type TendermintExtraApi struct {
+type NeatConExtraApi struct {
 	ChainID         string         `json:"chainId"`
 	Height          hexutil.Uint64 `json:"height"`
 	Time            time.Time      `json:"time"`

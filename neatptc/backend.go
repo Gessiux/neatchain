@@ -78,7 +78,7 @@ type NeatChain struct {
 	pruneDb neatdb.Database // Prune data database
 
 	eventMux       *event.TypeMux
-	engine         consensus.IPBFT
+	engine         consensus.NeatByFT
 	accountManager *accounts.Manager
 
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
@@ -221,12 +221,12 @@ func makeExtraData(extra []byte) []byte {
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an NeatChain service
 func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig *params.ChainConfig, db neatdb.Database,
-	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.IPBFT {
-	// If Tendermint is requested, set it up
-	if chainConfig.IPBFT.Epoch != 0 {
-		config.IPBFT.Epoch = chainConfig.IPBFT.Epoch
+	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.NeatByFT {
+	// If NeatCon is requested, set it up
+	if chainConfig.NeatByFT.Epoch != 0 {
+		config.NeatByFT.Epoch = chainConfig.NeatByFT.Epoch
 	}
-	config.IPBFT.ProposerPolicy = neatbyft.ProposerPolicy(chainConfig.IPBFT.ProposerPolicy)
+	config.NeatByFT.ProposerPolicy = neatbyft.ProposerPolicy(chainConfig.NeatByFT.ProposerPolicy)
 	return neatconBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
 }
 
@@ -312,7 +312,7 @@ func (s *NeatChain) ResetWithGenesisBlock(gb *types.Block) {
 }
 
 func (s *NeatChain) Coinbase() (eb common.Address, err error) {
-	if neatbyft, ok := s.engine.(consensus.IPBFT); ok {
+	if neatbyft, ok := s.engine.(consensus.NeatByFT); ok {
 		eb = neatbyft.PrivateValidator()
 		if eb != (common.Address{}) {
 			return eb, nil
@@ -355,7 +355,7 @@ func (self *NeatChain) SetCoinbase(coinbase common.Address) {
 
 func (s *NeatChain) StartMining(local bool) error {
 	var eb common.Address
-	if neatbyft, ok := s.engine.(consensus.IPBFT); ok {
+	if neatbyft, ok := s.engine.(consensus.NeatByFT); ok {
 		eb = neatbyft.PrivateValidator()
 		if (eb == common.Address{}) {
 			log.Error("Cannot start mining without private validator")
@@ -389,7 +389,7 @@ func (s *NeatChain) AccountManager() *accounts.Manager  { return s.accountManage
 func (s *NeatChain) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *NeatChain) TxPool() *core.TxPool               { return s.txPool }
 func (s *NeatChain) EventMux() *event.TypeMux           { return s.eventMux }
-func (s *NeatChain) Engine() consensus.IPBFT            { return s.engine }
+func (s *NeatChain) Engine() consensus.NeatByFT         { return s.engine }
 func (s *NeatChain) ChainDb() neatdb.Database           { return s.chainDb }
 func (s *NeatChain) IsListening() bool                  { return true } // Always listening
 func (s *NeatChain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
@@ -466,18 +466,18 @@ func (s *NeatChain) loopForMiningEvent() {
 				price := s.gasPrice
 				s.lock.RUnlock()
 				s.txPool.SetGasPrice(price)
-				s.chainConfig.ChainLogger.Info("IPBFT Consensus Engine will be start shortly")
-				s.engine.(consensus.IPBFT).ForceStart()
+				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine will be start shortly")
+				s.engine.(consensus.NeatByFT).ForceStart()
 				s.StartMining(true)
 			} else {
-				s.chainConfig.ChainLogger.Info("IPBFT Consensus Engine already started")
+				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine already started")
 			}
 		case <-stopMiningCh:
 			if s.IsMining() {
-				s.chainConfig.ChainLogger.Info("IPBFT Consensus Engine will be stop shortly")
+				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine will be stop shortly")
 				s.StopMining()
 			} else {
-				s.chainConfig.ChainLogger.Info("IPBFT Consensus Engine already stopped")
+				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine already stopped")
 			}
 		case <-startMiningSub.Err():
 			return

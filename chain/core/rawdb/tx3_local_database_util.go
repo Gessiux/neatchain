@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/chain/trie"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
@@ -123,12 +123,12 @@ func GetAllTX3ProofData(db neatdb.Database) []*types.TX3ProofData {
 // WriteTX3ProofData serializes TX3ProofData into the database.
 func WriteTX3ProofData(db neatdb.Database, proofData *types.TX3ProofData) error {
 	header := proofData.Header
-	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
-	chainId := tdmExtra.ChainID
+	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == params.MainnetChainConfig.NeatChainId || chainId == params.TestnetChainConfig.NeatChainId {
 		return fmt.Errorf("invalid child chain id: %s", chainId)
 	}

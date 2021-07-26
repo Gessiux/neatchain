@@ -599,7 +599,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 
 	// check address
-	if tx.To() != nil && !crypto.ValidateINTAddr(string(tx.To()[:])) {
+	if tx.To() != nil && !crypto.ValidateNEATAddr(string(tx.To()[:])) {
 		return ErrInvalidAddress
 	}
 

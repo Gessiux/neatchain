@@ -24,7 +24,7 @@ var GenDocKey = []byte("GenDocKey")
 
 var CONSENSUS_POS string = "pos"
 var CONSENSUS_POW string = "pow"
-var CONSENSUS_IPBFT string = "neatbyft"
+var CONSENSUS_NeatByFT string = "neatbyft"
 
 type GenesisValidator struct {
 	EthAccount     common.Address `json:"address"`

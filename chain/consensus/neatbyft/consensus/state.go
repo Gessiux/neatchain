@@ -37,7 +37,7 @@ const ROUND_NOT_PROPOSED int = 0
 const ROUND_PROPOSED int = 1
 
 type Backend interface {
-	Commit(proposal *types.TdmBlock, seals [][]byte, isProposer func() bool) error
+	Commit(proposal *types.NCBlock, seals [][]byte, isProposer func() bool) error
 	ChainReader() consss.ChainReader
 	GetBroadcaster() consss.Broadcaster
 	GetLogger() log.Logger
@@ -68,7 +68,7 @@ func (tp *TimeoutParams) WaitForMinerBlock() time.Duration {
 	return time.Duration(tp.WaitForMinerBlock0) * time.Millisecond
 }
 
-//In IPBFT, wait for this long for Proposer to send proposal
+//In NeatByFT, wait for this long for Proposer to send proposal
 //the more round, the more time to wait for proposer's proposal
 func (tp *TimeoutParams) Propose(round int) time.Duration {
 	if round >= 5 {
@@ -77,7 +77,7 @@ func (tp *TimeoutParams) Propose(round int) time.Duration {
 	return time.Duration(tp.Propose0+tp.ProposeDelta*round) * time.Millisecond
 }
 
-//In IPBFT, wait for this long for Non-Proposer validator to vote prevote
+//In NeatByFT, wait for this long for Non-Proposer validator to vote prevote
 //the more round, the more time to wait for validator's prevote
 func (tp *TimeoutParams) Prevote(round int) time.Duration {
 	//if round is less than 5, we assume it is in network traffic jam,
@@ -91,7 +91,7 @@ func (tp *TimeoutParams) Prevote(round int) time.Duration {
 	}
 }
 
-//In IPBFT, wait for this long for Non-Proposer validator to vote precommit
+//In NeatByFT, wait for this long for Non-Proposer validator to vote precommit
 func (tp *TimeoutParams) Precommit(round int) time.Duration {
 	if round < 5 {
 		return time.Duration(tp.Precommit0+tp.PrecommitDelta*round) * time.Millisecond
@@ -207,17 +207,17 @@ type RoundState struct {
 	CommitTime         time.Time // Subjective time when +2/3 precommits for Block at Round were found
 	Validators         *types.ValidatorSet
 	Proposal           *types.Proposal
-	ProposalBlock      *types.TdmBlock
+	ProposalBlock      *types.NCBlock
 	ProposalBlockParts *types.PartSet
 	ProposerPeerKey    string // Proposer's peer key
 	LockedRound        int
-	LockedBlock        *types.TdmBlock
+	LockedBlock        *types.NCBlock
 	LockedBlockParts   *types.PartSet
 	Votes              *HeightVoteSet
 	VoteSignAggr       *HeightVoteSignAggr
 	CommitRound        int //
 
-	// Following fields are used for IPBFT/BLS signature aggregation
+	// Following fields are used for NeatByFT/BLS signature aggregation
 	PrevoteMaj23SignAggr   *types.SignAggr
 	PrecommitMaj23SignAggr *types.SignAggr
 
@@ -400,7 +400,7 @@ func (cs *ConsensusState) GetValidators() (uint64, []*types.Validator) {
 	defer cs.mtx.Unlock()
 
 	_, val, _ := cs.state.GetValidators()
-	return cs.state.TdmExtra.Height, val.Copy().Validators
+	return cs.state.NCExtra.Height, val.Copy().Validators
 }
 
 // Sets our private validator account for signing votes.
@@ -416,7 +416,7 @@ func BytesToBig(data []byte) *big.Int {
 	return n
 }
 
-//IPBFT VRF proposer selection
+//NeatByFT VRF proposer selection
 func (cs *ConsensusState) updateProposer() {
 
 	//if need to re-initialize proposer, we use VRF
@@ -439,7 +439,7 @@ func (cs *ConsensusState) updateProposer() {
 	log.Debug("update proposer", "height", cs.Height, "round", cs.Round, "idx", cs.proposer.valIndex)
 }
 
-//IPBFT VRF proposer selection
+//NeatByFT VRF proposer selection
 func (cs *ConsensusState) proposerByRound(round int) *VRFProposer {
 
 	byVRF := false
@@ -468,10 +468,10 @@ func (cs *ConsensusState) proposerByRound(round int) *VRFProposer {
 			//just skip the proposer within this height
 			if lastProposer >= 0 &&
 				curProposer == lastProposer &&
-				cs.state.TdmExtra != nil &&
-				cs.state.TdmExtra.SeenCommit != nil &&
-				cs.state.TdmExtra.SeenCommit.BitArray != nil &&
-				!cs.state.TdmExtra.SeenCommit.BitArray.GetIndex(uint64(curProposer)) {
+				cs.state.NCExtra != nil &&
+				cs.state.NCExtra.SeenCommit != nil &&
+				cs.state.NCExtra.SeenCommit.BitArray != nil &&
+				!cs.state.NCExtra.SeenCommit.BitArray.GetIndex(uint64(curProposer)) {
 				idx = (idx + 1) % cs.Validators.Size()
 			}
 
@@ -580,8 +580,8 @@ func (cs *ConsensusState) LoadCommit(height uint64) *types.Commit {
 	cs.mtx.Lock()
 	defer cs.mtx.Unlock()
 
-	tdmExtra, height := cs.LoadTendermintExtra(height)
-	return tdmExtra.SeenCommit
+	ncExtra, height := cs.LoadNeatConExtra(height)
+	return ncExtra.SeenCommit
 }
 
 func (cs *ConsensusState) OnStart() error {
@@ -659,7 +659,7 @@ func (cs *ConsensusState) AddProposalBlockPart(height uint64, round int, part *t
 }
 
 // May block on send if queue is full.
-func (cs *ConsensusState) SetProposalAndBlock(proposal *types.Proposal, block *types.TdmBlock, parts *types.PartSet, peerKey string) error {
+func (cs *ConsensusState) SetProposalAndBlock(proposal *types.Proposal, block *types.NCBlock, parts *types.PartSet, peerKey string) error {
 	cs.SetProposal(proposal, peerKey)
 	for i := 0; i < parts.Total(); i++ {
 		part := parts.GetPart(i)
@@ -706,8 +706,8 @@ func (cs *ConsensusState) sendInternalMessage(mi msgInfo) {
 // (which happens even before saving the state)
 func (cs *ConsensusState) ReconstructLastCommit(state *sm.State) {
 
-	state.TdmExtra, _ = cs.LoadLastTendermintExtra()
-	if state.TdmExtra == nil {
+	state.NCExtra, _ = cs.LoadLastNeatConExtra()
+	if state.NCExtra == nil {
 		return
 	}
 }
@@ -986,23 +986,23 @@ func (cs *ConsensusState) enterPropose(height uint64, round int) {
 	// Save block to main chain (this happens only on validator node).
 	// Note!!! This will BLOCK the WHOLE consensus stack since it blocks receiveRoutine.
 	// TODO: what if there're more than one round for a height? 'saveBlockToMainChain' would be called more than once
-	if cs.state.TdmExtra.NeedToSave &&
-		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
+	if cs.state.NCExtra.NeedToSave &&
+		(cs.state.NCExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.NCExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
 		if cs.privValidator != nil && cs.IsProposer() {
-			cs.logger.Infof("enterPropose: saveBlockToMainChain height: %v", cs.state.TdmExtra.Height)
-			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.TdmExtra.Height)
+			cs.logger.Infof("enterPropose: saveBlockToMainChain height: %v", cs.state.NCExtra.Height)
+			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.NCExtra.Height)
 			cs.saveBlockToMainChain(lastBlock)
-			cs.state.TdmExtra.NeedToSave = false
+			cs.state.NCExtra.NeedToSave = false
 		}
 	}
 
-	if cs.state.TdmExtra.NeedToBroadcast &&
-		(cs.state.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
+	if cs.state.NCExtra.NeedToBroadcast &&
+		(cs.state.NCExtra.ChainID != params.MainnetChainConfig.NeatChainId && cs.state.NCExtra.ChainID != params.TestnetChainConfig.NeatChainId) {
 		if cs.privValidator != nil && cs.IsProposer() {
-			cs.logger.Infof("enterPropose: broadcastTX3ProofDataToMainChain height: %v", cs.state.TdmExtra.Height)
-			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.TdmExtra.Height)
+			cs.logger.Infof("enterPropose: broadcastTX3ProofDataToMainChain height: %v", cs.state.NCExtra.Height)
+			lastBlock := cs.GetChainReader().GetBlockByNumber(cs.state.NCExtra.Height)
 			cs.broadcastTX3ProofDataToMainChain(lastBlock)
-			cs.state.TdmExtra.NeedToBroadcast = false
+			cs.state.NCExtra.NeedToBroadcast = false
 		}
 	}
 
@@ -1024,7 +1024,7 @@ func (cs *ConsensusState) enterPropose(height uint64, round int) {
 }
 
 func (cs *ConsensusState) defaultDecideProposal(height uint64, round int) {
-	var block *types.TdmBlock
+	var block *types.NCBlock
 	var blockParts *types.PartSet
 	var proposerPeerKey string
 
@@ -1052,10 +1052,10 @@ func (cs *ConsensusState) defaultDecideProposal(height uint64, round int) {
 	cs.logger.Debugf("defaultDecideProposal: Proposer (peer key %s)", proposerPeerKey)
 
 	proposal := types.NewProposal(height, round, block.Hash(), blockParts.Header(), polRound, polBlockID, proposerPeerKey)
-	err := cs.privValidator.SignProposal(cs.state.TdmExtra.ChainID, proposal)
+	err := cs.privValidator.SignProposal(cs.state.NCExtra.ChainID, proposal)
 	if err == nil {
 
-		cs.logger.Infof("Signed proposal block, height: %v", block.TdmExtra.Height)
+		cs.logger.Infof("Signed proposal block, height: %v", block.NCExtra.Height)
 		// send proposal and block parts on internal msg queue
 		cs.sendInternalMessage(msgInfo{&ProposalMessage{proposal}, ""})
 		for i := 0; i < blockParts.Total(); i++ {
@@ -1081,7 +1081,7 @@ func (cs *ConsensusState) isProposalComplete() bool {
 // Create the next block to propose and return it.
 // Returns nil block upon error.
 // NOTE: keep it side-effect free for clarity.
-func (cs *ConsensusState) createProposalBlock() (*types.TdmBlock, *types.PartSet) {
+func (cs *ConsensusState) createProposalBlock() (*types.NCBlock, *types.PartSet) {
 
 	//here we wait for neatchain block to propose
 	if cs.blockFromMiner != nil {
@@ -1152,7 +1152,7 @@ func (cs *ConsensusState) createProposalBlock() (*types.TdmBlock, *types.PartSet
 			}
 		}
 
-		return types.MakeBlock(cs.Height, cs.state.TdmExtra.ChainID, commit, intBlock,
+		return types.MakeBlock(cs.Height, cs.state.NCExtra.ChainID, commit, intBlock,
 			val.Hash(), cs.Epoch.Number, epochBytes,
 			tx3ProofData, 65536)
 	} else {
@@ -1208,7 +1208,7 @@ func (cs *ConsensusState) defaultDoPrevote(height uint64, round int) {
 	}
 
 	// Validate proposal block
-	err := cs.ProposalBlock.ValidateBasic(cs.state.TdmExtra)
+	err := cs.ProposalBlock.ValidateBasic(cs.state.NCExtra)
 	if err != nil {
 		// ProposalBlock is invalid, prevote nil.
 		cs.logger.Warnf("enterPrevote: ProposalBlock is invalid, error: %v", err)
@@ -1246,7 +1246,7 @@ func (cs *ConsensusState) defaultDoPrevote(height uint64, round int) {
 	}
 
 	// Valdiate proposal block
-	proposedNextEpoch := ep.FromBytes(cs.ProposalBlock.TdmExtra.EpochBytes)
+	proposedNextEpoch := ep.FromBytes(cs.ProposalBlock.NCExtra.EpochBytes)
 	if proposedNextEpoch != nil && proposedNextEpoch.Number == cs.Epoch.Number+1 {
 		if cs.Epoch.ShouldProposeNextEpoch(cs.Height) {
 			lastHeight := cs.backend.ChainReader().CurrentBlock().Number().Uint64()
@@ -1268,7 +1268,7 @@ func (cs *ConsensusState) defaultDoPrevote(height uint64, round int) {
 	return
 }
 
-// In IPBFT, wait for 2/3 votes for prevote
+// In NeatByFT, wait for 2/3 votes for prevote
 func (cs *ConsensusState) enterPrevoteWait(height uint64, round int) {
 	if cs.Height != height || round < cs.Round || (cs.Round == round && RoundStepPrevoteWait <= cs.Step) {
 		cs.logger.Warnf("enterPrevoteWait(%v/%v): Invalid args. Current step: %v/%v/%v", height, round, cs.Height, cs.Round, cs.Step)
@@ -1287,7 +1287,7 @@ func (cs *ConsensusState) enterPrevoteWait(height uint64, round int) {
 	cs.scheduleTimeout(cs.timeoutParams.Prevote(round), height, round, RoundStepPrevoteWait)
 }
 
-// In IPBFT, when prevote round ends, enter to vote for precommit
+// In NeatByFT, when prevote round ends, enter to vote for precommit
 func (cs *ConsensusState) enterPrecommit(height uint64, round int) {
 	if cs.Height != height || round < cs.Round || (cs.Round == round && RoundStepPrecommit <= cs.Step) {
 		cs.logger.Warnf("enterPrecommit(%v/%v): Invalid args. Current step: %v/%v/%v", height, round, cs.Height, cs.Round, cs.Step)
@@ -1362,7 +1362,7 @@ func (cs *ConsensusState) enterPrecommit(height uint64, round int) {
 	if cs.ProposalBlock.HashesTo(blockID.Hash) {
 		cs.logger.Info("enterPrecommit: +2/3 prevoted proposal block. Locking", "hash", blockID.Hash)
 		// Validate the block.
-		if err := cs.ProposalBlock.ValidateBasic(cs.state.TdmExtra); err != nil {
+		if err := cs.ProposalBlock.ValidateBasic(cs.state.NCExtra); err != nil {
 			PanicConsensus(Fmt("enterPrecommit: +2/3 prevoted for an invalid block: %v", err))
 		}
 		cs.LockedRound = round
@@ -1389,7 +1389,7 @@ func (cs *ConsensusState) enterPrecommit(height uint64, round int) {
 	return
 }
 
-// In IPBFT, wait for 2/3 votes for precommit
+// In NeatByFT, wait for 2/3 votes for precommit
 func (cs *ConsensusState) enterPrecommitWait(height uint64, round int) {
 	if cs.Height != height || round < cs.Round || (cs.Round == round && RoundStepPrecommitWait <= cs.Step) {
 		cs.logger.Warnf("enterPrecommitWait(%v/%v): Invalid args. Current step: %v/%v/%v", height, round, cs.Height, cs.Round, cs.Step)
@@ -1505,27 +1505,27 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 	if !block.HashesTo(blockID.Hash) {
 		PanicSanity(Fmt("Cannot finalizeCommit, ProposalBlock does not hash to commit hash"))
 	}
-	if err := block.ValidateBasic(cs.state.TdmExtra); err != nil {
+	if err := block.ValidateBasic(cs.state.NCExtra); err != nil {
 		PanicConsensus(Fmt("+2/3 committed an invalid block: %v", err))
 	}
 
 	// Save to blockStore.
-	//if cs.blockStore.Height() < block.TdmExtra.Height {
-	if cs.state.TdmExtra.Height < block.TdmExtra.Height {
+	//if cs.blockStore.Height() < block.NCExtra.Height {
+	if cs.state.NCExtra.Height < block.NCExtra.Height {
 		// NOTE: the seenCommit is local justification to commit this block,
 		// but may differ from the LastCommit included in the next block
 		precommits := cs.VoteSignAggr.Precommits(cs.CommitRound)
 		seenCommit := precommits.MakeCommit()
 
-		block.TdmExtra.SeenCommit = seenCommit
-		block.TdmExtra.SeenCommitHash = seenCommit.Hash()
+		block.NCExtra.SeenCommit = seenCommit
+		block.NCExtra.SeenCommitHash = seenCommit.Hash()
 
 		// update 'NeedToSave' field here
-		if block.TdmExtra.ChainID != params.MainnetChainConfig.NeatChainId && block.TdmExtra.ChainID != params.TestnetChainConfig.NeatChainId {
+		if block.NCExtra.ChainID != params.MainnetChainConfig.NeatChainId && block.NCExtra.ChainID != params.TestnetChainConfig.NeatChainId {
 			// check epoch
-			if len(block.TdmExtra.EpochBytes) > 0 {
-				block.TdmExtra.NeedToSave = true
-				cs.logger.Infof("NeedToSave set to true due to epoch. Chain: %s, Height: %v", block.TdmExtra.ChainID, block.TdmExtra.Height)
+			if len(block.NCExtra.EpochBytes) > 0 {
+				block.NCExtra.NeedToSave = true
+				cs.logger.Infof("NeedToSave set to true due to epoch. Chain: %s, Height: %v", block.NCExtra.ChainID, block.NCExtra.Height)
 			}
 			// check special cross-chain tx
 			txs := block.Block.Transactions()
@@ -1538,8 +1538,8 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 					}
 
 					if function == neatAbi.WithdrawFromChildChain {
-						block.TdmExtra.NeedToBroadcast = true
-						cs.logger.Infof("NeedToBroadcast set to true due to tx. Tx: %s, Chain: %s, Height: %v", function.String(), block.TdmExtra.ChainID, block.TdmExtra.Height)
+						block.NCExtra.NeedToBroadcast = true
+						cs.logger.Infof("NeedToBroadcast set to true due to tx. Tx: %s, Chain: %s, Height: %v", function.String(), block.NCExtra.ChainID, block.NCExtra.Height)
 						break
 					}
 				}
@@ -1548,7 +1548,7 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 
 		// Fire event for new block.
 		types.FireEventNewBlock(cs.evsw, types.EventDataNewBlock{block})
-		types.FireEventNewBlockHeader(cs.evsw, types.EventDataNewBlockHeader{int(block.TdmExtra.Height)})
+		types.FireEventNewBlockHeader(cs.evsw, types.EventDataNewBlockHeader{int(block.NCExtra.Height)})
 
 		//the second parameter as signature has been set above
 		err := cs.backend.Commit(block, [][]byte{}, cs.IsProposer)
@@ -1556,7 +1556,7 @@ func (cs *ConsensusState) finalizeCommit(height uint64) {
 			cs.logger.Errorf("Commit fail. error: %v", err)
 		}
 	} else {
-		cs.logger.Warn("Calling finalizeCommit on already stored block", "height", block.TdmExtra.Height)
+		cs.logger.Warn("Calling finalizeCommit on already stored block", "height", block.NCExtra.Height)
 	}
 
 	return
@@ -1642,8 +1642,8 @@ func (cs *ConsensusState) addProposalBlockPart(height uint64, round int, part *t
 	}
 	if added && cs.ProposalBlockParts.IsComplete() {
 		// Added and completed!
-		tdmBlock := &types.TdmBlock{}
-		cs.ProposalBlock, err = tdmBlock.FromBytes(cs.ProposalBlockParts.GetReader())
+		ncBlock := &types.NCBlock{}
+		cs.ProposalBlock, err = ncBlock.FromBytes(cs.ProposalBlockParts.GetReader())
 
 		cs.logger.Infof("Received complete proposal block %v, err %v", cs.ProposalBlock, err)
 
@@ -1926,7 +1926,7 @@ func (cs *ConsensusState) signVote(type_ byte, hash []byte, header types.PartSet
 		Type:             type_,
 		BlockID:          types.BlockID{hash, header},
 	}
-	err := cs.privValidator.SignVote(cs.state.TdmExtra.ChainID, vote)
+	err := cs.privValidator.SignVote(cs.state.NCExtra.ChainID, vote)
 	return vote, err
 }
 
@@ -2044,7 +2044,7 @@ func CompareHRS(h1 uint64, r1 int, s1 RoundStepType, h2 uint64, r2 int, s2 Round
 	return 1
 }
 
-func (cs *ConsensusState) ValidateTX4(b *types.TdmBlock) error {
+func (cs *ConsensusState) ValidateTX4(b *types.NCBlock) error {
 	var index int
 
 	txs := b.Block.Transactions()
@@ -2169,7 +2169,7 @@ func (cs *ConsensusState) broadcastTX3ProofDataToMainChain(block *ethTypes.Block
 	}
 	cs.logger.Infof("broadcastTX3ProofDataToMainChain proof data length: %d", len(bs))
 
-	err = client.BroadcastDataToMainChain(ctx, cs.state.TdmExtra.ChainID, bs)
+	err = client.BroadcastDataToMainChain(ctx, cs.state.NCExtra.ChainID, bs)
 	if err != nil {
 		cs.logger.Error("broadcastTX3ProofDataToMainChain(rpc) failed", "err", err)
 		return

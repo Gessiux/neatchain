@@ -20,7 +20,7 @@ var (
 		Usage: "Verbosity of neatchain",
 	}
 
-	// Tendermint Flags
+	// NeatCon Flags
 
 	MonikerFlag = cli.StringFlag{
 		Name:  "moniker",

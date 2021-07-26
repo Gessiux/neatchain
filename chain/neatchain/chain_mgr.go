@@ -159,7 +159,7 @@ func (cm *ChainManager) InitCrossChainHelper() {
 func (cm *ChainManager) StartP2PServer() error {
 	srv := cm.server.Server()
 	// Append Main Chain Protocols
-	srv.Protocols = append(srv.Protocols, cm.mainChain.IntNode.GatherProtocols()...)
+	srv.Protocols = append(srv.Protocols, cm.mainChain.NeatNode.GatherProtocols()...)
 	// Append Child Chain Protocols
 	//for _, chain := range cm.childChains {
 	//	srv.Protocols = append(srv.Protocols, chain.EthNode.GatherProtocols()...)
@@ -172,9 +172,9 @@ func (cm *ChainManager) StartMainChain() error {
 	// Start the Main Chain
 	cm.mainStartDone = make(chan struct{})
 
-	cm.mainChain.IntNode.SetP2PServer(cm.server.Server())
+	cm.mainChain.NeatNode.SetP2PServer(cm.server.Server())
 
-	if address, ok := cm.getNodeValidator(cm.mainChain.IntNode); ok {
+	if address, ok := cm.getNodeValidator(cm.mainChain.NeatNode); ok {
 		cm.server.AddLocalValidator(cm.mainChain.Id, address)
 	}
 
@@ -182,7 +182,7 @@ func (cm *ChainManager) StartMainChain() error {
 
 	// Wait for Main Chain Start Complete
 	<-cm.mainStartDone
-	cm.mainQuit = cm.mainChain.IntNode.StopChan()
+	cm.mainQuit = cm.mainChain.NeatNode.StopChan()
 
 	return err
 }
@@ -192,15 +192,15 @@ func (cm *ChainManager) StartChains() error {
 	for _, chain := range cm.childChains {
 		// Start each Chain
 		srv := cm.server.Server()
-		childProtocols := chain.IntNode.GatherProtocols()
+		childProtocols := chain.NeatNode.GatherProtocols()
 		// Add Child Protocols to P2P Server Protocols
 		srv.Protocols = append(srv.Protocols, childProtocols...)
 		// Add Child Protocols to P2P Server Caps
 		srv.AddChildProtocolCaps(childProtocols)
 
-		chain.IntNode.SetP2PServer(srv)
+		chain.NeatNode.SetP2PServer(srv)
 
-		if address, ok := cm.getNodeValidator(chain.IntNode); ok {
+		if address, ok := cm.getNodeValidator(chain.NeatNode); ok {
 			cm.server.AddLocalValidator(chain.Id, address)
 		}
 
@@ -208,7 +208,7 @@ func (cm *ChainManager) StartChains() error {
 		StartChain(cm.ctx, chain, startDone)
 		<-startDone
 
-		cm.childQuits[chain.Id] = chain.IntNode.StopChan()
+		cm.childQuits[chain.Id] = chain.NeatNode.StopChan()
 
 		// Tell other peers that we have added into a new child chain
 		cm.server.BroadcastNewChildChainMsg(chain.Id)
@@ -225,13 +225,13 @@ func (cm *ChainManager) StartRPC() error {
 		return err
 	} else {
 		if utils.IsHTTPRunning() {
-			if h, err := cm.mainChain.IntNode.GetHTTPHandler(); err == nil {
+			if h, err := cm.mainChain.NeatNode.GetHTTPHandler(); err == nil {
 				utils.HookupHTTP(cm.mainChain.Id, h)
 			} else {
 				log.Errorf("Load Main Chain RPC HTTP handler failed: %v", err)
 			}
 			for _, chain := range cm.childChains {
-				if h, err := chain.IntNode.GetHTTPHandler(); err == nil {
+				if h, err := chain.NeatNode.GetHTTPHandler(); err == nil {
 					utils.HookupHTTP(chain.Id, h)
 				} else {
 					log.Errorf("Load Child Chain RPC HTTP handler failed: %v", err)
@@ -240,13 +240,13 @@ func (cm *ChainManager) StartRPC() error {
 		}
 
 		if utils.IsWSRunning() {
-			if h, err := cm.mainChain.IntNode.GetWSHandler(); err == nil {
+			if h, err := cm.mainChain.NeatNode.GetWSHandler(); err == nil {
 				utils.HookupWS(cm.mainChain.Id, h)
 			} else {
 				log.Errorf("Load Main Chain RPC WS handler failed: %v", err)
 			}
 			for _, chain := range cm.childChains {
-				if h, err := chain.IntNode.GetWSHandler(); err == nil {
+				if h, err := chain.NeatNode.GetWSHandler(); err == nil {
 					utils.HookupWS(chain.Id, h)
 				} else {
 					log.Errorf("Load Child Chain RPC WS handler failed: %v", err)
@@ -261,7 +261,7 @@ func (cm *ChainManager) StartRPC() error {
 func (cm *ChainManager) StartInspectEvent() {
 
 	createChildChainCh := make(chan core.CreateChildChainEvent, 10)
-	createChildChainSub := MustGetNeatChainFromNode(cm.mainChain.IntNode).BlockChain().SubscribeCreateChildChainEvent(createChildChainCh)
+	createChildChainSub := MustGetNeatChainFromNode(cm.mainChain.NeatNode).BlockChain().SubscribeCreateChildChainEvent(createChildChainCh)
 
 	go func() {
 		defer createChildChainSub.Unsubscribe()
@@ -298,10 +298,10 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 	validator := false
 
 	var neatchain *neatptc.NeatChain
-	cm.mainChain.IntNode.Service(&neatchain)
+	cm.mainChain.NeatNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
 		localEtherbase = neatbyft.PrivateValidator()
 	}
 
@@ -341,7 +341,7 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 
 	// Load the KeyStore file from MainChain (Optional)
 	var keyJson []byte
-	wallet, walletErr := cm.mainChain.IntNode.AccountManager().Find(accounts.Account{Address: localEtherbase})
+	wallet, walletErr := cm.mainChain.NeatNode.AccountManager().Find(accounts.Account{Address: localEtherbase})
 	if walletErr == nil {
 		var readKeyErr error
 		keyJson, readKeyErr = ioutil.ReadFile(wallet.URL().Path)
@@ -369,15 +369,15 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 	//StartChildChain to attach intp2p and intrpc
 	//TODO Hookup new Created Child Chain to P2P server
 	srv := cm.server.Server()
-	childProtocols := chain.IntNode.GatherProtocols()
+	childProtocols := chain.NeatNode.GatherProtocols()
 	// Add Child Protocols to P2P Server Protocols
 	srv.Protocols = append(srv.Protocols, childProtocols...)
 	// Add Child Protocols to P2P Server Caps
 	srv.AddChildProtocolCaps(childProtocols)
 
-	chain.IntNode.SetP2PServer(srv)
+	chain.NeatNode.SetP2PServer(srv)
 
-	if address, ok := cm.getNodeValidator(chain.IntNode); ok {
+	if address, ok := cm.getNodeValidator(chain.NeatNode); ok {
 		srv.AddLocalValidator(chain.Id, address)
 	}
 
@@ -389,11 +389,11 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 		return
 	}
 
-	cm.childQuits[chain.Id] = chain.IntNode.StopChan()
+	cm.childQuits[chain.Id] = chain.NeatNode.StopChan()
 
 	var childEthereum *neatptc.NeatChain
-	chain.IntNode.Service(&childEthereum)
-	firstEpoch := childEthereum.Engine().(consensus.IPBFT).GetEpoch()
+	chain.NeatNode.Service(&childEthereum)
+	firstEpoch := childEthereum.Engine().(consensus.NeatByFT).GetEpoch()
 	// Child Chain start success, then delete the pending data in chain info db
 	cm.formalizeChildChain(chainId, *cci, firstEpoch)
 
@@ -405,14 +405,14 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 
 	//hookup utils
 	if utils.IsHTTPRunning() {
-		if h, err := chain.IntNode.GetHTTPHandler(); err == nil {
+		if h, err := chain.NeatNode.GetHTTPHandler(); err == nil {
 			utils.HookupHTTP(chain.Id, h)
 		} else {
 			log.Errorf("Unable Hook up Child Chain (%v) RPC HTTP Handler: %v", chainId, err)
 		}
 	}
 	if utils.IsWSRunning() {
-		if h, err := chain.IntNode.GetWSHandler(); err == nil {
+		if h, err := chain.NeatNode.GetWSHandler(); err == nil {
 			utils.HookupWS(chain.Id, h)
 		} else {
 			log.Errorf("Unable Hook up Child Chain (%v) RPC WS Handler: %v", chainId, err)
@@ -430,10 +430,10 @@ func (cm *ChainManager) formalizeChildChain(chainId string, cci core.CoreChainIn
 
 func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool {
 	var neatchain *neatptc.NeatChain
-	cm.mainChain.IntNode.Service(&neatchain)
+	cm.mainChain.NeatNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
 		localEtherbase = neatbyft.PrivateValidator()
 	}
 
@@ -442,7 +442,7 @@ func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool 
 
 func (cm *ChainManager) StopChain() {
 	go func() {
-		mainChainError := cm.mainChain.IntNode.Close()
+		mainChainError := cm.mainChain.NeatNode.Close()
 		if mainChainError != nil {
 			log.Error("Error when closing main chain", "err", mainChainError)
 		} else {
@@ -451,7 +451,7 @@ func (cm *ChainManager) StopChain() {
 	}()
 	for _, child := range cm.childChains {
 		go func() {
-			childChainError := child.IntNode.Close()
+			childChainError := child.NeatNode.Close()
 			if childChainError != nil {
 				log.Error("Error when closing child chain", "child id", child.Id, "err", childChainError)
 			}

@@ -40,11 +40,10 @@ import (
 )
 
 var (
-	pubkeyVersion = byte(0x00)
-	scriptVersion = byte(0x05)
-	addressPrefix = "INT"
-	bs58Str       = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz" // remove  0 I O l
-	// 椭圆曲线的阶
+	pubkeyVersion  = byte(0x00)
+	scriptVersion  = byte(0x42)
+	addressPrefix  = "NEA"
+	bs58Str        = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 	secp256k1N, _  = new(big.Int).SetString("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16)
 	secp256k1halfN = new(big.Int).Div(secp256k1N, big.NewInt(2))
 )
@@ -89,7 +88,7 @@ func Keccak512(data ...[]byte) []byte {
 //
 func CreateAddress(b common.Address, nonce uint64) common.Address {
 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
-	return common.StringToAddress(NewINTScriptAddr(data))
+	return common.StringToAddress(NewNEATScriptAddr(data))
 }
 
 // CreateAddress2 creates an ethereum address given the address bytes, initial
@@ -99,7 +98,7 @@ func CreateAddress(b common.Address, nonce uint64) common.Address {
 //}
 
 func CreateAddress2(b common.Address, salt [32]byte, inithash []byte) common.Address {
-	return common.BytesToAddress([]byte(NewINTScriptAddr(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash))))
+	return common.BytesToAddress([]byte(NewNEATScriptAddr(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash))))
 }
 
 // ToECDSA creates a private key with the given D value.
@@ -150,13 +149,11 @@ func FromECDSA(priv *ecdsa.PrivateKey) []byte {
 	return math.PaddedBigBytes(priv.D, priv.Params().BitSize/8)
 }
 
-// TODO remove toecdsapub
 func ToECDSAPub(pub []byte) *ecdsa.PublicKey {
 	if len(pub) == 0 {
 		return nil
 	}
 	x, y := elliptic.Unmarshal(S256(), pub)
-	//x, y := Unmarshal(S256(), pub)
 	return &ecdsa.PublicKey{Curve: S256(), X: x, Y: y}
 }
 
@@ -176,77 +173,6 @@ func FromECDSAPub(pub *ecdsa.PublicKey) []byte {
 	return elliptic.Marshal(S256(), pub.X, pub.Y)
 	//return Marshal(S256(), pub.X, pub.Y)
 }
-
-// Marshal converts a point into the compressed
-//func Marshal(curve elliptic.Curve, x, y *big.Int) []byte {
-//	byteLen := (curve.Params().BitSize + 7) >> 3
-//
-//	ret := make([]byte, 1+byteLen)
-//	//ret[0] = 4 // uncompressed point
-//
-//	xBytes := x.Bytes()
-//	copy(ret[1+byteLen-len(xBytes):], xBytes)
-//	//yBytes := y.Bytes()
-//	//copy(ret[1+2*byteLen-len(yBytes):], yBytes)
-//	str := []byte(y.String())
-//
-//	// y 为偶数，添加前缀2，y为奇数，添加前缀3
-//	lastNum, _ := strconv.ParseInt(string(str[len(str)-1:][0]), 10, 10)
-//	if (lastNum & 1) == 1 {
-//		ret[0] = 3
-//	} else {
-//		ret[0] = 2
-//	}
-//	return ret
-//}
-// Unmarshal converts a point, serialized by Marshal, into an x, y pair.
-// It is an error if the point is not in compressed form or is not on the curve.
-// On error, x = nil.
-//func Unmarshal(curve elliptic.Curve, data []byte) (x, y *big.Int) {
-//	byteLen := (curve.Params().BitSize + 7) >> 3
-//	if len(data) != 1+byteLen {
-//		return
-//	}
-//	if !(data[0] == 2 || data[0] == 3) { // compressed form
-//		return
-//	}
-//	p := curve.Params().P
-//	b := curve.Params().B
-//	x = new(big.Int).SetBytes(data[1 : 1+byteLen])
-//	fmt.Printf("Unmarshal x=%v\n", x)
-//	//y = new(big.Int).SetBytes(data[1+byteLen:])
-//
-//	// 由 x 计算出 y，y² mod p = x³ - 3x + b (mod p)
-//	//y2 := new(big.Int).Mul(y, y)
-//	//y2.Mod(y2, curve.Params().P)
-//
-//	x3 := new(big.Int).Mul(x, x)
-//	x3.Mul(x3, x)
-//
-//	threeX := new(big.Int).Lsh(x, 1)
-//	threeX.Add(threeX, x)
-//
-//	x3.Sub(x3, threeX)
-//	x3.Add(x3, b)
-//
-//	y = big.NewInt(0)
-//	//todo 计算的 y的值不对
-//	y.Sqrt(x3)
-//
-//	//return x3.Cmp(y2) == 0
-//	//y = x3.Sqrt(x3)
-//	fmt.Printf("Unmarshal y=%v\n", y)
-//	fmt.Printf("Unmarshal ybytes=%v\n", y.Bytes())
-//
-//
-//	if x.Cmp(p) >= 0 || y.Cmp(p) >= 0 {
-//		return nil, nil
-//	}
-//	if !curve.IsOnCurve(x, y) {
-//		return nil, nil
-//	}
-//	return
-//}
 
 // HexToECDSA parses a secp256k1 private key.
 func HexToECDSA(hexkey string) (*ecdsa.PrivateKey, error) {
@@ -309,7 +235,7 @@ func ValidateSignatureValues(v byte, r, s *big.Int, homestead bool) bool {
 
 func PubkeyToAddress(p ecdsa.PublicKey) common.Address {
 	pubBytes := FromECDSAPub(&p)
-	return common.StringToAddress(NewINTScriptAddr(pubBytes))
+	return common.StringToAddress(NewNEATScriptAddr(pubBytes))
 }
 
 func zeroBytes(bytes []byte) {
@@ -318,28 +244,28 @@ func zeroBytes(bytes []byte) {
 	}
 }
 
-// P2PH 暂时不用，因为长度不固定
-func NewINTPubkeyAddr(pubkey []byte) string {
+// P2PH
+func NewNEATPubkeyAddr(pubkey []byte) string {
 	input := Hash160(pubkey)
 
 	return encodeAddress(input, pubkeyVersion)
 }
 
 // P2SH
-func NewINTScriptAddr(script []byte) string {
+func NewNEATScriptAddr(script []byte) string {
 	input := Hash160(script)
 	strArray := strings.Split(encodeAddress(input, scriptVersion), "")
 	return addressPrefix + strings.Join(strArray[:29], "")
 }
 
-// check INT address is validate or not
-func ValidateINTAddr(input string) bool {
+// check NEAT address is validate or not
+func ValidateNEATAddr(input string) bool {
 	inputByte := []byte(input)
 	if len(inputByte) != 32 {
 		return false
 	}
 
-	if inputByte[0] != 'I' || inputByte[1] != 'N' || inputByte[2] != 'T' || inputByte[3] != '3' {
+	if inputByte[0] != 'N' || inputByte[1] != 'E' || inputByte[2] != 'A' || inputByte[3] != 'T' {
 		return false
 	}
 

@@ -35,15 +35,11 @@ import (
 )
 
 var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"
-var testINTAddrHex = "3334536a7873394177526a356d437978374166784a755a783566393142714a353333"
+var testNEATAddrHex = "3334536a7873394177526a356d437978374166784a755a783566393142714a353333"
 
-//var testINTAddrHex = "00000000000000000000000000000000000000000000000000000000000000000000"
-var testINTAddr = "NEATb437dSzaqRGxhTgW4qCq877ytYxb" // 34Sjxs9AwRj5mCyx7AfxJuZx5f91BqJ533
+var testNEATAddr = "NEATb437dSzaqRGxhTgW4qCq877ytYxb"
 var testPrivHex = "289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032"
 
-// These tests are sanity checks.
-// They should ensure that we don't e.g. use Sha3-224 instead of Sha3-256
-// and that the sha3 library uses keccak-f permutation.
 func TestKeccak256Hash(t *testing.T) {
 	msg := []byte("abc")
 	exp, _ := hex.DecodeString("4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45")
@@ -66,39 +62,9 @@ func BenchmarkSha3(b *testing.B) {
 	}
 }
 
-//func TestSign(t *testing.T) {
-//	key, _ := HexToECDSA(testPrivHex)
-//	addr := common.HexToAddress(testAddrHex)
-//
-//	msg := Keccak256([]byte("foo"))
-//	sig, err := Sign(msg, key)
-//	if err != nil {
-//		t.Errorf("Sign error: %s", err)
-//	}
-//	recoveredPub, err := Ecrecover(msg, sig)
-//	if err != nil {
-//		t.Errorf("ECRecover error: %s", err)
-//	}
-//	pubKey := ToECDSAPub(recoveredPub)
-//	recoveredAddr := PubkeyToAddress(*pubKey)
-//	if addr != recoveredAddr {
-//		t.Errorf("Address mismatch: want: %x have: %x", addr, recoveredAddr)
-//	}
-//
-//	// should be equal to SigToPub
-//	recoveredPub2, err := SigToPub(msg, sig)
-//	if err != nil {
-//		t.Errorf("ECRecover error: %s", err)
-//	}
-//	recoveredAddr2 := PubkeyToAddress(*recoveredPub2)
-//	if addr != recoveredAddr2 {
-//		t.Errorf("Address mismatch: want: %x have: %x", addr, recoveredAddr2)
-//	}
-//}
-
 func TestSign(t *testing.T) {
 	key, _ := HexToECDSA(testPrivHex)
-	addr := common.HexToAddress(testINTAddrHex)
+	addr := common.HexToAddress(testNEATAddrHex)
 
 	msg := Keccak256([]byte("foo"))
 	sig, err := Sign(msg, key)
@@ -164,11 +130,10 @@ func TestInvalidSign(t *testing.T) {
 
 func TestNewContractAddress(t *testing.T) {
 	key, _ := HexToECDSA(testPrivHex)
-	addr := common.HexToAddress(testINTAddrHex)
+	addr := common.HexToAddress(testNEATAddrHex)
 	fmt.Printf("byte addr=%v\n", addr)
 	genAddr := PubkeyToAddress(key.PublicKey)
 	fmt.Printf("gen addr=%v\n", addr)
-	// sanity check before using addr to create contract address
 	checkAddr(t, genAddr, addr)
 
 	caddr0 := CreateAddress(addr, 0)
@@ -200,7 +165,6 @@ func TestLoadECDSAFile(t *testing.T) {
 	}
 	checkKey(key0)
 
-	// again, this time with SaveECDSA instead of manual save:
 	err = SaveECDSA(fileName1, key0)
 	if err != nil {
 		t.Fatal(err)
@@ -267,20 +231,12 @@ func checkhash(t *testing.T, name string, f func([]byte) []byte, msg, exp []byte
 	}
 }
 
-//func checkAddr(t *testing.T, addr0, addr1 common.Address) {
-//	if addr0 != addr1 {
-//		t.Fatalf("address mismatch: want: %x have: %x", addr0, addr1)
-//	}
-//}
-
 func checkAddr(t *testing.T, addr0, addr1 common.Address) {
 	if addr0 != addr1 {
 		t.Fatalf("address mismatch: want: %x have: %x", addr0, addr1)
 	}
 }
 
-// test to help Python team with integration of libsecp256k1
-// skip but keep it after they are done
 func TestPythonIntegration(t *testing.T) {
 	kh := "289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032"
 	k0, _ := HexToECDSA(kh)
@@ -295,7 +251,7 @@ func TestPythonIntegration(t *testing.T) {
 	t.Logf("msg: %x, privkey: %s sig: %x\n", msg1, kh, sig1)
 }
 
-func TestNewINTAddr(t *testing.T) {
+func TestNewNEATAddr(t *testing.T) {
 	key, _ := HexToECDSA(testPrivHex)
 	pubKeyBytes := FromECDSAPub(&key.PublicKey)
 	fmt.Printf("pubkeybytes=%v\n\n", pubKeyBytes)
@@ -308,20 +264,13 @@ func TestNewINTAddr(t *testing.T) {
 	fmt.Printf("x=%v\n", key.PublicKey.X.Bytes())
 	fmt.Printf("y=%v\n\n", key.PublicKey.Y.Bytes())
 
-	addr := NewINTScriptAddr(pubKeyBytes)
+	addr := NewNEATScriptAddr(pubKeyBytes)
 	fmt.Printf("address=%v\n", addr)
 
-	//pubByte, _ := hexutil.Decode("0x0400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000")
 	pubByte, _ := hexutil.Decode("0x04ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-	pubAddr := NewINTPubkeyAddr(pubByte)
+	pubAddr := NewNEATPubkeyAddr(pubByte)
 	fmt.Printf("0x040000 address %v\n", pubAddr)
 
-	//data,_ := hexutil.Decode("0x000000000000000000000000000000000000000000")
-	//data,_ := hexutil.Decode("0x00ffffffffffffffffffffffffffffffffffffffff")
-	//data, _ := hexutil.Decode("0x009c4379e039f8d503d6daabf57a5c75f992f1daaf")
-	//data, _ := hexutil.Decode("0x004a33d522f1fbcddab0c4926777e828")
-	//data, _ := hexutil.Decode("0x004a33d522f1fbcddab0c4926777e826")
-	//data, _ := hexutil.Decode("0x0095027ab391b1a5327c6e64548e934248545fdd8e")
 	data, _ := hexutil.Decode("0x0095027ab391b1a5327c6e64548e9340f1212b0b5b")
 	fmt.Printf("data %v\n", data)
 	checkByte := calcHash(calcHash(data, sha256.New()), sha256.New())
@@ -352,18 +301,17 @@ func TestNewINTAddr(t *testing.T) {
 	strAddr := binAddr.String()
 	fmt.Printf("string address=%v\n\n", strAddr)
 
-	checkINTAddr(t, addr, testINTAddr)
+	checkNEATAddr(t, addr, testNEATAddr)
 }
 
-func BenchmarkCreateINTAddress(b *testing.B) {
+func BenchmarkCreateNEATAddress(b *testing.B) {
 	for i := 0; i < 100; i++ {
 		key, _ := GenerateKey()
-		addr := NewINTScriptAddr(FromECDSAPub(&key.PublicKey))
-		//addr := newINTPubkeyAddr(FromECDSAPub(&key.PublicKey))
-		fmt.Printf("INT address %v\n", addr)
+		addr := NewNEATScriptAddr(FromECDSAPub(&key.PublicKey))
+		fmt.Printf("NEAT address %v\n", addr)
 		addrLen := len([]byte(addr))
-		if addrLen != common.INTAddressLength {
-			b.Errorf("INT address %v lenght mismatch want %v, but %v\n", addr, common.INTAddressLength, addrLen)
+		if addrLen != common.NEATAddressLength {
+			b.Errorf("NEAT address %v lenght mismatch want %v, but %v\n", addr, common.NEATAddressLength, addrLen)
 		}
 	}
 }
@@ -375,26 +323,30 @@ type addressTest struct {
 
 var addressList = []*addressTest{
 	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: true},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYx", Valid: false},
+	{Address: "NEAHb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "nEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NeATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEaTb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEAtb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "neaTb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "neATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NeaTb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEatb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "nEAtb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NeAtb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "nEatb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "b437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
 	{Address: "NEAT", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
-	{Address: "NEATb437dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb43ldSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb43IdSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb430dSzaqRGxhTgW4qCq877ytYxb", Valid: false},
+	{Address: "NEATb43OdSzaqRGxhTgW4qCq877ytYxb", Valid: false},
 }
 
-func TestValidateINTAddress(t *testing.T) {
+func TestValidateNEATAddress(t *testing.T) {
 	for _, v := range addressList {
-		b := ValidateINTAddr(v.Address)
+		b := ValidateNEATAddr(v.Address)
 		if b == v.Valid {
 			t.Log("pass")
 		} else {
@@ -408,10 +360,10 @@ func TestHexToAddress(t *testing.T) {
 	addr := common.HexToAddress("0x494e5433437046756b32634a31746539575a563177385933776b51436341355a")
 	fmt.Printf("addr=%v\n", addr.String())
 	fmt.Printf("addr=%v\n", len(addr))
-	fmt.Printf("testINTAddrHex=%v\n", []byte(testINTAddrHex))
+	fmt.Printf("testNEATAddrHex=%v\n", []byte(testNEATAddrHex))
 }
 
-func checkINTAddr(t *testing.T, addr0, addr1 string) {
+func checkNEATAddr(t *testing.T, addr0, addr1 string) {
 	if addr0 != addr1 {
 		t.Fatalf("address mismatch want: %s have: %s", addr0, addr1)
 	}

@@ -46,13 +46,13 @@ var (
 	initINTGenesisCmd = cli.Command{
 		Action:    utils.MigrateFlags(initIntGenesis),
 		Name:      "init-neatchain",
-		Usage:     "Initialize INT genesis.json file. init-neatchain {\"1000000000000000000000000000\",\"100000000000000000000000\"}",
+		Usage:     "Initialize NEAT genesis.json file. init-neatchain {\"1000000000000000000000000000\",\"100000000000000000000000\"}",
 		ArgsUsage: "<genesisPath>",
 		Flags: []cli.Flag{
 			utils.DataDirFlag,
 		},
 		Category:    "BLOCKCHAIN COMMANDS",
-		Description: "The init-neatchain initializes a new INT genesis.json file for the network.",
+		Description: "The init-neatchain initializes a new NEAT genesis.json file for the network.",
 	}
 
 	initCommand = cli.Command{

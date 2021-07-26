@@ -15,15 +15,15 @@ import (
 	"gopkg.in/urfave/cli.v1"
 )
 
-// New creates an Ethereum backend for Tendermint core engine.
+// New creates an Ethereum backend for NeatCon core engine.
 func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
-	privateKey *ecdsa.PrivateKey, cch core.CrossChainHelper) consensus.IPBFT {
+	privateKey *ecdsa.PrivateKey, cch core.CrossChainHelper) consensus.NeatByFT {
 	// Allocate the snapshot caches and create the engine
 	//recents, _ := lru.NewARC(inmemorySnapshots)
 	//recentMessages, _ := lru.NewARC(inmemoryPeers)
 	//knownMessages, _ := lru.NewARC(inmemoryMessages)
 
-	config := GetTendermintConfig(chainConfig.NeatChainId, cliCtx)
+	config := GetNeatConConfig(chainConfig.NeatChainId, cliCtx)
 
 	backend := &backend{
 		//config:             config,
@@ -42,7 +42,7 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 		//recentMessages:   recentMessages,
 		//knownMessages:    knownMessages,
 	}
-	backend.core = MakeTendermintNode(backend, config, chainConfig, cch)
+	backend.core = MakeNeatConNode(backend, config, chainConfig, cch)
 	return backend
 }
 

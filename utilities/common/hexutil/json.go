@@ -142,7 +142,7 @@ func UnmarshalAddrFixedText(typname string, input, out []byte) error {
 
 	//b := addr.IsValidate()
 	//if !b {
-	//	return fmt.Errorf("invalid INT address")
+	//	return fmt.Errorf("invalid NEAT address")
 	//}
 	//fmt.Printf("json UnmarshalAddrFixedText out=%v\n", out)
 	return nil

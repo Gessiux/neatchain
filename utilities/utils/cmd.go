@@ -90,10 +90,10 @@ func StartNode(ctx *cli.Context, stack *node.Node) error {
 	mining := false
 	var neatchain *neatptc.NeatChain
 	if err := stack.Service(&neatchain); err == nil {
-		if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
+		if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
 			mining = neatbyft.ShouldStart()
 			if mining {
-				stack.GetLogger().Info("IPBFT Consensus Engine will be start shortly")
+				stack.GetLogger().Info("NeatByFT Consensus Engine will be start shortly")
 			}
 		}
 	}

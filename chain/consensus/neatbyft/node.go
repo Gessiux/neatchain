@@ -124,7 +124,7 @@ func (n *Node) OnStop() {
 	n.logger.Info("(n *Node) OnStop() called")
 	n.BaseService.OnStop()
 
-	//n.sw.StopChainReactor(n.consensusState.GetState().TdmExtra.ChainID)
+	//n.sw.StopChainReactor(n.consensusState.GetState().NCExtra.ChainID)
 	n.evsw.Stop()
 	n.consensusReactor.Stop()
 }
@@ -136,9 +136,9 @@ func (n *Node) OnStop() {
 //	state := n.consensusState.GetState()
 //
 //	fmt.Printf("(n *Node) SaveState(block *ethTypes.Block) with state.height = %v, block.height = %v\n",
-//		uint64(state.TdmExtra.Height), block.NumberU64())
+//		uint64(state.NCExtra.Height), block.NumberU64())
 //
-//	if uint64(state.TdmExtra.Height) != block.NumberU64() {
+//	if uint64(state.NCExtra.Height) != block.NumberU64() {
 //		fmt.Printf("(n *Node) SaveState(block *ethTypes.Block)， block height not equal\n")
 //	}
 //
@@ -268,7 +268,7 @@ func ProtocolAndAddress(listenAddr string) (string, string) {
 	return protocol, address
 }
 
-func MakeTendermintNode(backend *backend, config cfg.Config, chainConfig *params.ChainConfig, cch core.CrossChainHelper) *Node {
+func MakeNeatConNode(backend *backend, config cfg.Config, chainConfig *params.ChainConfig, cch core.CrossChainHelper) *Node {
 
 	var genDoc *types.GenesisDoc
 	genDocFile := config.GetString("genesis_file")

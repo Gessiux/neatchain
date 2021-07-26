@@ -43,7 +43,7 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0), //let's start from 1 block
 		ConstantinopleBlock: nil,
-		IPBFT: &IPBFTConfig{
+		NeatByFT: &NeatByFTConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -60,7 +60,7 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: nil,
-		IPBFT: &IPBFTConfig{
+		NeatByFT: &NeatByFTConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -98,19 +98,19 @@ type ChainConfig struct {
 	ConstantinopleBlock *big.Int `json:"constantinopleBlock,omitempty"` // Constantinople switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	IPBFT *IPBFTConfig `json:"neatbyft,omitempty"`
+	NeatByFT *NeatByFTConfig `json:"neatbyft,omitempty"`
 
 	ChainLogger log.Logger `json:"-"`
 }
 
-// IPBFTConfig is the consensus engine configs for Istanbul based sealing.
-type IPBFTConfig struct {
+// NeatByFTConfig is the consensus engine configs for Istanbul based sealing.
+type NeatByFTConfig struct {
 	Epoch          uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
 	ProposerPolicy uint64 `json:"policy"` // The policy for proposer selection
 }
 
 // String implements the stringer interface, returning the consensus engine details.
-func (c *IPBFTConfig) String() string {
+func (c *NeatByFTConfig) String() string {
 	return "neatbyft"
 }
 
@@ -126,7 +126,7 @@ func NewChildChainConfig(childChainID string) *ChainConfig {
 		//ByzantiumBlock:      big.NewInt(4370000),
 		ByzantiumBlock:      big.NewInt(0), //let's start from 1 block
 		ConstantinopleBlock: nil,
-		IPBFT: &IPBFTConfig{
+		NeatByFT: &NeatByFTConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -142,8 +142,8 @@ func NewChildChainConfig(childChainID string) *ChainConfig {
 func (c *ChainConfig) String() string {
 	var engine interface{}
 	switch {
-	case c.IPBFT != nil:
-		engine = c.IPBFT
+	case c.NeatByFT != nil:
+		engine = c.NeatByFT
 	default:
 		engine = "unknown"
 	}

@@ -29,7 +29,7 @@ import (
 const (
 	HashLength = 32
 	//AddressLength = 20
-	INTAddressLength = 32
+	NEATAddressLength = 32
 )
 
 var (
@@ -138,8 +138,8 @@ func (h UnprefixedHash) MarshalText() ([]byte, error) {
 // Address represents the 20 byte address of an Ethereum account.
 //type Address [AddressLength]byte
 
-// INT address
-type Address [INTAddressLength]byte
+// NEAT address
+type Address [NEATAddressLength]byte
 
 func BytesToAddress(b []byte) Address {
 	var a Address
@@ -164,7 +164,7 @@ func IsHexAddress(s string) bool {
 		s = s[2:]
 	}
 
-	return len(s) == 2*INTAddressLength && isHex(s)
+	return len(s) == 2*NEATAddressLength && isHex(s)
 }
 
 // Get the string representation of the underlying address
@@ -203,7 +203,7 @@ func (a Address) Hex() string {
 
 //func (a Address) IsValidate() bool {
 //	addrStr := string(a[:])
-//	return crypto.ValidateINTAddr(addrStr)
+//	return crypto.ValidateNEATAddr(addrStr)
 //}
 
 // String implements the stringer interface and is used also by the logger.
@@ -226,10 +226,10 @@ func (a Address) Format(s fmt.State, c rune) {
 //}
 
 func (a *Address) SetBytes(b []byte) {
-	if len(b) > INTAddressLength {
-		b = b[len(b)-INTAddressLength:]
+	if len(b) > NEATAddressLength {
+		b = b[len(b)-NEATAddressLength:]
 	}
-	copy(a[INTAddressLength-len(b):], b)
+	copy(a[NEATAddressLength-len(b):], b)
 }
 
 // Set string `s` to a. If s is larger than len(a) it will panic

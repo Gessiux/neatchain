@@ -42,7 +42,7 @@ type State struct {
 		NeedToSave 	bool //record the number of the block which should be saved to main chain
 		EpochNumber	uint64
 	*/
-	TdmExtra *types.TendermintExtra
+	NCExtra *types.NeatConExtra
 
 	Epoch *epoch.Epoch
 	//Validators      *types.ValidatorSet
@@ -103,8 +103,8 @@ func (s *State) Copy() *State {
 			EpochNumber:     s.EpochNumber,
 			NeedToSave:      s.NeedToSave,
 		*/
-		TdmExtra: s.TdmExtra.Copy(),
-		Epoch:    s.Epoch.Copy(),
+		NCExtra: s.NCExtra.Copy(),
+		Epoch:   s.Epoch.Copy(),
 		//Validators:      s.Validators.Copy(),
 		//LastValidators:  s.LastValidators.Copy(),
 		//AppHash:         s.AppHash,
@@ -139,9 +139,9 @@ func (s *State) GetValidators() (*types.ValidatorSet, *types.ValidatorSet, error
 		return nil, nil, errors.New("epoch does not exist")
 	}
 
-	if s.TdmExtra.EpochNumber == uint64(s.Epoch.Number) {
+	if s.NCExtra.EpochNumber == uint64(s.Epoch.Number) {
 		return s.Epoch.Validators, s.Epoch.Validators, nil
-	} else if s.TdmExtra.EpochNumber == uint64(s.Epoch.Number-1) {
+	} else if s.NCExtra.EpochNumber == uint64(s.Epoch.Number-1) {
 		return s.Epoch.GetPreviousEpoch().Validators, s.Epoch.Validators, nil
 	}
 
@@ -180,7 +180,7 @@ func MakeGenesisState( /*db dbm.DB,  genDoc *types.GenesisDoc,*/ chainID string,
 	return &State{
 		//db:              db,
 		//GenesisDoc: genDoc,
-		TdmExtra: &types.TendermintExtra{
+		NCExtra: &types.NeatConExtra{
 			ChainID:         chainID,
 			Height:          0,
 			Time:            time.Now(),

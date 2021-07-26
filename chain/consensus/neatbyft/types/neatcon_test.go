@@ -16,9 +16,9 @@ var extraHex = "0x0108696e74636861696e0000000000002c0615cd7d205898b7400000000000
 var extraHex2 = "0x0108696e74636861696e000000000003713d15d1c7c6c2488b8000000000000000000020011415d14546048c69022a12e0c8605338e68a841fb30114ec299e752fd4b41f0ea3d5a4e2b350e6f3a1471b010114ca95018425ce58d2e041eb5d9eda115f181214f800000000000000010114f4fd5d4e44794f67fa797f7824dd706934970e3c000000000003713d010201405678a97feace6079d60753d636ad7358349fcd2b222e1ffff393359f2c272e5d132f435b18967010e881db0dc52055c8c50ff0ac660195c494aa85a7015c7de30100000000000000030101000000000000000300"
 var blsPubkeyHex = "0x31A9A1B8808146B846E8D919F9BF565F3F18E1F5359101B05BB41A28761F671411D824C15794553ACC74E85E5B6E67919B7C4CCFB844AC21611DD9AD2B78AA2069B988F89E9C2C6DA57A68960584D0346FFD910823DE06C55D7B151AECBBC4731F76DDA5E7202BB1EAF824F065EB43E187D14CC1EBC5C69033D42D03F699D8F2"
 
-func TestEncodeTendermintExtra(t *testing.T) {
-	var extra = TendermintExtra{}
-	extra = TendermintExtra{
+func TestEncodeNeatConExtra(t *testing.T) {
+	var extra = NeatConExtra{}
+	extra = NeatConExtra{
 		ChainID:         "neatchain",
 		Height:          uint64(11270),
 		Time:            time.Now(),
@@ -107,8 +107,8 @@ func TestValidator_Hash(t *testing.T) {
 //
 //}
 
-func TestDecodeTendermintExtra(t *testing.T) {
-	var extra = TendermintExtra{}
+func TestDecodeNeatConExtra(t *testing.T) {
+	var extra = NeatConExtra{}
 	extraByte, err := hexutil.Decode(extraHex2)
 	fmt.Printf("extraByte=%v\n\n", extraByte)
 	if err != nil {

@@ -20,7 +20,7 @@ import (
 	"errors"
 
 	"github.com/Gessiux/neatchain/chain/consensus"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/params"
@@ -34,7 +34,7 @@ var (
 // Protocol implements consensus.Engine.Protocol
 func (sb *backend) Protocol() consensus.Protocol {
 
-	sb.logger.Info("IPBFT backend protocol")
+	sb.logger.Info("NeatByFT backend protocol")
 
 	var protocolName string
 	if sb.chainConfig.NeatChainId == params.MainnetChainConfig.NeatChainId || sb.chainConfig.NeatChainId == params.TestnetChainConfig.NeatChainId {
@@ -63,13 +63,13 @@ func (sb *backend) HandleMsg(chID uint64, src consensus.Peer, msgBytes []byte) (
 // SetBroadcaster implements consensus.Handler.SetBroadcaster
 func (sb *backend) SetBroadcaster(broadcaster consensus.Broadcaster) {
 
-	sb.logger.Infof("IPBFT SetBroadcaster: %p", broadcaster)
+	sb.logger.Infof("NeatByFT SetBroadcaster: %p", broadcaster)
 	sb.broadcaster = broadcaster
 }
 
 func (sb *backend) GetBroadcaster() consensus.Broadcaster {
 
-	sb.logger.Infof("IPBFT GetBroadcaster: %p", sb.broadcaster)
+	sb.logger.Infof("NeatByFT GetBroadcaster: %p", sb.broadcaster)
 	return sb.broadcaster
 }
 
@@ -79,7 +79,7 @@ func (sb *backend) NewChainHead(block *types.Block) error {
 	if !sb.coreStarted {
 		return ErrStoppedEngine
 	}
-	go tdmTypes.FireEventFinalCommitted(sb.core.EventSwitch(), tdmTypes.EventDataFinalCommitted{block.NumberU64()})
+	go ncTypes.FireEventFinalCommitted(sb.core.EventSwitch(), ncTypes.EventDataFinalCommitted{block.NumberU64()})
 	return nil
 }
 
@@ -94,7 +94,7 @@ func (sb *backend) AddPeer(src consensus.Peer) {
 
 	/*
 		if !sb.shouldStart {
-			sb.logger.Debug("Consensus Engine (Tendermint) does not plan to start")
+			sb.logger.Debug("Consensus Engine (NeatCon) does not plan to start")
 			return
 		}
 
@@ -113,7 +113,7 @@ func (sb *backend) AddPeer(src consensus.Peer) {
 			}
 		}
 
-		sb.logger.Error("Wait for 10 sec, Consensus Engine (Tendermint) still not start, unable to add the peer to Engine")
+		sb.logger.Error("Wait for 10 sec, Consensus Engine (NeatCon) still not start, unable to add the peer to Engine")
 	*/
 }
 

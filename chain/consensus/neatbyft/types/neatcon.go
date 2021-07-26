@@ -10,7 +10,7 @@ import (
 	"github.com/Gessiux/neatchain/utilities/common/hexutil"
 )
 
-type TendermintExtra struct {
+type NeatConExtra struct {
 	ChainID         string    `json:"chain_id"`
 	Height          uint64    `json:"height"`
 	Time            time.Time `json:"time"`
@@ -25,7 +25,7 @@ type TendermintExtra struct {
 
 /*
 // EncodeRLP serializes ist into the Ethereum RLP format.
-func (te *TendermintExtra) EncodeRLP(w io.Writer) error {
+func (te *NeatConExtra) EncodeRLP(w io.Writer) error {
 	return rlp.Encode(w, []interface{}{
 		te.ChainID, te.Height, te.Time, te.LastBlockID,
 		te.SeenCommitHash, te.ValidatorsHash,
@@ -34,26 +34,26 @@ func (te *TendermintExtra) EncodeRLP(w io.Writer) error {
 }
 
 // DecodeRLP implements rlp.Decoder, and load the istanbul fields from a RLP stream.
-func (te *TendermintExtra) DecodeRLP(s *rlp.Stream) error {
-	var tdmExtra TendermintExtra
-	if err := s.Decode(&tdmExtra); err != nil {
+func (te *NeatConExtra) DecodeRLP(s *rlp.Stream) error {
+	var ncExtra NeatConExtra
+	if err := s.Decode(&ncExtra); err != nil {
 		return err
 	}
 	te.ChainID, te.Height, te.Time, te.LastBlockID,
 		te.SeenCommitHash, te.ValidatorsHash,
-		te.SeenCommit = tdmExtra.ChainID, tdmExtra.Height, tdmExtra.Time, tdmExtra.LastBlockID,
-		tdmExtra.SeenCommitHash, tdmExtra.ValidatorsHash,
-		tdmExtra.SeenCommit
+		te.SeenCommit = ncExtra.ChainID, ncExtra.Height, ncExtra.Time, ncExtra.LastBlockID,
+		ncExtra.SeenCommitHash, ncExtra.ValidatorsHash,
+		ncExtra.SeenCommit
 	return nil
 }
 */
 
 //be careful, here not deep copy because just reference to SeenCommit
-func (te *TendermintExtra) Copy() *TendermintExtra {
+func (te *NeatConExtra) Copy() *NeatConExtra {
 	//fmt.Printf("State.Copy(), s.LastValidators are %v\n",s.LastValidators)
 	//debug.PrintStack()
 
-	return &TendermintExtra{
+	return &NeatConExtra{
 		ChainID:         te.ChainID,
 		Height:          te.Height,
 		Time:            te.Time,
@@ -68,7 +68,7 @@ func (te *TendermintExtra) Copy() *TendermintExtra {
 }
 
 // NOTE: hash is nil if required fields are missing.
-func (te *TendermintExtra) Hash() []byte {
+func (te *NeatConExtra) Hash() []byte {
 	if len(te.ValidatorsHash) == 0 {
 		return nil
 	}
@@ -84,26 +84,26 @@ func (te *TendermintExtra) Hash() []byte {
 	})
 }
 
-// ExtractTendermintExtra extracts all values of the TendermintExtra from the header. It returns an
+// ExtractNeatConExtra extracts all values of the NeatConExtra from the header. It returns an
 // error if the length of the given extra-data is less than 32 bytes or the extra-data can not
 // be decoded.
-func ExtractTendermintExtra(h *ethTypes.Header) (*TendermintExtra, error) {
+func ExtractNeatConExtra(h *ethTypes.Header) (*NeatConExtra, error) {
 
 	if len(h.Extra) == 0 {
-		return &TendermintExtra{}, nil
+		return &NeatConExtra{}, nil
 	}
 
-	var tdmExtra = TendermintExtra{}
-	err := wire.ReadBinaryBytes(h.Extra[:], &tdmExtra)
-	//err := rlp.DecodeBytes(h.Extra[:], &tdmExtra)
+	var ncExtra = NeatConExtra{}
+	err := wire.ReadBinaryBytes(h.Extra[:], &ncExtra)
+	//err := rlp.DecodeBytes(h.Extra[:], &ncExtra)
 	if err != nil {
 		return nil, err
 	}
-	return &tdmExtra, nil
+	return &ncExtra, nil
 }
 
-func (te *TendermintExtra) String() string {
-	str := fmt.Sprintf(`TendermintExtra: {
+func (te *NeatConExtra) String() string {
+	str := fmt.Sprintf(`NeatConExtra: {
 ChainID:     %s
 EpochNumber: %v
 Height:      %v
@@ -115,16 +115,16 @@ EpochBytes: length %v
 	return str
 }
 
-func DecodeExtraData(extra string) (tdmExtra *TendermintExtra, err error) {
-	tdmExtra = &TendermintExtra{}
+func DecodeExtraData(extra string) (ncExtra *NeatConExtra, err error) {
+	ncExtra = &NeatConExtra{}
 	extraByte, err := hexutil.Decode(extra)
 	if err != nil {
 		return nil, err
 	}
 
-	err = wire.ReadBinaryBytes(extraByte, tdmExtra)
+	err = wire.ReadBinaryBytes(extraByte, ncExtra)
 	if err != nil {
 		return nil, err
 	}
-	return tdmExtra, nil
+	return ncExtra, nil
 }

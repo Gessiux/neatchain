@@ -28,16 +28,16 @@ type IntermediateBlockResult struct {
 	Ops      *types.PendingOps
 }
 
-type TdmBlock struct {
+type NCBlock struct {
 	Block              *types.Block             `json:"block"`
-	TdmExtra           *TendermintExtra         `json:"tdmexdata"`
+	NCExtra            *NeatConExtra            `json:"tdmexdata"`
 	TX3ProofData       []*types.TX3ProofData    `json:"tx3proofdata"`
 	IntermediateResult *IntermediateBlockResult `json:"-"`
 }
 
 func MakeBlock(height uint64, chainID string, commit *Commit,
-	block *types.Block, valHash []byte, epochNumber uint64, epochBytes []byte, tx3ProofData []*types.TX3ProofData, partSize int) (*TdmBlock, *PartSet) {
-	TdmExtra := &TendermintExtra{
+	block *types.Block, valHash []byte, epochNumber uint64, epochBytes []byte, tx3ProofData []*types.TX3ProofData, partSize int) (*NCBlock, *PartSet) {
+	NCExtra := &NeatConExtra{
 		ChainID:        chainID,
 		Height:         uint64(height),
 		Time:           time.Now(),
@@ -47,33 +47,33 @@ func MakeBlock(height uint64, chainID string, commit *Commit,
 		EpochBytes:     epochBytes,
 	}
 
-	tdmBlock := &TdmBlock{
+	ncBlock := &NCBlock{
 		Block:        block,
-		TdmExtra:     TdmExtra,
+		NCExtra:      NCExtra,
 		TX3ProofData: tx3ProofData,
 	}
-	return tdmBlock, tdmBlock.MakePartSet(partSize)
+	return ncBlock, ncBlock.MakePartSet(partSize)
 }
 
 // Basic validation that doesn't involve state data.
-func (b *TdmBlock) ValidateBasic(tdmExtra *TendermintExtra) error {
+func (b *NCBlock) ValidateBasic(ncExtra *NeatConExtra) error {
 
-	if b.TdmExtra.ChainID != tdmExtra.ChainID {
-		return errors.New(Fmt("Wrong Block.Header.ChainID. Expected %v, got %v", tdmExtra.ChainID, b.TdmExtra.ChainID))
+	if b.NCExtra.ChainID != ncExtra.ChainID {
+		return errors.New(Fmt("Wrong Block.Header.ChainID. Expected %v, got %v", ncExtra.ChainID, b.NCExtra.ChainID))
 	}
-	if b.TdmExtra.Height != tdmExtra.Height+1 {
-		return errors.New(Fmt("Wrong Block.Header.Height. Expected %v, got %v", tdmExtra.Height+1, b.TdmExtra.Height))
+	if b.NCExtra.Height != ncExtra.Height+1 {
+		return errors.New(Fmt("Wrong Block.Header.Height. Expected %v, got %v", ncExtra.Height+1, b.NCExtra.Height))
 	}
 
 	/*
-		if !b.TdmExtra.BlockID.Equals(blockID) {
-			return errors.New(Fmt("Wrong Block.Header.LastBlockID.  Expected %v, got %v", blockID, b.TdmExtra.BlockID))
+		if !b.NCExtra.BlockID.Equals(blockID) {
+			return errors.New(Fmt("Wrong Block.Header.LastBlockID.  Expected %v, got %v", blockID, b.NCExtra.BlockID))
 		}
-		if !bytes.Equal(b.TdmExtra.SeenCommitHash, b.TdmExtra.SeenCommit.Hash()) {
-			return errors.New(Fmt("Wrong Block.Header.LastCommitHash.  Expected %X, got %X", b.TdmExtra.SeenCommitHash, b.TdmExtra.SeenCommit.Hash()))
+		if !bytes.Equal(b.NCExtra.SeenCommitHash, b.NCExtra.SeenCommit.Hash()) {
+			return errors.New(Fmt("Wrong Block.Header.LastCommitHash.  Expected %X, got %X", b.NCExtra.SeenCommitHash, b.NCExtra.SeenCommit.Hash()))
 		}
-		if b.TdmExtra.Height != 1 {
-			if err := b.TdmExtra.SeenCommit.ValidateBasic(); err != nil {
+		if b.NCExtra.Height != 1 {
+			if err := b.NCExtra.SeenCommit.ValidateBasic(); err != nil {
 				return err
 			}
 		}
@@ -81,44 +81,44 @@ func (b *TdmBlock) ValidateBasic(tdmExtra *TendermintExtra) error {
 	return nil
 }
 
-func (b *TdmBlock) FillSeenCommitHash() {
-	if b.TdmExtra.SeenCommitHash == nil {
-		b.TdmExtra.SeenCommitHash = b.TdmExtra.SeenCommit.Hash()
+func (b *NCBlock) FillSeenCommitHash() {
+	if b.NCExtra.SeenCommitHash == nil {
+		b.NCExtra.SeenCommitHash = b.NCExtra.SeenCommit.Hash()
 	}
 }
 
 // Computes and returns the block hash.
 // If the block is incomplete, block hash is nil for safety.
-func (b *TdmBlock) Hash() []byte {
+func (b *NCBlock) Hash() []byte {
 	// fmt.Println(">>", b.Data)
-	if b == nil || b.TdmExtra.SeenCommit == nil {
+	if b == nil || b.NCExtra.SeenCommit == nil {
 		return nil
 	}
 	b.FillSeenCommitHash()
-	return b.TdmExtra.Hash()
+	return b.NCExtra.Hash()
 }
 
-func (b *TdmBlock) MakePartSet(partSize int) *PartSet {
+func (b *NCBlock) MakePartSet(partSize int) *PartSet {
 
 	return NewPartSetFromData(b.ToBytes(), partSize)
 }
 
-func (b *TdmBlock) ToBytes() []byte {
+func (b *NCBlock) ToBytes() []byte {
 
 	type TmpBlock struct {
 		BlockData    []byte
-		TdmExtra     *TendermintExtra
+		NCExtra      *NeatConExtra
 		TX3ProofData []*types.TX3ProofData
 	}
-	//fmt.Printf("TdmBlock.toBytes 0 with block: %v\n", b)
+	//fmt.Printf("NCBlock.toBytes 0 with block: %v\n", b)
 
 	bs, err := rlp.EncodeToBytes(b.Block)
 	if err != nil {
-		log.Warnf("TdmBlock.toBytes error\n")
+		log.Warnf("NCBlock.toBytes error\n")
 	}
 	bb := &TmpBlock{
 		BlockData:    bs,
-		TdmExtra:     b.TdmExtra,
+		NCExtra:      b.NCExtra,
 		TX3ProofData: b.TX3ProofData,
 	}
 
@@ -126,45 +126,45 @@ func (b *TdmBlock) ToBytes() []byte {
 	return ret
 }
 
-func (b *TdmBlock) FromBytes(reader io.Reader) (*TdmBlock, error) {
+func (b *NCBlock) FromBytes(reader io.Reader) (*NCBlock, error) {
 
 	type TmpBlock struct {
 		BlockData    []byte
-		TdmExtra     *TendermintExtra
+		NCExtra      *NeatConExtra
 		TX3ProofData []*types.TX3ProofData
 	}
 
-	//fmt.Printf("TdmBlock.FromBytes \n")
+	//fmt.Printf("NCBlock.FromBytes \n")
 
 	var n int
 	var err error
 	bb := wire.ReadBinary(&TmpBlock{}, reader, MaxBlockSize, &n, &err).(*TmpBlock)
 	if err != nil {
-		log.Warnf("TdmBlock.FromBytes 0 error: %v\n", err)
+		log.Warnf("NCBlock.FromBytes 0 error: %v\n", err)
 		return nil, err
 	}
 
 	var block types.Block
 	err = rlp.DecodeBytes(bb.BlockData, &block)
 	if err != nil {
-		log.Warnf("TdmBlock.FromBytes 1 error: %v\n", err)
+		log.Warnf("NCBlock.FromBytes 1 error: %v\n", err)
 		return nil, err
 	}
 
-	tdmBlock := &TdmBlock{
+	ncBlock := &NCBlock{
 		Block:        &block,
-		TdmExtra:     bb.TdmExtra,
+		NCExtra:      bb.NCExtra,
 		TX3ProofData: bb.TX3ProofData,
 	}
 
-	log.Debugf("TdmBlock.FromBytes 2 with: %v\n", tdmBlock)
-	return tdmBlock, nil
+	log.Debugf("NCBlock.FromBytes 2 with: %v\n", ncBlock)
+	return ncBlock, nil
 }
 
 // Convenience.
 // A nil block never hashes to anything.
 // Nothing hashes to a nil hash.
-func (b *TdmBlock) HashesTo(hash []byte) bool {
+func (b *NCBlock) HashesTo(hash []byte) bool {
 	if len(hash) == 0 {
 		return false
 	}
@@ -174,11 +174,11 @@ func (b *TdmBlock) HashesTo(hash []byte) bool {
 	return bytes.Equal(b.Hash(), hash)
 }
 
-func (b *TdmBlock) String() string {
+func (b *NCBlock) String() string {
 	return b.StringIndented("")
 }
 
-func (b *TdmBlock) StringIndented(indent string) string {
+func (b *NCBlock) StringIndented(indent string) string {
 	if b == nil {
 		return "nil-Block"
 	}
@@ -189,12 +189,12 @@ func (b *TdmBlock) StringIndented(indent string) string {
 %s  %v
 %s}#%X`,
 		indent, b.Block.String(),
-		indent, b.TdmExtra,
-		indent, b.TdmExtra.SeenCommit.StringIndented(indent+""),
+		indent, b.NCExtra,
+		indent, b.NCExtra.SeenCommit.StringIndented(indent+""),
 		indent, b.Hash())
 }
 
-func (b *TdmBlock) StringShort() string {
+func (b *NCBlock) StringShort() string {
 	if b == nil {
 		return "nil-Block"
 	} else {

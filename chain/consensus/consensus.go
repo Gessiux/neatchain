@@ -152,8 +152,8 @@ type EngineStartStop interface {
 	Stop() error
 }
 
-// IPBFT is a consensus engine to avoid byzantine failure
-type IPBFT interface {
+// NeatByFT is a consensus engine to avoid byzantine failure
+type NeatByFT interface {
 	Engine
 
 	EngineStartStop

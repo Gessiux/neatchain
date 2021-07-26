@@ -15,7 +15,7 @@ import (
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
-	tdmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/chain/core/rawdb"
 	"github.com/Gessiux/neatchain/chain/core/state"
@@ -98,12 +98,12 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	// Check the minimum deposit amount
 	officialMinimumDeposit := math.MustParseBig256(core.OFFICIAL_MINIMUM_DEPOSIT)
 	if minDepositAmount.Cmp(officialMinimumDeposit) == -1 {
-		return fmt.Errorf("Deposit amount is not meet the minimum official deposit amount (%v PI)", new(big.Int).Div(officialMinimumDeposit, big.NewInt(params.INT)))
+		return fmt.Errorf("Deposit amount is not meet the minimum official deposit amount (%v PI)", new(big.Int).Div(officialMinimumDeposit, big.NewInt(params.NEAT)))
 	}
 
 	// Check the startup cost
 	if startupCost.Cmp(officialMinimumDeposit) != 0 {
-		return fmt.Errorf("Startup cost is not meet the required amount (%v PI)", new(big.Int).Div(officialMinimumDeposit, big.NewInt(params.INT)))
+		return fmt.Errorf("Startup cost is not meet the required amount (%v PI)", new(big.Int).Div(officialMinimumDeposit, big.NewInt(params.NEAT)))
 	}
 
 	// Check start/end block
@@ -112,7 +112,7 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	// Check End Block already passed
-	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.NeatNode)
 	currentBlock := neatchain.BlockChain().CurrentBlock()
 	if endBlock.Cmp(currentBlock.Number()) <= 0 {
 		return errors.New("end block number has already passed")
@@ -307,12 +307,12 @@ func (cch *CrossChainHelper) UpdateNextEpoch(ep *epoch.Epoch, from common.Addres
 }
 
 func (cch *CrossChainHelper) GetHeightFromMainChain() *big.Int {
-	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.NeatNode)
 	return neatchain.BlockChain().CurrentBlock().Number()
 }
 
 func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Transaction {
-	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.NeatNode)
 	chainDb := neatchain.ChainDb()
 
 	tx, _, _, _ := rawdb.ReadTransaction(chainDb, txHash)
@@ -320,9 +320,9 @@ func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Trans
 }
 
 func (cch *CrossChainHelper) GetEpochFromMainChain() (string, *epoch.Epoch) {
-	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.IntNode)
+	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.NeatNode)
 	var ep *epoch.Epoch
-	if neatbyft, ok := neatchain.Engine().(consensus.IPBFT); ok {
+	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
 		ep = neatbyft.GetEpoch()
 	}
 	return neatchain.ChainConfig().NeatChainId, ep
@@ -341,11 +341,11 @@ func (cch *CrossChainHelper) ChangeValidators(chainId string) {
 		chain = chn
 	}
 
-	if chain == nil || chain.IntNode == nil {
+	if chain == nil || chain.NeatNode == nil {
 		return
 	}
 
-	if address, ok := chainMgr.getNodeValidator(chain.IntNode); ok {
+	if address, ok := chainMgr.getNodeValidator(chain.NeatNode); ok {
 		chainMgr.server.AddLocalValidator(chainId, address)
 	}
 }
@@ -368,36 +368,36 @@ func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
 		//return errors.New("block in the future")
 	}
 
-	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
-	chainId := tdmExtra.ChainID
+	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
 		return fmt.Errorf("invalid child chain id: %s", chainId)
 	}
 
-	if header.Nonce != (types.TendermintEmptyNonce) && !bytes.Equal(header.Nonce[:], types.TendermintNonce) {
+	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
 		return errors.New("invalid nonce")
 	}
 
-	if header.MixDigest != types.TendermintDigest {
+	if header.MixDigest != types.NeatConDigest {
 		return errors.New("invalid mix digest")
 	}
 
-	if header.UncleHash != types.TendermintNilUncleHash {
+	if header.UncleHash != types.NeatConNilUncleHash {
 		return errors.New("invalid uncle Hash")
 	}
 
-	if header.Difficulty == nil || header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+	if header.Difficulty == nil || header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 		return errors.New("invalid difficulty")
 	}
 
 	// special case: epoch 0 update
 	// TODO: how to verify this block which includes epoch 0?
-	if tdmExtra.EpochBytes != nil && len(tdmExtra.EpochBytes) != 0 {
-		ep := epoch.FromBytes(tdmExtra.EpochBytes)
+	if ncExtra.EpochBytes != nil && len(ncExtra.EpochBytes) != 0 {
+		ep := epoch.FromBytes(ncExtra.EpochBytes)
 		if ep != nil && ep.Number == 0 {
 			return nil
 		}
@@ -410,21 +410,21 @@ func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
 		if ci == nil {
 			return fmt.Errorf("chain info %s not found", chainId)
 		}
-		epoch := ci.GetEpochByBlockNumber(tdmExtra.Height)
+		epoch := ci.GetEpochByBlockNumber(ncExtra.Height)
 		if epoch == nil {
-			return fmt.Errorf("could not get epoch for block height %v", tdmExtra.Height)
+			return fmt.Errorf("could not get epoch for block height %v", ncExtra.Height)
 		}
 		valSet := epoch.Validators
-		if !bytes.Equal(valSet.Hash(), tdmExtra.ValidatorsHash) {
+		if !bytes.Equal(valSet.Hash(), ncExtra.ValidatorsHash) {
 			return errors.New("inconsistent validator set")
 		}
 
-		seenCommit := tdmExtra.SeenCommit
-		if !bytes.Equal(tdmExtra.SeenCommitHash, seenCommit.Hash()) {
+		seenCommit := ncExtra.SeenCommit
+		if !bytes.Equal(ncExtra.SeenCommitHash, seenCommit.Hash()) {
 			return errors.New("invalid committed seals")
 		}
 
-		if err = valSet.VerifyCommit(tdmExtra.ChainID, tdmExtra.Height, seenCommit); err != nil {
+		if err = valSet.VerifyCommit(ncExtra.ChainID, ncExtra.Height, seenCommit); err != nil {
 			return err
 		}
 	}
@@ -443,34 +443,34 @@ func (cch *CrossChainHelper) SaveChildChainProofDataToMainChain(bs []byte) error
 	}
 
 	header := proofData.Header
-	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
-	chainId := tdmExtra.ChainID
+	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
 		return fmt.Errorf("invalid child chain id: %s", chainId)
 	}
 
 	// here is epoch update; should be a more general mechanism
-	if len(tdmExtra.EpochBytes) != 0 {
-		ep := epoch.FromBytes(tdmExtra.EpochBytes)
+	if len(ncExtra.EpochBytes) != 0 {
+		ep := epoch.FromBytes(ncExtra.EpochBytes)
 		if ep != nil {
-			ci := core.GetChainInfo(cch.chainInfoDB, tdmExtra.ChainID)
+			ci := core.GetChainInfo(cch.chainInfoDB, ncExtra.ChainID)
 			// ChainInfo is nil means we need to wait for Child Chain to be launched, this could happened during catch-up scenario
 			if ci == nil {
 				for {
 					// wait for 3 sec and try again
 					time.Sleep(3 * time.Second)
-					ci = core.GetChainInfo(cch.chainInfoDB, tdmExtra.ChainID)
+					ci = core.GetChainInfo(cch.chainInfoDB, ncExtra.ChainID)
 					if ci != nil {
 						break
 					}
 				}
 			}
 
-			futureEpoch := ep.Number > ci.EpochNumber && tdmExtra.Height < ep.StartBlock
+			futureEpoch := ep.Number > ci.EpochNumber && ncExtra.Height < ep.StartBlock
 			if futureEpoch {
 				// Future Epoch, just save the Epoch into Chain Info DB
 				core.SaveFutureEpoch(cch.chainInfoDB, ep, chainId)
@@ -498,36 +498,36 @@ func (cch *CrossChainHelper) ValidateTX3ProofData(proofData *types.TX3ProofData)
 		//return errors.New("block in the future")
 	}
 
-	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
-	chainId := tdmExtra.ChainID
+	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
 		return fmt.Errorf("invalid child chain id: %s", chainId)
 	}
 
-	if header.Nonce != (types.TendermintEmptyNonce) && !bytes.Equal(header.Nonce[:], types.TendermintNonce) {
+	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
 		return errors.New("invalid nonce")
 	}
 
-	if header.MixDigest != types.TendermintDigest {
+	if header.MixDigest != types.NeatConDigest {
 		return errors.New("invalid mix digest")
 	}
 
-	if header.UncleHash != types.TendermintNilUncleHash {
+	if header.UncleHash != types.NeatConNilUncleHash {
 		return errors.New("invalid uncle Hash")
 	}
 
-	if header.Difficulty == nil || header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+	if header.Difficulty == nil || header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 		return errors.New("invalid difficulty")
 	}
 
 	// special case: epoch 0 update
 	// TODO: how to verify this block which includes epoch 0?
-	if tdmExtra.EpochBytes != nil && len(tdmExtra.EpochBytes) != 0 {
-		ep := epoch.FromBytes(tdmExtra.EpochBytes)
+	if ncExtra.EpochBytes != nil && len(ncExtra.EpochBytes) != 0 {
+		ep := epoch.FromBytes(ncExtra.EpochBytes)
 		if ep != nil && ep.Number == 0 {
 			return nil
 		}
@@ -537,21 +537,21 @@ func (cch *CrossChainHelper) ValidateTX3ProofData(proofData *types.TX3ProofData)
 	if ci == nil {
 		return fmt.Errorf("chain info %s not found", chainId)
 	}
-	epoch := ci.GetEpochByBlockNumber(tdmExtra.Height)
+	epoch := ci.GetEpochByBlockNumber(ncExtra.Height)
 	if epoch == nil {
-		return fmt.Errorf("could not get epoch for block height %v", tdmExtra.Height)
+		return fmt.Errorf("could not get epoch for block height %v", ncExtra.Height)
 	}
 	valSet := epoch.Validators
-	if !bytes.Equal(valSet.Hash(), tdmExtra.ValidatorsHash) {
+	if !bytes.Equal(valSet.Hash(), ncExtra.ValidatorsHash) {
 		return errors.New("inconsistent validator set")
 	}
 
-	seenCommit := tdmExtra.SeenCommit
-	if !bytes.Equal(tdmExtra.SeenCommitHash, seenCommit.Hash()) {
+	seenCommit := ncExtra.SeenCommit
+	if !bytes.Equal(ncExtra.SeenCommitHash, seenCommit.Hash()) {
 		return errors.New("invalid committed seals")
 	}
 
-	if err = valSet.VerifyCommit(tdmExtra.ChainID, tdmExtra.Height, seenCommit); err != nil {
+	if err = valSet.VerifyCommit(ncExtra.ChainID, ncExtra.Height, seenCommit); err != nil {
 		return err
 	}
 
@@ -647,29 +647,29 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //		//return errors.New("block in the future")
 //	}
 //
-//	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+//	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		return err
 //	}
 //
-//	chainId := tdmExtra.ChainID
+//	chainId := ncExtra.ChainID
 //	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
 //		return fmt.Errorf("invalid child chain id: %s", chainId)
 //	}
 //
-//	if header.Nonce != (types.TendermintEmptyNonce) && !bytes.Equal(header.Nonce[:], types.TendermintNonce) {
+//	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
 //		return errors.New("invalid nonce")
 //	}
 //
-//	if header.MixDigest != types.TendermintDigest {
+//	if header.MixDigest != types.NeatConDigest {
 //		return errors.New("invalid mix digest")
 //	}
 //
-//	if header.UncleHash != types.TendermintNilUncleHash {
+//	if header.UncleHash != types.NeatConNilUncleHash {
 //		return errors.New("invalid uncle Hash")
 //	}
 //
-//	if header.Difficulty == nil || header.Difficulty.Cmp(types.TendermintDefaultDifficulty) != 0 {
+//	if header.Difficulty == nil || header.Difficulty.Cmp(types.NeatConDefaultDifficulty) != 0 {
 //		return errors.New("invalid difficulty")
 //	}
 //
@@ -683,19 +683,19 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //	if chainId != "child_0" || isSd2mc {
 //
 //		getValidatorsFromChainInfo := false
-//		if tdmExtra.EpochBytes != nil && len(tdmExtra.EpochBytes) != 0 {
-//			ep := epoch.FromBytes(tdmExtra.EpochBytes)
+//		if ncExtra.EpochBytes != nil && len(ncExtra.EpochBytes) != 0 {
+//			ep := epoch.FromBytes(ncExtra.EpochBytes)
 //			if ep != nil && ep.Number == 0 {
 //				//Child chain just created and save the epoch info, get validators from chain info
 //				getValidatorsFromChainInfo = true
 //			}
 //		}
 //
-//		var valSet *tdmTypes.ValidatorSet = nil
+//		var valSet *ncTypes.ValidatorSet = nil
 //		if !getValidatorsFromChainInfo {
-//			ep := ci.GetEpochByBlockNumber(tdmExtra.Height)
+//			ep := ci.GetEpochByBlockNumber(ncExtra.Height)
 //			if ep == nil {
-//				return fmt.Errorf("could not get epoch for block height %v", tdmExtra.Height)
+//				return fmt.Errorf("could not get epoch for block height %v", ncExtra.Height)
 //			}
 //			valSet = ep.Validators
 //		} else {
@@ -703,7 +703,7 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //			if tdmGenesis == nil {
 //				return errors.New(fmt.Sprintf("unable to retrieve the genesis file for child chain %s", chainId))
 //			}
-//			coreGenesis, err := tdmTypes.GenesisDocFromJSON(tdmGenesis)
+//			coreGenesis, err := ncTypes.GenesisDocFromJSON(tdmGenesis)
 //			if err != nil {
 //				return err
 //			}
@@ -715,16 +715,16 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //			valSet = ep.Validators
 //		}
 //
-//		if !bytes.Equal(valSet.Hash(), tdmExtra.ValidatorsHash) {
+//		if !bytes.Equal(valSet.Hash(), ncExtra.ValidatorsHash) {
 //			return errors.New("inconsistent validator set")
 //		}
 //
-//		seenCommit := tdmExtra.SeenCommit
-//		if !bytes.Equal(tdmExtra.SeenCommitHash, seenCommit.Hash()) {
+//		seenCommit := ncExtra.SeenCommit
+//		if !bytes.Equal(ncExtra.SeenCommitHash, seenCommit.Hash()) {
 //			return errors.New("invalid committed seals")
 //		}
 //
-//		if err = valSet.VerifyCommit(tdmExtra.ChainID, tdmExtra.Height, seenCommit); err != nil {
+//		if err = valSet.VerifyCommit(ncExtra.ChainID, ncExtra.Height, seenCommit); err != nil {
 //			return err
 //		}
 //	}
@@ -749,28 +749,28 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //	log.Info("SaveChildChainProofDataToMainChainV1 - start")
 //
 //	header := proofData.Header
-//	tdmExtra, err := tdmTypes.ExtractTendermintExtra(header)
+//	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		return err
 //	}
 //
-//	chainId := tdmExtra.ChainID
+//	chainId := ncExtra.ChainID
 //	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
 //		return fmt.Errorf("invalid child chain id: %s", chainId)
 //	}
 //
 //	// here is epoch update; should be a more general mechanism
-//	if len(tdmExtra.EpochBytes) != 0 {
+//	if len(ncExtra.EpochBytes) != 0 {
 //		log.Info("SaveChildChainProofDataToMainChainV1 - Save Epoch")
-//		ep := epoch.FromBytes(tdmExtra.EpochBytes)
+//		ep := epoch.FromBytes(ncExtra.EpochBytes)
 //		if ep != nil {
-//			ci := core.GetChainInfo(cch.chainInfoDB, tdmExtra.ChainID)
+//			ci := core.GetChainInfo(cch.chainInfoDB, ncExtra.ChainID)
 //			// ChainInfo is nil means we need to wait for Child Chain to be launched, this could happened during catch-up scenario
 //			if ci == nil {
 //				return fmt.Errorf("not possible to pass verification")
 //			}
 //
-//			futureEpoch := ep.Number > ci.EpochNumber && tdmExtra.Height < ep.StartBlock
+//			futureEpoch := ep.Number > ci.EpochNumber && ncExtra.Height < ep.StartBlock
 //			if futureEpoch {
 //				// Future Epoch, just save the Epoch into Chain Info DB
 //				core.SaveFutureEpoch(cch.chainInfoDB, ep, chainId)

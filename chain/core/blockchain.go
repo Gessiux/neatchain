@@ -665,7 +665,7 @@ func (bc *BlockChain) ValidateBlock(block *types.Block) (*state.StateDB, types.R
 	}
 
 	// Header verify
-	if err := bc.engine.(consensus.IPBFT).VerifyHeaderBeforeConsensus(bc, block.Header(), true); err != nil {
+	if err := bc.engine.(consensus.NeatByFT).VerifyHeaderBeforeConsensus(bc, block.Header(), true); err != nil {
 		return nil, nil, nil, err
 	}
 
@@ -995,7 +995,7 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	triedb := bc.stateCache.TrieDB()
 
 	//we flush db within 5 blocks before/after epoch-switch to avoid rollback issues
-	tdm := bc.Engine().(consensus.IPBFT)
+	tdm := bc.Engine().(consensus.NeatByFT)
 	FORCEFULSHWINDOW := uint64(5)
 	curBlockNumber := block.NumberU64()
 	curEpoch := tdm.GetEpoch().GetEpochByBlockNumber(curBlockNumber)
@@ -1062,8 +1062,8 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	rawdb.WriteReceipts(batch, block.Hash(), block.NumberU64(), receipts)
 
 	var reorg bool
-	if _, ok := bc.engine.(consensus.IPBFT); ok {
-		// IPBFT Engine always Canon State, insert the block to the chain,
+	if _, ok := bc.engine.(consensus.NeatByFT); ok {
+		// NeatByFT Engine always Canon State, insert the block to the chain,
 		reorg = true
 	} else {
 		// If the total difficulty is higher than our known, add it to the canonical chain
@@ -1816,7 +1816,7 @@ func (bc *BlockChain) SubscribeStopMiningEvent(ch chan<- StopMiningEvent) event.
 //	bc.wg.Add(1)
 //	defer bc.wg.Done()
 //
-//	ep := bc.engine.(consensus.Tendermint).GetEpoch()
+//	ep := bc.engine.(consensus.NeatCon).GetEpoch()
 //	validators := ep.Validators.Validators
 //	height := header.Number.Uint64()
 //	blockTime := header.Time
@@ -1827,7 +1827,7 @@ func (bc *BlockChain) SubscribeStopMiningEvent(ch chan<- StopMiningEvent) event.
 //		return nil
 //	}
 //
-//	extra, err := tdmTypes.ExtractTendermintExtra(header)
+//	extra, err := ncTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		bc.logger.Debugf("update validator status decode extra data error %v", err)
 //		return err

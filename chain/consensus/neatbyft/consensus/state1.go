@@ -44,23 +44,23 @@ func (cs *ConsensusState) InitState(epoch *ep.Epoch) *sm.State {
 
 	state := sm.NewState(cs.logger)
 
-	state.TdmExtra, _ = cs.LoadLastTendermintExtra()
-	if state.TdmExtra == nil { //means it it the first block
+	state.NCExtra, _ = cs.LoadLastNeatConExtra()
+	if state.NCExtra == nil { //means it it the first block
 
 		state = sm.MakeGenesisState( /*stateDB, */ cs.chainConfig.NeatChainId, cs.logger)
 		//state.Save()
 
-		if state.TdmExtra.EpochNumber != uint64(epoch.Number) {
+		if state.NCExtra.EpochNumber != uint64(epoch.Number) {
 			cmn.Exit(cmn.Fmt("InitStateAndEpoch(), initial state error"))
 		}
 		state.Epoch = epoch
 
-		cs.logger.Infof("InitStateAndEpoch. genesis state extra: %#v, epoch validators: %v", state.TdmExtra, epoch.Validators)
+		cs.logger.Infof("InitStateAndEpoch. genesis state extra: %#v, epoch validators: %v", state.NCExtra, epoch.Validators)
 	} else {
 		state.Epoch = epoch
 		cs.ReconstructLastCommit(state)
 
-		cs.logger.Infof("InitStateAndEpoch. state extra: %#v, epoch validators: %v", state.TdmExtra, epoch.Validators)
+		cs.logger.Infof("InitStateAndEpoch. state extra: %#v, epoch validators: %v", state.NCExtra, epoch.Validators)
 	}
 
 	return state
@@ -96,7 +96,7 @@ func (cs *ConsensusState) UpdateToState(state *sm.State) {
 
 	cs.Initialize()
 
-	height := state.TdmExtra.Height + 1
+	height := state.NCExtra.Height + 1
 	// Next desired block height
 	cs.Height = height
 
@@ -110,8 +110,8 @@ func (cs *ConsensusState) UpdateToState(state *sm.State) {
 	cs.updateRoundStep(0, RoundStepNewHeight)
 	//cs.StartTime = cs.timeoutParams.Commit(cs.CommitTime)
 
-	if state.TdmExtra.ChainID == params.MainnetChainConfig.NeatChainId ||
-		state.TdmExtra.ChainID == params.TestnetChainConfig.NeatChainId {
+	if state.NCExtra.ChainID == params.MainnetChainConfig.NeatChainId ||
+		state.NCExtra.ChainID == params.TestnetChainConfig.NeatChainId {
 		cs.StartTime = cs.timeoutParams.Commit(time.Now())
 	} else {
 		if cs.CommitTime.IsZero() {
@@ -142,7 +142,7 @@ func (cs *ConsensusState) UpdateToState(state *sm.State) {
 
 // The +2/3 and other Precommit-votes for block at `height`.
 // This Commit comes from block.LastCommit for `height+1`.
-func (cs *ConsensusState) LoadBlock(height uint64) *types.TdmBlock {
+func (cs *ConsensusState) LoadBlock(height uint64) *types.NCBlock {
 
 	cr := cs.GetChainReader()
 
@@ -155,18 +155,18 @@ func (cs *ConsensusState) LoadBlock(height uint64) *types.TdmBlock {
 	if header == nil {
 		return nil
 	}
-	TdmExtra, err := types.ExtractTendermintExtra(header)
+	NCExtra, err := types.ExtractNeatConExtra(header)
 	if err != nil {
 		return nil
 	}
 
-	return &types.TdmBlock{
-		Block:    ethBlock,
-		TdmExtra: TdmExtra,
+	return &types.NCBlock{
+		Block:   ethBlock,
+		NCExtra: NCExtra,
 	}
 }
 
-func (cs *ConsensusState) LoadLastTendermintExtra() (*types.TendermintExtra, uint64) {
+func (cs *ConsensusState) LoadLastNeatConExtra() (*types.NeatConExtra, uint64) {
 
 	cr := cs.backend.ChainReader()
 
@@ -176,31 +176,31 @@ func (cs *ConsensusState) LoadLastTendermintExtra() (*types.TendermintExtra, uin
 		return nil, 0
 	}
 
-	return cs.LoadTendermintExtra(curHeight)
+	return cs.LoadNeatConExtra(curHeight)
 }
 
-func (cs *ConsensusState) LoadTendermintExtra(height uint64) (*types.TendermintExtra, uint64) {
+func (cs *ConsensusState) LoadNeatConExtra(height uint64) (*types.NeatConExtra, uint64) {
 
 	cr := cs.backend.ChainReader()
 
 	ethBlock := cr.GetBlockByNumber(height)
 	if ethBlock == nil {
-		cs.logger.Warn("LoadTendermintExtra. nil block")
+		cs.logger.Warn("LoadNeatConExtra. nil block")
 		return nil, 0
 	}
 
 	header := cr.GetHeader(ethBlock.Hash(), ethBlock.NumberU64())
-	tdmExtra, err := types.ExtractTendermintExtra(header)
+	ncExtra, err := types.ExtractNeatConExtra(header)
 	if err != nil {
-		cs.logger.Warnf("LoadTendermintExtra. error: %v", err)
+		cs.logger.Warnf("LoadNeatConExtra. error: %v", err)
 		return nil, 0
 	}
 
 	blockHeight := ethBlock.NumberU64()
-	if tdmExtra.Height != blockHeight {
-		cs.logger.Warnf("extra.height:%v, block.Number %v, reset it", tdmExtra.Height, blockHeight)
-		tdmExtra.Height = blockHeight
+	if ncExtra.Height != blockHeight {
+		cs.logger.Warnf("extra.height:%v, block.Number %v, reset it", ncExtra.Height, blockHeight)
+		ncExtra.Height = blockHeight
 	}
 
-	return tdmExtra, tdmExtra.Height
+	return ncExtra, ncExtra.Height
 }

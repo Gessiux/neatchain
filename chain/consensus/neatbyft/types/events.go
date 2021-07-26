@@ -84,7 +84,7 @@ var _ = wire.RegisterInterface(
 // but some (an input to a call tx or a receive) are more exotic
 
 type EventDataNewBlock struct {
-	Block *TdmBlock `json:"block"`
+	Block *NCBlock `json:"block"`
 }
 
 // light weight event for benchmarking

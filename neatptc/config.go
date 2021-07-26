@@ -110,8 +110,8 @@ type Config struct {
 	// Enables tracking of SHA3 preimages in the VM
 	EnablePreimageRecording bool
 
-	// Tendermint options
-	IPBFT neatbyft.Config
+	// NeatCon options
+	NeatByFT neatbyft.Config
 
 	// Miscellaneous options
 	DocRoot string `toml:"-"`

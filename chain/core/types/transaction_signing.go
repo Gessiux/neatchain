@@ -263,7 +263,7 @@ func recoverPlain(sighash common.Hash, R, S, Vb *big.Int, homestead bool) (commo
 	}
 	var addr common.Address
 	//copy(addr[:], crypto.Keccak256(pub[1:])[12:])
-	copy(addr[:], []byte(crypto.NewINTScriptAddr(pub)))
+	copy(addr[:], []byte(crypto.NewNEATScriptAddr(pub)))
 	return addr, nil
 }
 

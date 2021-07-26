@@ -12,7 +12,7 @@ import (
 	tmcfg "github.com/Gessiux/neatchain/chain/consensus/neatbyft/config/neatcon"
 )
 
-func GetTendermintConfig(chainId string, ctx *cli.Context) cfg.Config {
+func GetNeatConConfig(chainId string, ctx *cli.Context) cfg.Config {
 	datadir := ctx.GlobalString(DataDirFlag.Name)
 	config := tmcfg.GetConfig(datadir, chainId)
 

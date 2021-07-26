@@ -65,7 +65,7 @@ func TestValidatorSet_Hash(t *testing.T) {
 	fmt.Printf("validatorset validatorset hash %v\n", valSet.Hash())
 	fmt.Printf("validatorset validatorset hash hex %v\n\n", hexutil.Encode(valSet.Hash()))
 
-	var extraData TendermintExtra
+	var extraData NeatConExtra
 	bytes, err := hexutil.Decode(extraTreeVal)
 	if err != nil {
 		t.Fatal(err)

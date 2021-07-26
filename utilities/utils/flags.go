@@ -479,7 +479,7 @@ var (
 	}
 
 	// ----------------------------
-	// Tendermint Flags
+	// NeatCon Flags
 
 	MonikerFlag = cli.StringFlag{
 		Name:  "moniker",
@@ -1230,7 +1230,7 @@ var (
 	Config cfg.Config
 )
 
-func GetTendermintConfig(chainId string, ctx *cli.Context) cfg.Config {
+func GetNeatConConfig(chainId string, ctx *cli.Context) cfg.Config {
 	datadir := ctx.GlobalString(DataDirFlag.Name)
 	config := tmcfg.GetConfig(datadir, chainId)
 

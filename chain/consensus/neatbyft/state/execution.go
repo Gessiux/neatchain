@@ -16,10 +16,10 @@ import (
 // return a bit array of validators that signed the last commit
 // NOTE: assumes commits have already been authenticated
 /*
-func commitBitArrayFromBlock(block *types.TdmBlock) *BitArray {
+func commitBitArrayFromBlock(block *types.NCBlock) *BitArray {
 
-	signed := NewBitArray(uint64(len(block.TdmExtra.SeenCommit.Precommits)))
-	for i, precommit := range block.TdmExtra.SeenCommit.Precommits {
+	signed := NewBitArray(uint64(len(block.NCExtra.SeenCommit.Precommits)))
+	for i, precommit := range block.NCExtra.SeenCommit.Precommits {
 		if precommit != nil {
 			signed.SetIndex(uint64(i), true) // val_.LastCommitHeight = block.Height - 1
 		}
@@ -30,27 +30,27 @@ func commitBitArrayFromBlock(block *types.TdmBlock) *BitArray {
 //-----------------------------------------------------
 // Validate block
 
-func (s *State) ValidateBlock(block *types.TdmBlock) error {
+func (s *State) ValidateBlock(block *types.NCBlock) error {
 	return s.validateBlock(block)
 }
 
 //Very current block
-func (s *State) validateBlock(block *types.TdmBlock) error {
+func (s *State) validateBlock(block *types.NCBlock) error {
 	// Basic block validation.
-	err := block.ValidateBasic(s.TdmExtra)
+	err := block.ValidateBasic(s.NCExtra)
 	if err != nil {
 		return err
 	}
 
 	// Validate block SeenCommit.
-	epoch := s.Epoch.GetEpochByBlockNumber(block.TdmExtra.Height)
+	epoch := s.Epoch.GetEpochByBlockNumber(block.NCExtra.Height)
 	if epoch == nil || epoch.Validators == nil {
 		return errors.New("no epoch for current block height")
 	}
 
 	valSet := epoch.Validators
-	err = valSet.VerifyCommit(block.TdmExtra.ChainID, block.TdmExtra.Height,
-		block.TdmExtra.SeenCommit)
+	err = valSet.VerifyCommit(block.NCExtra.ChainID, block.NCExtra.Height,
+		block.NCExtra.SeenCommit)
 	if err != nil {
 		return err
 	}
@@ -70,11 +70,11 @@ func updateLocalEpoch(bc *core.BlockChain, block *ethTypes.Block) {
 		return
 	}
 
-	tdmExtra, _ := types.ExtractTendermintExtra(block.Header())
+	ncExtra, _ := types.ExtractNeatConExtra(block.Header())
 	//here handles the proposed next epoch
-	epochInBlock := ep.FromBytes(tdmExtra.EpochBytes)
+	epochInBlock := ep.FromBytes(ncExtra.EpochBytes)
 
-	eng := bc.Engine().(consensus.IPBFT)
+	eng := bc.Engine().(consensus.NeatByFT)
 	currentEpoch := eng.GetEpoch()
 
 	if epochInBlock != nil {
@@ -113,7 +113,7 @@ func updateLocalEpoch(bc *core.BlockChain, block *ethTypes.Block) {
 }
 
 func autoStartMining(bc *core.BlockChain, block *ethTypes.Block) {
-	eng := bc.Engine().(consensus.IPBFT)
+	eng := bc.Engine().(consensus.NeatByFT)
 	currentEpoch := eng.GetEpoch()
 
 	// At one block before epoch end block, we should able to calculate the new validator
