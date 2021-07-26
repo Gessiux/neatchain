@@ -26,7 +26,7 @@ import (
 	sm "github.com/Gessiux/neatchain/chain/consensus/neatbyft/state"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/crypto"
@@ -330,7 +330,7 @@ type ConsensusState struct {
 
 	done chan struct{}
 
-	blockFromMiner *ethTypes.Block
+	blockFromMiner *neatTypes.Block
 	backend        Backend
 
 	conR *ConsensusReactor
@@ -1092,8 +1092,8 @@ func (cs *ConsensusState) createProposalBlock() (*types.NCBlock, *types.PartSet)
 			return nil, nil
 		}
 
-		intBlock := cs.blockFromMiner
-		//fmt.Printf("consensus state createProposalBlock intBlock=%v\n", intBlock)
+		neatBlock := cs.blockFromMiner
+		//fmt.Printf("consensus state createProposalBlock neatBlock=%v\n", neatBlock)
 		var commit = &types.Commit{}
 		var epochBytes []byte
 
@@ -1127,8 +1127,8 @@ func (cs *ConsensusState) createProposalBlock() (*types.NCBlock, *types.PartSet)
 		//cs.blockFromMiner = nil
 
 		// retrieve TX3ProofData for TX4
-		var tx3ProofData []*ethTypes.TX3ProofData
-		txs := intBlock.Transactions()
+		var tx3ProofData []*neatTypes.TX3ProofData
+		txs := neatBlock.Transactions()
 		for _, tx := range txs {
 			if neatAbi.IsNeatChainContractAddr(tx.To()) {
 				data := tx.Data()
@@ -1152,7 +1152,7 @@ func (cs *ConsensusState) createProposalBlock() (*types.NCBlock, *types.PartSet)
 			}
 		}
 
-		return types.MakeBlock(cs.Height, cs.state.NCExtra.ChainID, commit, intBlock,
+		return types.MakeBlock(cs.Height, cs.state.NCExtra.ChainID, commit, neatBlock,
 			val.Hash(), cs.Epoch.Number, epochBytes,
 			tx3ProofData, 65536)
 	} else {
@@ -2078,14 +2078,14 @@ func (cs *ConsensusState) ValidateTX4(b *types.NCBlock) error {
 	return nil
 }
 
-func (cs *ConsensusState) saveBlockToMainChain(block *ethTypes.Block) {
+func (cs *ConsensusState) saveBlockToMainChain(block *neatTypes.Block) {
 
 	client := cs.cch.GetClient()
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	//ctx := context.Background() // testing only!
 
 	bs := []byte{}
-	proofData, err := ethTypes.NewChildChainProofData(block)
+	proofData, err := neatTypes.NewChildChainProofData(block)
 	if err != nil {
 		cs.logger.Error("saveDataToMainChain: failed to create proof data", "block", block, "err", err)
 		return
@@ -2151,12 +2151,12 @@ func (cs *ConsensusState) saveBlockToMainChain(block *ethTypes.Block) {
 	cs.logger.Error("saveDataToMainChain: tx not packaged in any block after 3 blocks in main chain")
 }
 
-func (cs *ConsensusState) broadcastTX3ProofDataToMainChain(block *ethTypes.Block) {
+func (cs *ConsensusState) broadcastTX3ProofDataToMainChain(block *neatTypes.Block) {
 	client := cs.cch.GetClient()
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	//ctx := context.Background() // testing only!
 
-	proofData, err := ethTypes.NewTX3ProofData(block)
+	proofData, err := neatTypes.NewTX3ProofData(block)
 	if err != nil {
 		cs.logger.Error("broadcastTX3ProofDataToMainChain: failed to create proof data", "block", block, "err", err)
 		return

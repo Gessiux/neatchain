@@ -10,7 +10,7 @@ import (
 	. "github.com/Gessiux/go-common"
 	"github.com/Gessiux/go-crypto"
 	"github.com/Gessiux/go-wire"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/utilities/common"
 )
 
@@ -97,7 +97,7 @@ type SwitchEpochOp struct {
 	NewValidators *ValidatorSet
 }
 
-func (op *SwitchEpochOp) Conflict(op1 ethTypes.PendingOp) bool {
+func (op *SwitchEpochOp) Conflict(op1 neatTypes.PendingOp) bool {
 	if _, ok := op1.(*SwitchEpochOp); ok {
 		// Only one SwitchEpochOp is allowed in each block
 		return true

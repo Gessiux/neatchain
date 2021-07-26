@@ -6,7 +6,7 @@ import (
 
 	"github.com/Gessiux/go-merkle"
 	"github.com/Gessiux/go-wire"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/utilities/common/hexutil"
 )
 
@@ -87,7 +87,7 @@ func (te *NeatConExtra) Hash() []byte {
 // ExtractNeatConExtra extracts all values of the NeatConExtra from the header. It returns an
 // error if the length of the given extra-data is less than 32 bytes or the extra-data can not
 // be decoded.
-func ExtractNeatConExtra(h *ethTypes.Header) (*NeatConExtra, error) {
+func ExtractNeatConExtra(h *neatTypes.Header) (*NeatConExtra, error) {
 
 	if len(h.Extra) == 0 {
 		return &NeatConExtra{}, nil

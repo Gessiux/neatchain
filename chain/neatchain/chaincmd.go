@@ -43,8 +43,8 @@ import (
 )
 
 var (
-	initINTGenesisCmd = cli.Command{
-		Action:    utils.MigrateFlags(initIntGenesis),
+	initNEATGenesisCmd = cli.Command{
+		Action:    utils.MigrateFlags(initNeatGenesis),
 		Name:      "init-neatchain",
 		Usage:     "Initialize NEAT genesis.json file. init-neatchain {\"1000000000000000000000000000\",\"100000000000000000000000\"}",
 		ArgsUsage: "<genesisPath>",

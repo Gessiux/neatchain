@@ -8,7 +8,7 @@ import (
 	ep "github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 )
 
 //--------------------------------------------------
@@ -65,7 +65,7 @@ func init() {
 	core.RegisterInsertBlockCb("AutoStartMining", autoStartMining)
 }
 
-func updateLocalEpoch(bc *core.BlockChain, block *ethTypes.Block) {
+func updateLocalEpoch(bc *core.BlockChain, block *neatTypes.Block) {
 	if block.NumberU64() == 0 {
 		return
 	}
@@ -112,7 +112,7 @@ func updateLocalEpoch(bc *core.BlockChain, block *ethTypes.Block) {
 	}
 }
 
-func autoStartMining(bc *core.BlockChain, block *ethTypes.Block) {
+func autoStartMining(bc *core.BlockChain, block *neatTypes.Block) {
 	eng := bc.Engine().(consensus.NeatByFT)
 	currentEpoch := eng.GetEpoch()
 

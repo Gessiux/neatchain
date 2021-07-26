@@ -130,16 +130,16 @@ func (n *Node) OnStop() {
 }
 
 //update the state with new insert block information
-//func (n *Node) SaveState(block *ethTypes.Block) {
+//func (n *Node) SaveState(block *neatTypes.Block) {
 //
 //	epoch := n.consensusState.Epoch
 //	state := n.consensusState.GetState()
 //
-//	fmt.Printf("(n *Node) SaveState(block *ethTypes.Block) with state.height = %v, block.height = %v\n",
+//	fmt.Printf("(n *Node) SaveState(block *neatTypes.Block) with state.height = %v, block.height = %v\n",
 //		uint64(state.NCExtra.Height), block.NumberU64())
 //
 //	if uint64(state.NCExtra.Height) != block.NumberU64() {
-//		fmt.Printf("(n *Node) SaveState(block *ethTypes.Block)， block height not equal\n")
+//		fmt.Printf("(n *Node) SaveState(block *neatTypes.Block)， block height not equal\n")
 //	}
 //
 //	epoch.Save()

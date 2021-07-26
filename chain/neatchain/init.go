@@ -55,7 +55,7 @@ func (invalid InvalidArgs) Error() string {
 	return "invalid args:" + invalid.args
 }
 
-func initIntGenesis(ctx *cli.Context) error {
+func initNeatGenesis(ctx *cli.Context) error {
 	log.Info("this is init-neatchain")
 	args := ctx.Args()
 	if len(args) != 1 {
@@ -117,9 +117,9 @@ func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) erro
 		utils.Fatalf("marshal coreGenesis failed")
 		return err
 	}
-	intGenesisPath := config.GetString("neat_genesis_file")
+	neatGenesisPath := config.GetString("neat_genesis_file")
 
-	if err = ioutil.WriteFile(intGenesisPath, contents, 0654); err != nil {
+	if err = ioutil.WriteFile(neatGenesisPath, contents, 0654); err != nil {
 		utils.Fatalf("write neat_genesis_file failed")
 		return err
 	}
@@ -129,9 +129,9 @@ func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) erro
 func initCmd(ctx *cli.Context) error {
 
 	// int genesis.json
-	intGenesisPath := ctx.Args().First()
-	fmt.Printf("int genesis path %v\n", intGenesisPath)
-	if len(intGenesisPath) == 0 {
+	neatGenesisPath := ctx.Args().First()
+	fmt.Printf("int genesis path %v\n", neatGenesisPath)
+	if len(neatGenesisPath) == 0 {
 		utils.Fatalf("must supply path to genesis JSON file")
 	}
 
@@ -143,7 +143,7 @@ func initCmd(ctx *cli.Context) error {
 		}
 	}
 
-	return init_cmd(ctx, utils.GetNeatConConfig(chainId, ctx), chainId, intGenesisPath)
+	return init_cmd(ctx, utils.GetNeatConConfig(chainId, ctx), chainId, neatGenesisPath)
 }
 
 func InitChildChainCmd(ctx *cli.Context) error {
@@ -190,16 +190,16 @@ func InitChildChainCmd(ctx *cli.Context) error {
 	return nil
 }
 
-func init_cmd(ctx *cli.Context, config cfg.Config, chainId string, intGenesisPath string) error {
+func init_cmd(ctx *cli.Context, config cfg.Config, chainId string, neatGenesisPath string) error {
 
-	init_neatchain(chainId, intGenesisPath, ctx)
+	init_neatchain(chainId, neatGenesisPath, ctx)
 
-	init_em_files(config, chainId, intGenesisPath, nil)
+	init_em_files(config, chainId, neatGenesisPath, nil)
 
 	return nil
 }
 
-func init_neatchain(chainId string, intGenesisPath string, ctx *cli.Context) {
+func init_neatchain(chainId string, neatGenesisPath string, ctx *cli.Context) {
 
 	dbPath := filepath.Join(utils.MakeDataDir(ctx), chainId, clientIdentifier, "/chaindata")
 	log.Infof("init_neatchain 0 with dbPath: %s", dbPath)
@@ -211,7 +211,7 @@ func init_neatchain(chainId string, intGenesisPath string, ctx *cli.Context) {
 	defer chainDb.Close()
 
 	log.Info("init_neatchain 1")
-	genesisFile, err := os.Open(intGenesisPath)
+	genesisFile, err := os.Open(neatGenesisPath)
 	if err != nil {
 		utils.Fatalf("failed to read genesis file: %v", err)
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
 	"github.com/Gessiux/neatchain/chain/core"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/common"
@@ -34,7 +34,7 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 		//core:             node,
 		//chain:     chain,
 		logger:    chainConfig.ChainLogger,
-		commitCh:  make(chan *ethTypes.Block, 1),
+		commitCh:  make(chan *neatTypes.Block, 1),
 		vcommitCh: make(chan *types.IntermediateBlockResult, 1),
 		//recents:          recents,
 		//candidates:  make(map[common.Address]bool),
@@ -55,11 +55,11 @@ type backend struct {
 	core            *Node
 	logger          log.Logger
 	chain           consensus.ChainReader
-	currentBlock    func() *ethTypes.Block
+	currentBlock    func() *neatTypes.Block
 	hasBadBlock     func(hash common.Hash) bool
 
 	// the channels for istanbul engine notifications
-	commitCh          chan *ethTypes.Block
+	commitCh          chan *neatTypes.Block
 	vcommitCh         chan *types.IntermediateBlockResult
 	proposedBlockHash common.Hash
 	sealMu            sync.Mutex

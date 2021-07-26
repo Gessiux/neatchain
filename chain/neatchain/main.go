@@ -107,11 +107,11 @@ func init() {
 	// Initialize the CLI app and start neatchain
 	app.Action = neatchainCmd
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2018-2020 The NEAT Chain Authors"
+	app.Copyright = "Copyright 2021 Neatio Developers"
 	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		createValidatorCmd,
-		initINTGenesisCmd,
+		initNEATGenesisCmd,
 		initCommand,
 		//initChildChainCmd,
 		importCommand,

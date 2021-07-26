@@ -5,7 +5,7 @@ import (
 	. "github.com/Gessiux/go-common"
 	"github.com/Gessiux/go-events"
 	"github.com/Gessiux/go-wire"
-	ethTypes "github.com/Gessiux/neatchain/chain/core/types"
+	neatTypes "github.com/Gessiux/neatchain/chain/core/types"
 )
 
 // Functions to generate eventId strings
@@ -126,7 +126,7 @@ type EventDataVote2Proposer struct {
 
 // EventDataRequest is posted to propose a proposal
 type EventDataRequest struct {
-	Proposal *ethTypes.Block `json:"proposal"`
+	Proposal *neatTypes.Block `json:"proposal"`
 }
 
 // EventDataMessage is posted for Istanbul engine communication
