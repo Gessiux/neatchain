@@ -1903,18 +1903,18 @@ var unitMap = {
     'microether':   '1000000000000',
     'micro':        '1000000000000',
     'finney':       '1000000000000000',
-    'milliether':    '1000000000000000',
-    'milli':         '1000000000000000',
+    'milliether':   '1000000000000000',
+    'milli':        '1000000000000000',
     'ether':        '1000000000000000000',
-    'int':        '1000000000000000000',
+    'neat':         '1000000000000000000',
     'kether':       '1000000000000000000000',
-    'kint':       '1000000000000000000000',
+    'kneat':        '1000000000000000000000',
     'grand':        '1000000000000000000000',
     'mether':       '1000000000000000000000000',
-    'mint':       '1000000000000000000000000',
+    'mneat':        '1000000000000000000000000',
     'gether':       '1000000000000000000000000000',
-    'gint':       '1000000000000000000000000000',
-    'tint':       '1000000000000000000000000000000',
+    'gneat':        '1000000000000000000000000000',
+    'tneat':        '1000000000000000000000000000000',
     'tether':       '1000000000000000000000000000000'
 };
 
@@ -2544,7 +2544,7 @@ function Web3 (provider) {
     this._requestManager = new RequestManager(provider);
     this.currentProvider = provider;
     this.eth = new Eth(this);
-    this.int = new Eth(this);
+    this.neat = new Eth(this);
     this.db = new DB(this);
     this.shh = new Shh(this);
     this.net = new Net(this);

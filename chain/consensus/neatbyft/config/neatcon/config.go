@@ -64,7 +64,7 @@ func GetConfig(rootDir, chainId string) cfg.Config {
 	mapConfig.SetRequired("chain_id") // blows up if you try to use it before setting.
 	mapConfig.SetDefault("chain_id", chainId)
 	mapConfig.SetDefault("genesis_file", filepath.Join(rootDir, chainId, "genesis.json"))
-	mapConfig.SetDefault("neat_genesis_file", filepath.Join(rootDir, chainId, "int_genesis.json"))
+	mapConfig.SetDefault("neat_genesis_file", filepath.Join(rootDir, chainId, "neat_genesis.json"))
 	mapConfig.SetDefault("keystore", filepath.Join(rootDir, chainId, "keystore"))
 	//mapConfig.SetDefault("proxy_app", "tcp://127.0.0.1:46658")
 	//mapConfig.SetDefault("abci", "socket")

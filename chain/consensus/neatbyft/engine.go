@@ -83,7 +83,7 @@ var (
 // APIs returns the RPC APIs this consensus engine provides.
 func (sb *backend) APIs(chain consensus.ChainReader) []rpc.API {
 	return []rpc.API{{
-		Namespace: "int",
+		Namespace: "neat",
 		Version:   "1.0",
 		Service:   &API{chain: chain, neatcon: sb},
 		Public:    true,

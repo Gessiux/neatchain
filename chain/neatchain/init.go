@@ -34,8 +34,7 @@ import (
 )
 
 const (
-	POSReward = "200000000000000000000000000" // 2亿
-	//LockReward = "11500000000000000000000000"  // 11.5m
+	POSReward = "200000000000000000000000000"
 
 	TotalYear = 10
 
@@ -72,14 +71,14 @@ func initNeatGenesis(ctx *cli.Context) error {
 	}
 	log.Infof("this is init-neatchain chainId %v", chainId)
 	log.Info("this is init-neatchain" + ctx.GlobalString(utils.DataDirFlag.Name) + "--" + ctx.Args()[0])
-	return init_int_genesis(utils.GetNeatConConfig(chainId, ctx), balance_str, isMainnet)
+	return init_neat_genesis(utils.GetNeatConConfig(chainId, ctx), balance_str, isMainnet)
 }
 
-func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) error {
+func init_neat_genesis(config cfg.Config, balanceStr string, isMainnet bool) error {
 
 	balanceAmounts, err := parseBalaceAmount(balanceStr)
 	if err != nil {
-		utils.Fatalf("init int-neatchain failed")
+		utils.Fatalf("init neatchain failed")
 		return err
 	}
 
@@ -128,7 +127,6 @@ func init_int_genesis(config cfg.Config, balanceStr string, isMainnet bool) erro
 
 func initCmd(ctx *cli.Context) error {
 
-	// int genesis.json
 	neatGenesisPath := ctx.Args().First()
 	fmt.Printf("int genesis path %v\n", neatGenesisPath)
 	if len(neatGenesisPath) == 0 {
@@ -147,14 +145,13 @@ func initCmd(ctx *cli.Context) error {
 }
 
 func InitChildChainCmd(ctx *cli.Context) error {
-	// Load ChainInfo db
+
 	chainInfoDb := dbm.NewDB("chaininfo", "leveldb", ctx.GlobalString(utils.DataDirFlag.Name))
 	if chainInfoDb == nil {
 		return errors.New("could not open chain info database")
 	}
 	defer chainInfoDb.Close()
 
-	// Initial Child Chain Genesis
 	childChainIds := ctx.GlobalString("childChain")
 	if childChainIds == "" {
 		return errors.New("please provide child chain id to initialization")
@@ -169,17 +166,14 @@ func InitChildChainCmd(ctx *cli.Context) error {
 
 		childConfig := utils.GetNeatConConfig(chainId, ctx)
 
-		// Write down genesis and get the genesis path
 		ethGenesisPath := childConfig.GetString("neat_genesis_file")
 		if err := ioutil.WriteFile(ethGenesisPath, ethGenesis, 0644); err != nil {
 			utils.Fatalf("write neat_genesis_file failed")
 			return err
 		}
 
-		// Init the blockchain from genesis path
 		init_neatchain(chainId, ethGenesisPath, ctx)
 
-		// Write down TDM Genesis directly
 		if err := ioutil.WriteFile(childConfig.GetString("genesis_file"), tdmGenesis, 0644); err != nil {
 			utils.Fatalf("write tdm genesis_file failed")
 			return err
@@ -265,18 +259,17 @@ func init_em_files(config cfg.Config, chainId string, genesisPath string, valida
 	}
 
 	var privValidator *types.PrivValidator
-	// validators == nil means we are init the Genesis from priv_validator, not from runtime GenesisValidator
+
 	if validators == nil {
 		privValPath := config.GetString("priv_validator_file")
 		if _, err := os.Stat(privValPath); os.IsNotExist(err) {
 			log.Info("priv_validator_file not exist, probably you are running in non-mining mode")
 			return nil
 		}
-		// Now load the priv_validator_file
+
 		privValidator = types.LoadPrivValidator(privValPath)
 	}
 
-	// Create the Genesis Doc
 	if err := createGenesisDoc(config, chainId, &coreGenesis, privValidator, validators); err != nil {
 		utils.Fatalf("failed to write genesis file: %v", err)
 		return err
@@ -407,12 +400,12 @@ func createPriValidators(config cfg.Config, num int) []*types.PrivValidator {
 
 	privValFile := config.GetString("priv_validator_file_root")
 	for i := 0; i < num; i++ {
-		// Create New NeatChain Account
+
 		account, err := ks.NewAccount(DefaultAccountPassword)
 		if err != nil {
 			utils.Fatalf("Failed to create NeatChain account: %v", err)
 		}
-		// Generate Consensus KeyPair
+
 		validators[i] = types.GenPrivValidatorKey(account.Address)
 		log.Info("createPriValidators", "account:", validators[i].Address, "pwd:", DefaultAccountPassword)
 		if i > 0 {
@@ -490,7 +483,6 @@ func generateETHGenesis(childChainID string, validators []types.GenesisValidator
 		}
 	}
 
-	// Add Child Chain Default Token
 	coreGenesis.Alloc[abi.ChildChainTokenIncentiveAddr] = core.GenesisAccount{
 		Balance: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
 		Amount:  common.Big0,

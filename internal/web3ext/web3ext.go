@@ -23,7 +23,7 @@ var Modules = map[string]string{
 	"clique":     Clique_JS,
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
-	"int":        INT_JS,
+	"neat":       NEAT_JS,
 	"miner":      Miner_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
@@ -32,10 +32,6 @@ var Modules = map[string]string{
 	"swarmfs":    SWARMFS_JS,
 	"txpool":     TxPool_JS,
 	"istanbul":   Istanbul_JS,
-	//// NeatChain JS
-	//"chain": Chain_JS,
-	//"tdm":   Tdm_JS,
-	//"del":   Del_JS,
 }
 
 const Chequebook_JS = `
@@ -465,175 +461,175 @@ web3._extend({
 });
 `
 
-const INT_JS = `
+const NEAT_JS = `
 web3._extend({
-	property: 'int',
+	property: 'neat',
 	methods: [
 		new web3._extend.Method({
 			name: 'sign',
-			call: 'int_sign',
+			call: 'neat_sign',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
 		}),
 		new web3._extend.Method({
 			name: 'resend',
-			call: 'int_resend',
+			call: 'neat_resend',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter, web3._extend.utils.fromDecimal, web3._extend.utils.fromDecimal]
 		}),
 		new web3._extend.Method({
 			name: 'signTransaction',
-			call: 'int_signTransaction',
+			call: 'neat_signTransaction',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'submitTransaction',
-			call: 'int_submitTransaction',
+			call: 'neat_submitTransaction',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputTransactionFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'getRawTransaction',
-			call: 'int_getRawTransactionByHash',
+			call: 'neat_getRawTransactionByHash',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'getRawTransactionFromBlock',
 			call: function(args) {
-				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'int_getRawTransactionByBlockHashAndIndex' : 'int_getRawTransactionByBlockNumberAndIndex';
+				return (web3._extend.utils.isString(args[0]) && args[0].indexOf('0x') === 0) ? 'neat_getRawTransactionByBlockHashAndIndex' : 'neat_getRawTransactionByBlockNumberAndIndex';
 			},
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter, web3._extend.utils.toHex]
 		}),
 		new web3._extend.Method({
 			name: 'getBalanceDetail',
-			call: 'int_getBalanceDetail',
+			call: 'neat_getBalanceDetail',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter, null]
 		}),
 		new web3._extend.Method({
 			name: 'signAddress',
-			call: 'int_signAddress',
+			call: 'neat_signAddress',
 			params: 2
 		}),
 		new web3._extend.Method({
 			name: 'getBlockReward',
-			call: 'int_getBlockReward',
+			call: 'neat_getBlockReward',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'withdrawReward',
-			call: 'int_withdrawReward',
+			call: 'neat_withdrawReward',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputAddressFormatter, null]
 		}),
 		new web3._extend.Method({
 			name: 'voteNextEpoch',
-			call: 'int_voteNextEpoch',
+			call: 'neat_voteNextEpoch',
 			params: 3
 		}),
 		new web3._extend.Method({
 			name: 'revealVote',
-			call: 'int_revealVote',
+			call: 'neat_revealVote',
 			params: 6
 		}),
 		new web3._extend.Method({
 			name: 'getCurrentEpochNumber',
-			call: 'int_getCurrentEpochNumber'
+			call: 'neat_getCurrentEpochNumber'
 		}),
 		new web3._extend.Method({
 			name: 'getEpoch',
-			call: 'int_getEpoch',
+			call: 'neat_getEpoch',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'getNextEpochVote',
-			call: 'int_getNextEpochVote'
+			call: 'neat_getNextEpochVote'
 		}),
 		new web3._extend.Method({
 			name: 'getNextEpochValidators',
-			call: 'int_getNextEpochValidators'
+			call: 'neat_getNextEpochValidators'
 		}),
 		new web3._extend.Method({
 			name: 'getValidatorStatus',
-			call: 'int_getValidatorStatus',
+			call: 'neat_getValidatorStatus',
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'unForbidden',
-			call: 'int_unForbidden',
+			call: 'neat_unForbidden',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null]
 		}),
 		new web3._extend.Method({
 			name: 'editValidator',
-			call: 'int_editValidator',
+			call: 'neat_editValidator',
 			params: 6,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null, null, null, null]
 		}),
 		new web3._extend.Method({
 			name: 'getVoteHash',
-			call: 'int_getVoteHash',
+			call: 'neat_getVoteHash',
 			params: 4,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null, null]
 		}),
 		new web3._extend.Method({
 			name: 'getConsensusPublicKey',
-			call: 'int_getConsensusPublicKey',
+			call: 'neat_getConsensusPublicKey',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'decodeExtraData',
-			call: 'int_decodeExtraData',
+			call: 'neat_decodeExtraData',
 			params: 1
 		}),
 		new web3._extend.Method({
 			name: 'getCandidateList',
-			call: 'int_getCandidateList',
+			call: 'neat_getCandidateList',
 			params: 0
 		}),
 		new web3._extend.Method({
 			name: 'getForbiddenList',
-			call: 'int_getForbiddenList',
+			call: 'neat_getForbiddenList',
 			params: 0
 		}),
 		new web3._extend.Method({
 			name: 'delegate',
-			call: 'int_delegate',
+			call: 'neat_delegate',
 			params: 4
 		}),
 		new web3._extend.Method({
 			name: 'unDelegate',
-			call: 'int_unDelegate',
+			call: 'neat_unDelegate',
 			params: 4
 		}),
 		new web3._extend.Method({
 			name: 'register',
-			call: 'int_register',
+			call: 'neat_register',
 			params: 6
 		}),
 		new web3._extend.Method({
 			name: 'unRegister',
-			call: 'int_unRegister',
+			call: 'neat_unRegister',
 			params: 2
 		}),
 		new web3._extend.Method({
 			name: 'checkCandidate',
-			call: 'int_checkCandidate',
+			call: 'neat_checkCandidate',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'getForbiddenStatus',
-			call: 'int_getForbiddenStatus',
+			call: 'neat_getForbiddenStatus',
 			params: 2,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, web3._extend.formatters.inputDefaultBlockNumberFormatter]
 		}),
 		new web3._extend.Method({
 			name: 'setCommission',
-			call: 'int_setCommission',
+			call: 'neat_setCommission',
 			params: 3,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null]
 		})
