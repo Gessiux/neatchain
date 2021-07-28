@@ -337,7 +337,7 @@ func (n *Node) startIPC(apis []rpc.API) error {
 	}
 	n.ipcListener = listener
 	n.ipcHandler = handler
-	n.log.Info("IPC endpoint opened", "url", n.ipcEndpoint)
+	//n.log.Info("IPC endpoint opened", "url", n.ipcEndpoint)
 	return nil
 }
 

@@ -91,6 +91,6 @@ var (
 	// ErrNotAllowedInMainChain is returned if the transaction with main flag = false be sent to main chain
 	ErrNotAllowedInMainChain = errors.New("transaction not allowed in main chain")
 
-	// ErrNotAllowedInChildChain is returned if the transaction with child flag = false be sent to child chain
-	ErrNotAllowedInChildChain = errors.New("transaction not allowed in child chain")
+	// ErrNotAllowedInSideChain is returned if the transaction with side flag = false be sent to side chain
+	ErrNotAllowedInSideChain = errors.New("transaction not allowed in side chain")
 )

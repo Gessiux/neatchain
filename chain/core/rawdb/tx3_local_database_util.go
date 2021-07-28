@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ntcTypes "github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/chain/trie"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
@@ -123,14 +123,14 @@ func GetAllTX3ProofData(db neatdb.Database) []*types.TX3ProofData {
 // WriteTX3ProofData serializes TX3ProofData into the database.
 func WriteTX3ProofData(db neatdb.Database, proofData *types.TX3ProofData) error {
 	header := proofData.Header
-	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
 	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == params.MainnetChainConfig.NeatChainId || chainId == params.TestnetChainConfig.NeatChainId {
-		return fmt.Errorf("invalid child chain id: %s", chainId)
+		return fmt.Errorf("invalid side chain id: %s", chainId)
 	}
 
 	num := header.Number.Uint64()
@@ -209,7 +209,7 @@ func WriteTX3(db neatdb.Writer, chainId string, header *types.Header, txIndex ui
 			return err
 		}
 
-		if function == neatAbi.WithdrawFromChildChain {
+		if function == neatAbi.WithdrawFromSideChain {
 			txHash := tx.Hash()
 			key1 := append(tx3Prefix, append([]byte(chainId), txHash.Bytes()...)...)
 			bs, _ := rlp.EncodeToBytes(&tx)

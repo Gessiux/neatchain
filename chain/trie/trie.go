@@ -130,11 +130,11 @@ func (t *Trie) tryGet(origNode node, key []byte, pos int) (value []byte, newnode
 		}
 		return value, n, didResolve, err
 	case hashNode:
-		child, err := t.resolveHash(n, key[:pos])
+		side, err := t.resolveHash(n, key[:pos])
 		if err != nil {
 			return nil, n, true, err
 		}
-		value, newnode, _, err := t.tryGet(child, key, pos)
+		value, newnode, _, err := t.tryGet(side, key, pos)
 		return value, newnode, true, err
 	default:
 		panic(fmt.Sprintf("%T: invalid node: %v", origNode, origNode))
@@ -231,7 +231,7 @@ func (t *Trie) insert(n node, prefix, key []byte, value node) (bool, node, error
 
 	case hashNode:
 		// We've hit a part of the trie that isn't loaded yet. Load
-		// the node and insert into it. This leaves all child nodes on
+		// the node and insert into it. This leaves all side nodes on
 		// the path to the value in the trie.
 		rn, err := t.resolveHash(n, prefix)
 		if err != nil {
@@ -281,14 +281,14 @@ func (t *Trie) delete(n node, prefix, key []byte) (bool, node, error) {
 			return true, nil, nil // remove n entirely for whole matches
 		}
 		// The key is longer than n.Key. Remove the remaining suffix
-		// from the subtrie. Child can never be nil here since the
+		// from the subtrie. Side can never be nil here since the
 		// subtrie must contain at least two other values with keys
 		// longer than n.Key.
-		dirty, child, err := t.delete(n.Val, append(prefix, key[:len(n.Key)]...), key[len(n.Key):])
+		dirty, side, err := t.delete(n.Val, append(prefix, key[:len(n.Key)]...), key[len(n.Key):])
 		if !dirty || err != nil {
 			return false, n, err
 		}
-		switch child := child.(type) {
+		switch side := side.(type) {
 		case *shortNode:
 			// Deleting from the subtrie reduced it to another
 			// short node. Merge the nodes to avoid creating a
@@ -296,9 +296,9 @@ func (t *Trie) delete(n node, prefix, key []byte) (bool, node, error) {
 			// always creates a new slice) instead of append to
 			// avoid modifying n.Key since it might be shared with
 			// other nodes.
-			return true, &shortNode{concat(n.Key, child.Key...), child.Val, t.newFlag()}, nil
+			return true, &shortNode{concat(n.Key, side.Key...), side.Val, t.newFlag()}, nil
 		default:
-			return true, &shortNode{n.Key, child, t.newFlag()}, nil
+			return true, &shortNode{n.Key, side, t.newFlag()}, nil
 		}
 
 	case *fullNode:
@@ -312,7 +312,7 @@ func (t *Trie) delete(n node, prefix, key []byte) (bool, node, error) {
 
 		// Check how many non-nil entries are left after deleting and
 		// reduce the full node to a short node if only one entry is
-		// left. Since n must've contained at least two children
+		// left. Since n must've contained at least two sideren
 		// before deletion (otherwise it would not be a full node) n
 		// can never be reduced to nil.
 		//
@@ -348,7 +348,7 @@ func (t *Trie) delete(n node, prefix, key []byte) (bool, node, error) {
 				}
 			}
 			// Otherwise, n is replaced by a one-nibble short node
-			// containing the child.
+			// containing the side.
 			return true, &shortNode{[]byte{byte(pos)}, n.Children[pos], t.newFlag()}, nil
 		}
 		// n still contains at least two values and cannot be reduced.
@@ -362,7 +362,7 @@ func (t *Trie) delete(n node, prefix, key []byte) (bool, node, error) {
 
 	case hashNode:
 		// We've hit a part of the trie that isn't loaded yet. Load
-		// the node and delete from it. This leaves all child nodes on
+		// the node and delete from it. This leaves all side nodes on
 		// the path to the value in the trie.
 		rn, err := t.resolveHash(n, prefix)
 		if err != nil {

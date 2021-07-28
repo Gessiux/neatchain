@@ -619,11 +619,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 			return err
 		}
 
-		// check Function main/child flag
+		// check Function main/side flag
 		if pool.chainconfig.IsMainChain() && !function.AllowInMainChain() {
 			return ErrNotAllowedInMainChain
-		} else if !pool.chainconfig.IsMainChain() && !function.AllowInChildChain() {
-			return ErrNotAllowedInChildChain
+		} else if !pool.chainconfig.IsMainChain() && !function.AllowInSideChain() {
+			return ErrNotAllowedInSideChain
 		}
 
 		log.Infof("validateTx Chain Function %v", function.String())

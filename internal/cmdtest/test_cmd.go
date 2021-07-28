@@ -74,7 +74,7 @@ func (tt *TestCmd) Run(name string, args ...string) {
 	}
 }
 
-// InputLine writes the given text to the childs stdin.
+// InputLine writes the given text to the sides stdin.
 // This method can also be called from an expect template, e.g.:
 //
 //     neatchain.expect(`Passphrase: {{.InputLine "password"}}`)
@@ -91,7 +91,7 @@ func (tt *TestCmd) SetTemplateFunc(name string, fn interface{}) {
 }
 
 // Expect runs its argument as a template, then expects the
-// child process to output the result of the template within 5s.
+// side process to output the result of the template within 5s.
 //
 // If the template starts with a newline, the newline is removed
 // before matching.
@@ -136,7 +136,7 @@ func (tt *TestCmd) matchExactOutput(want []byte) error {
 	return nil
 }
 
-// ExpectRegexp expects the child process to output text matching the
+// ExpectRegexp expects the side process to output text matching the
 // given regular expression within 5s.
 //
 // Note that an arbitrary amount of output may be consumed by the
@@ -165,7 +165,7 @@ func (tt *TestCmd) ExpectRegexp(regex string) (*regexp.Regexp, []string) {
 	return re, submatches
 }
 
-// ExpectExit expects the child process to exit within 5s without
+// ExpectExit expects the side process to exit within 5s without
 // printing any additional text on stdout.
 func (tt *TestCmd) ExpectExit() {
 	var output []byte
@@ -211,7 +211,7 @@ func (tt *TestCmd) Kill() {
 
 func (tt *TestCmd) withKillTimeout(fn func()) {
 	timeout := time.AfterFunc(5*time.Second, func() {
-		tt.Log("killing the child process (timeout)")
+		tt.Log("killing the side process (timeout)")
 		tt.Kill()
 	})
 	defer timeout.Stop()

@@ -71,11 +71,11 @@ participating.
 
 It expects the genesis file as argument.`,
 	}
-	initChildChainCmd = cli.Command{
-		Action:      utils.MigrateFlags(InitChildChainCmd),
-		Name:        "init-child-chain",
-		Usage:       "neatchain --childChain=child_0,child_1,child_2 init-child-chain",
-		Description: "Initialize child chain genesis from chain info db",
+	initSideChainCmd = cli.Command{
+		Action:      utils.MigrateFlags(InitSideChainCmd),
+		Name:        "init-side-chain",
+		Usage:       "neatchain --sideChain=side_0,side_1,side_2 init-side-chain",
+		Description: "Initialize side chain genesis from chain info db",
 	}
 	//	initCommand = cli.Command{
 	//		Action:    utils.MigrateFlags(initGenesis),

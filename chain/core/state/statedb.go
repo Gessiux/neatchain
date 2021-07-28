@@ -72,9 +72,9 @@ type StateDB struct {
 	forbiddenSet      ForbiddenSet
 	forbiddenSetDirty bool
 
-	// Cache of Child Chain Reward Per Block
-	childChainRewardPerBlock      *big.Int
-	childChainRewardPerBlockDirty bool
+	// Cache of Side Chain Reward Per Block
+	sideChainRewardPerBlock      *big.Int
+	sideChainRewardPerBlockDirty bool
 
 	// DB error.
 	// State objects are used by the consensus core and VM which are
@@ -108,22 +108,22 @@ func New(root common.Hash, db Database) (*StateDB, error) {
 	}
 
 	return &StateDB{
-		db:                            db,
-		trie:                          tr,
-		stateObjects:                  make(map[common.Address]*stateObject),
-		stateObjectsDirty:             make(map[common.Address]struct{}),
-		delegateRefundSet:             make(DelegateRefundSet),
-		delegateRefundSetDirty:        false,
-		rewardSet:                     make(RewardSet),
-		rewardSetDirty:                false,
-		candidateSet:                  make(CandidateSet),
-		candidateSetDirty:             false,
-		forbiddenSet:                  make(ForbiddenSet),
-		forbiddenSetDirty:             false,
-		childChainRewardPerBlock:      nil,
-		childChainRewardPerBlockDirty: false,
-		logs:                          make(map[common.Hash][]*types.Log),
-		preimages:                     make(map[common.Hash][]byte),
+		db:                           db,
+		trie:                         tr,
+		stateObjects:                 make(map[common.Address]*stateObject),
+		stateObjectsDirty:            make(map[common.Address]struct{}),
+		delegateRefundSet:            make(DelegateRefundSet),
+		delegateRefundSetDirty:       false,
+		rewardSet:                    make(RewardSet),
+		rewardSetDirty:               false,
+		candidateSet:                 make(CandidateSet),
+		candidateSetDirty:            false,
+		forbiddenSet:                 make(ForbiddenSet),
+		forbiddenSetDirty:            false,
+		sideChainRewardPerBlock:      nil,
+		sideChainRewardPerBlockDirty: false,
+		logs:                         make(map[common.Hash][]*types.Log),
+		preimages:                    make(map[common.Hash][]byte),
 	}, nil
 }
 
@@ -152,7 +152,7 @@ func (self *StateDB) Reset(root common.Hash) error {
 	self.rewardSet = make(RewardSet)
 	self.candidateSet = make(CandidateSet)
 	self.forbiddenSet = make(ForbiddenSet)
-	self.childChainRewardPerBlock = nil
+	self.sideChainRewardPerBlock = nil
 	self.thash = common.Hash{}
 	self.bhash = common.Hash{}
 	self.txIndex = 0
@@ -632,23 +632,23 @@ func (db *StateDB) ForEachProxied(addr common.Address, cb func(key common.Addres
 func (self *StateDB) Copy() *StateDB {
 	// Copy all the basic fields, initialize the memory ones
 	state := &StateDB{
-		db:                            self.db,
-		trie:                          self.db.CopyTrie(self.trie),
-		stateObjects:                  make(map[common.Address]*stateObject, len(self.stateObjectsDirty)),
-		stateObjectsDirty:             make(map[common.Address]struct{}, len(self.stateObjectsDirty)),
-		delegateRefundSet:             make(DelegateRefundSet, len(self.delegateRefundSet)),
-		delegateRefundSetDirty:        self.delegateRefundSetDirty,
-		rewardSet:                     make(RewardSet, len(self.rewardSet)),
-		rewardSetDirty:                self.rewardSetDirty,
-		candidateSet:                  make(CandidateSet, len(self.candidateSet)),
-		candidateSetDirty:             self.candidateSetDirty,
-		forbiddenSet:                  make(ForbiddenSet, len(self.forbiddenSet)),
-		forbiddenSetDirty:             self.forbiddenSetDirty,
-		childChainRewardPerBlockDirty: self.childChainRewardPerBlockDirty,
-		refund:                        self.refund,
-		logs:                          make(map[common.Hash][]*types.Log, len(self.logs)),
-		logSize:                       self.logSize,
-		preimages:                     make(map[common.Hash][]byte, len(self.preimages)),
+		db:                           self.db,
+		trie:                         self.db.CopyTrie(self.trie),
+		stateObjects:                 make(map[common.Address]*stateObject, len(self.stateObjectsDirty)),
+		stateObjectsDirty:            make(map[common.Address]struct{}, len(self.stateObjectsDirty)),
+		delegateRefundSet:            make(DelegateRefundSet, len(self.delegateRefundSet)),
+		delegateRefundSetDirty:       self.delegateRefundSetDirty,
+		rewardSet:                    make(RewardSet, len(self.rewardSet)),
+		rewardSetDirty:               self.rewardSetDirty,
+		candidateSet:                 make(CandidateSet, len(self.candidateSet)),
+		candidateSetDirty:            self.candidateSetDirty,
+		forbiddenSet:                 make(ForbiddenSet, len(self.forbiddenSet)),
+		forbiddenSetDirty:            self.forbiddenSetDirty,
+		sideChainRewardPerBlockDirty: self.sideChainRewardPerBlockDirty,
+		refund:                       self.refund,
+		logs:                         make(map[common.Hash][]*types.Log, len(self.logs)),
+		logSize:                      self.logSize,
+		preimages:                    make(map[common.Hash][]byte, len(self.preimages)),
 	}
 	// Copy the dirty states, logs, and preimages
 	for addr := range self.stateObjectsDirty {
@@ -670,8 +670,8 @@ func (self *StateDB) Copy() *StateDB {
 		state.forbiddenSet[addr] = struct{}{}
 	}
 
-	if self.childChainRewardPerBlock != nil {
-		state.childChainRewardPerBlock = new(big.Int).Set(self.childChainRewardPerBlock)
+	if self.sideChainRewardPerBlock != nil {
+		state.sideChainRewardPerBlock = new(big.Int).Set(self.sideChainRewardPerBlock)
 	}
 	for hash, logs := range self.logs {
 		state.logs[hash] = make([]*types.Log, len(logs))
@@ -754,9 +754,9 @@ func (s *StateDB) Finalise(deleteEmptyObjects bool) {
 		s.commitForbiddenSet()
 	}
 
-	// Update Child Chain Reward per Block if something changed
-	if s.childChainRewardPerBlockDirty {
-		s.commitChildChainRewardPerBlock()
+	// Update Side Chain Reward per Block if something changed
+	if s.sideChainRewardPerBlockDirty {
+		s.commitSideChainRewardPerBlock()
 	}
 
 	// Invalidate journal because reverting across transactions is not allowed.
@@ -874,9 +874,9 @@ func (s *StateDB) Commit(deleteEmptyObjects bool) (root common.Hash, err error) 
 	}
 
 	// Commit Reward Per Block to the trie
-	if s.childChainRewardPerBlockDirty {
-		s.commitChildChainRewardPerBlock()
-		s.childChainRewardPerBlockDirty = false
+	if s.sideChainRewardPerBlockDirty {
+		s.commitSideChainRewardPerBlock()
+		s.sideChainRewardPerBlockDirty = false
 	}
 
 	// Write trie changes.

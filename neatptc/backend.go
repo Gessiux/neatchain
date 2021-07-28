@@ -27,8 +27,8 @@ import (
 
 	"github.com/Gessiux/neatchain/chain/accounts"
 	"github.com/Gessiux/neatchain/chain/consensus"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft"
-	neatconBackend "github.com/Gessiux/neatchain/chain/consensus/neatbyft"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon"
+	ntcBackend "github.com/Gessiux/neatchain/chain/consensus/neatcon"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/chain/core/bloombits"
 	"github.com/Gessiux/neatchain/chain/core/datareduction"
@@ -78,7 +78,7 @@ type NeatChain struct {
 	pruneDb neatdb.Database // Prune data database
 
 	eventMux       *event.TypeMux
-	engine         consensus.NeatByFT
+	engine         consensus.NeatCon
 	accountManager *accounts.Manager
 
 	bloomRequests chan chan *bloombits.Retrieval // Channel receiving bloom data retrieval requests
@@ -121,7 +121,7 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 		return nil, genesisErr
 	}
 	chainConfig.ChainLogger = logger
-	logger.Info("Initialised chain configuration", "config", chainConfig)
+	//logger.Info("Initialised chain configuration", "config", chainConfig)
 
 	neatChain := &NeatChain{
 		config:         config,
@@ -145,12 +145,11 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	if bcVersion != nil {
 		dbVer = fmt.Sprintf("%d", *bcVersion)
 	}
-	//logger.Info("Initialising NeatChain protocol", "versions", eth.engine.Protocol().Versions, "network", config.NetworkId, "dbversion", dbVer)
-	logger.Info("Initialising neatchain protocol", "network", config.NetworkId, "dbversion", dbVer)
+	logger.Info("Initialising Neatio protocol", "network", chainConfig.NeatChainId)
 
 	if !config.SkipBcVersionCheck {
 		if bcVersion != nil && *bcVersion > core.BlockChainVersion {
-			return nil, fmt.Errorf("database version is v%d, Geth %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
+			return nil, fmt.Errorf("database version is v%d, Neatio %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
 		} else if bcVersion == nil || *bcVersion < core.BlockChainVersion {
 			logger.Warn("Upgrade blockchain database version", "from", dbVer, "to", core.BlockChainVersion)
 			rawdb.WriteDatabaseVersion(chainDb, core.BlockChainVersion)
@@ -166,7 +165,6 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 			TrieTimeLimit:     config.TrieTimeout,
 		}
 	)
-	//eth.engine = CreateConsensusEngine(ctx, config, chainConfig, chainDb, cliCtx, cch)
 
 	neatChain.blockchain, err = core.NewBlockChain(chainDb, cacheConfig, neatChain.chainConfig, neatChain.engine, vmConfig, cch)
 	if err != nil {
@@ -221,13 +219,13 @@ func makeExtraData(extra []byte) []byte {
 
 // CreateConsensusEngine creates the required type of consensus engine instance for an NeatChain service
 func CreateConsensusEngine(ctx *node.ServiceContext, config *Config, chainConfig *params.ChainConfig, db neatdb.Database,
-	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.NeatByFT {
+	cliCtx *cli.Context, cch core.CrossChainHelper) consensus.NeatCon {
 	// If NeatCon is requested, set it up
-	if chainConfig.NeatByFT.Epoch != 0 {
-		config.NeatByFT.Epoch = chainConfig.NeatByFT.Epoch
+	if chainConfig.NeatCon.Epoch != 0 {
+		config.NeatCon.Epoch = chainConfig.NeatCon.Epoch
 	}
-	config.NeatByFT.ProposerPolicy = neatbyft.ProposerPolicy(chainConfig.NeatByFT.ProposerPolicy)
-	return neatconBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
+	config.NeatCon.ProposerPolicy = neatcon.ProposerPolicy(chainConfig.NeatCon.ProposerPolicy)
+	return ntcBackend.New(chainConfig, cliCtx, ctx.NodeKey(), cch)
 }
 
 // APIs returns the collection of RPC services the NeatChain package offers.
@@ -255,17 +253,17 @@ func (s *NeatChain) APIs() []rpc.API {
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
 		}, {
-			Namespace: "int",
+			Namespace: "neat",
 			Version:   "1.0",
 			Service:   NewPublicEthereumAPI(s),
 			Public:    true,
 		}, {
-			Namespace: "int",
+			Namespace: "neat",
 			Version:   "1.0",
 			Service:   NewPublicMinerAPI(s),
 			Public:    true,
 		}, {
-			Namespace: "int",
+			Namespace: "neat",
 			Version:   "1.0",
 			Service:   downloader.NewPublicDownloaderAPI(s.protocolManager.downloader, s.eventMux),
 			Public:    true,
@@ -280,7 +278,7 @@ func (s *NeatChain) APIs() []rpc.API {
 			Service:   filters.NewPublicFilterAPI(s.ApiBackend, false),
 			Public:    true,
 		}, {
-			Namespace: "int",
+			Namespace: "neat",
 			Version:   "1.0",
 			Service:   filters.NewPublicFilterAPI(s.ApiBackend, false),
 			Public:    true,
@@ -312,8 +310,8 @@ func (s *NeatChain) ResetWithGenesisBlock(gb *types.Block) {
 }
 
 func (s *NeatChain) Coinbase() (eb common.Address, err error) {
-	if neatbyft, ok := s.engine.(consensus.NeatByFT); ok {
-		eb = neatbyft.PrivateValidator()
+	if neatcon, ok := s.engine.(consensus.NeatCon); ok {
+		eb = neatcon.PrivateValidator()
 		if eb != (common.Address{}) {
 			return eb, nil
 		} else {
@@ -340,7 +338,7 @@ func (s *NeatChain) Coinbase() (eb common.Address, err error) {
 			}
 		}
 	}
-	return common.Address{}, fmt.Errorf("etherbase must be explicitly specified")
+	return common.Address{}, fmt.Errorf("Base address must be explicitly specified")
 }
 
 // set in js console via admin interface or wrapper from cli flags
@@ -355,17 +353,17 @@ func (self *NeatChain) SetCoinbase(coinbase common.Address) {
 
 func (s *NeatChain) StartMining(local bool) error {
 	var eb common.Address
-	if neatbyft, ok := s.engine.(consensus.NeatByFT); ok {
-		eb = neatbyft.PrivateValidator()
+	if neatcon, ok := s.engine.(consensus.NeatCon); ok {
+		eb = neatcon.PrivateValidator()
 		if (eb == common.Address{}) {
-			log.Error("Cannot start mining without private validator")
-			return errors.New("private validator missing")
+			log.Error("Cannot start minting without private validator")
+			return errors.New("private validator file missing")
 		}
 	} else {
 		_, err := s.Coinbase()
 		if err != nil {
-			log.Error("Cannot start mining without etherbase", "err", err)
-			return fmt.Errorf("etherbase missing: %v", err)
+			log.Error("Cannot start mining without base address", "err", err)
+			return fmt.Errorf("base address missing: %v", err)
 		}
 	}
 
@@ -389,7 +387,7 @@ func (s *NeatChain) AccountManager() *accounts.Manager  { return s.accountManage
 func (s *NeatChain) BlockChain() *core.BlockChain       { return s.blockchain }
 func (s *NeatChain) TxPool() *core.TxPool               { return s.txPool }
 func (s *NeatChain) EventMux() *event.TypeMux           { return s.eventMux }
-func (s *NeatChain) Engine() consensus.NeatByFT         { return s.engine }
+func (s *NeatChain) Engine() consensus.NeatCon          { return s.engine }
 func (s *NeatChain) ChainDb() neatdb.Database           { return s.chainDb }
 func (s *NeatChain) IsListening() bool                  { return true } // Always listening
 func (s *NeatChain) EthVersion() int                    { return int(s.protocolManager.SubProtocols[0].Version) }
@@ -421,7 +419,7 @@ func (s *NeatChain) Start(srvr *p2p.Server) error {
 	go s.loopForMiningEvent()
 
 	// Start the Data Reduction
-	if s.config.PruneStateData && s.chainConfig.NeatChainId == "child_0" {
+	if s.config.PruneStateData && s.chainConfig.NeatChainId == "side_0" {
 		go s.StartScanAndPrune(0)
 	}
 
@@ -466,18 +464,18 @@ func (s *NeatChain) loopForMiningEvent() {
 				price := s.gasPrice
 				s.lock.RUnlock()
 				s.txPool.SetGasPrice(price)
-				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine will be start shortly")
-				s.engine.(consensus.NeatByFT).ForceStart()
+				s.chainConfig.ChainLogger.Info("NeatCon Consensus Engine will start shortly")
+				s.engine.(consensus.NeatCon).ForceStart()
 				s.StartMining(true)
 			} else {
-				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine already started")
+				s.chainConfig.ChainLogger.Info("NeatCon Consensus Engine already started")
 			}
 		case <-stopMiningCh:
 			if s.IsMining() {
-				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine will be stop shortly")
+				s.chainConfig.ChainLogger.Info("NeatCon Consensus Engine will stop shortly")
 				s.StopMining()
 			} else {
-				s.chainConfig.ChainLogger.Info("NeatByFT Consensus Engine already stopped")
+				s.chainConfig.ChainLogger.Info("NeatCon Consensus Engine already stopped")
 			}
 		case <-startMiningSub.Err():
 			return

@@ -20,7 +20,7 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
 	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/network/rpc"
@@ -152,8 +152,8 @@ type EngineStartStop interface {
 	Stop() error
 }
 
-// NeatByFT is a consensus engine to avoid byzantine failure
-type NeatByFT interface {
+// NeatCon is a consensus engine to avoid byzantine failure
+type NeatCon interface {
 	Engine
 
 	EngineStartStop

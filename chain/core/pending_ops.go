@@ -4,45 +4,45 @@ import (
 	"fmt"
 
 	"github.com/Gessiux/neatchain/chain/consensus"
-	tmTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	tmTypes "github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core/types"
 )
 
 // Consider moving the apply logic to each op (how to avoid import circular reference?)
 func ApplyOp(op types.PendingOp, bc *BlockChain, cch CrossChainHelper) error {
 	switch op := op.(type) {
-	case *types.CreateChildChainOp:
-		return cch.CreateChildChain(op.From, op.ChainId, op.MinValidators, op.MinDepositAmount, op.StartBlock, op.EndBlock)
-	case *types.JoinChildChainOp:
-		return cch.JoinChildChain(op.From, op.PubKey, op.ChainId, op.DepositAmount)
-	case *types.LaunchChildChainsOp:
-		if len(op.ChildChainIds) > 0 {
+	case *types.CreateSideChainOp:
+		return cch.CreateSideChain(op.From, op.ChainId, op.MinValidators, op.MinDepositAmount, op.StartBlock, op.EndBlock)
+	case *types.JoinSideChainOp:
+		return cch.JoinSideChain(op.From, op.PubKey, op.ChainId, op.DepositAmount)
+	case *types.LaunchSideChainsOp:
+		if len(op.SideChainIds) > 0 {
 			var events []interface{}
-			for _, childChainId := range op.ChildChainIds {
-				events = append(events, CreateChildChainEvent{ChainId: childChainId})
+			for _, sideChainId := range op.SideChainIds {
+				events = append(events, CreateSideChainEvent{ChainId: sideChainId})
 			}
 			bc.PostChainEvents(events, nil)
 		}
-		if op.NewPendingIdx != nil || len(op.DeleteChildChainIds) > 0 {
-			cch.ProcessPostPendingData(op.NewPendingIdx, op.DeleteChildChainIds)
+		if op.NewPendingIdx != nil || len(op.DeleteSideChainIds) > 0 {
+			cch.ProcessPostPendingData(op.NewPendingIdx, op.DeleteSideChainIds)
 		}
 		return nil
 	case *types.VoteNextEpochOp:
-		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatCon).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.VoteNextEpoch(ep, op.From, op.VoteHash, op.TxHash)
 	case *types.RevealVoteOp:
-		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatCon).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.RevealVote(ep, op.From, op.Pubkey, op.Amount, op.Salt, op.TxHash)
 	case *types.UpdateNextEpochOp:
-		ep := bc.engine.(consensus.NeatByFT).GetEpoch()
+		ep := bc.engine.(consensus.NeatCon).GetEpoch()
 		ep = ep.GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 		return cch.UpdateNextEpoch(ep, op.From, op.PubKey, op.Amount, op.Salt, op.TxHash)
 	case *types.SaveDataToMainChainOp:
-		return cch.SaveChildChainProofDataToMainChain(op.Data)
+		return cch.SaveSideChainProofDataToMainChain(op.Data)
 	case *tmTypes.SwitchEpochOp:
-		eng := bc.engine.(consensus.NeatByFT)
+		eng := bc.engine.(consensus.NeatCon)
 		nextEp, err := eng.GetEpoch().EnterNewEpoch(op.NewValidators)
 		if err == nil {
 			// Stop the Engine if we are not in the new validators

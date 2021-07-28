@@ -106,7 +106,7 @@ type Config struct {
 	LocalValidators []P2PValidator
 
 	// Validators set in all chains
-	// Should find nodes for all of them to support bls transport in NeatByFT module
+	// Should find nodes for all of them to support bls transport in NeatCon module
 	Validators map[P2PValidator]*P2PValidatorNodeInfo
 
 	// Connectivity can be restricted to certain IP networks.
@@ -414,7 +414,7 @@ func (srv *Server) Start() (err error) {
 	if srv.log == nil {
 		srv.log = log.New()
 	}
-	srv.log.Info("Starting P2P networking")
+	srv.log.Info("Starting P2P networking...")
 
 	// static fields
 	if srv.PrivateKey == nil {
@@ -535,9 +535,9 @@ func (srv *Server) Start() (err error) {
 	return nil
 }
 
-// AddHandshakeCaps Add the Child Protocol Caps after create the child chain and before launch it
-func (srv *Server) AddChildProtocolCaps(childProtocols []Protocol) {
-	for _, p := range childProtocols {
+// AddHandshakeCaps Add the Side Protocol Caps after create the side chain and before launch it
+func (srv *Server) AddChildProtocolCaps(sideProtocols []Protocol) {
+	for _, p := range sideProtocols {
 		srv.ourHandshake.Caps = append(srv.ourHandshake.Caps, p.cap())
 	}
 }
@@ -818,7 +818,7 @@ type tempError interface {
 // inbound connections.
 func (srv *Server) listenLoop() {
 	defer srv.loopWG.Done()
-	srv.log.Info("RLPx listener up", "self", srv.makeSelf(srv.listener, srv.ntab))
+	//srv.log.Info("RLPx listener up", "self", srv.makeSelf(srv.listener, srv.ntab))
 
 	tokens := defaultMaxPendingPeers
 	if srv.MaxPendingPeers > 0 {
@@ -1054,7 +1054,7 @@ func (srv *Server) PeersInfo() []*PeerInfo {
 func (srv *Server) BroadcastMsg(msgCode uint64, data interface{}) {
 	peers := srv.Peers()
 	for _, p := range peers {
-		Send(p.rw, BroadcastNewChildChainMsg, data)
+		Send(p.rw, BroadcastNewSideChainMsg, data)
 	}
 }
 

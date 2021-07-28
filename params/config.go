@@ -27,7 +27,7 @@ import (
 )
 
 var (
-	MainnetGenesisHash = common.HexToHash("0x379b516819fb4d18988fc0b86196b66a7c2021dd20aa5ba4cff768e74e9892e5") // Mainnet genesis hash to enforce below configs on
+	MainnetGenesisHash = common.HexToHash("0xb8ec7179904a79bd642b43355ec5e3180fdf76724870f23b1adfda6a993cb5c8") // Mainnet genesis hash to enforce below configs on
 	TestnetGenesisHash = common.HexToHash("0x1cbef527b5e69640b795df3b76437741e7fd4c98be557c6ead9be5f38ae7febc") // Testnet genesis hash to enforce below configs on
 )
 
@@ -43,7 +43,7 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0), //let's start from 1 block
 		ConstantinopleBlock: nil,
-		NeatByFT: &NeatByFTConfig{
+		NeatCon: &NeatConConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -60,7 +60,7 @@ var (
 		EIP158Block:         big.NewInt(0),
 		ByzantiumBlock:      big.NewInt(0),
 		ConstantinopleBlock: nil,
-		NeatByFT: &NeatByFTConfig{
+		NeatCon: &NeatConConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -98,26 +98,26 @@ type ChainConfig struct {
 	ConstantinopleBlock *big.Int `json:"constantinopleBlock,omitempty"` // Constantinople switch block (nil = no fork, 0 = already activated)
 
 	// Various consensus engines
-	NeatByFT *NeatByFTConfig `json:"neatbyft,omitempty"`
+	NeatCon *NeatConConfig `json:"neatcon,omitempty"`
 
 	ChainLogger log.Logger `json:"-"`
 }
 
-// NeatByFTConfig is the consensus engine configs for Istanbul based sealing.
-type NeatByFTConfig struct {
+// NeatConConfig is the consensus engine configs for Istanbul based sealing.
+type NeatConConfig struct {
 	Epoch          uint64 `json:"epoch"`  // Epoch length to reset votes and checkpoint
 	ProposerPolicy uint64 `json:"policy"` // The policy for proposer selection
 }
 
 // String implements the stringer interface, returning the consensus engine details.
-func (c *NeatByFTConfig) String() string {
-	return "neatbyft"
+func (c *NeatConConfig) String() string {
+	return "neatcon"
 }
 
-// Create a new Chain Config based on the Chain ID, for child chain creation purpose
-func NewChildChainConfig(childChainID string) *ChainConfig {
+// Create a new Chain Config based on the Chain ID, for side chain creation purpose
+func NewSideChainConfig(sideChainID string) *ChainConfig {
 	config := &ChainConfig{
-		NeatChainId:    childChainID,
+		NeatChainId:    sideChainID,
 		HomesteadBlock: big.NewInt(0),
 		EIP150Block:    big.NewInt(0),
 		EIP150Hash:     common.HexToHash("0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0"),
@@ -126,7 +126,7 @@ func NewChildChainConfig(childChainID string) *ChainConfig {
 		//ByzantiumBlock:      big.NewInt(4370000),
 		ByzantiumBlock:      big.NewInt(0), //let's start from 1 block
 		ConstantinopleBlock: nil,
-		NeatByFT: &NeatByFTConfig{
+		NeatCon: &NeatConConfig{
 			Epoch:          30000,
 			ProposerPolicy: 0,
 		},
@@ -142,8 +142,8 @@ func NewChildChainConfig(childChainID string) *ChainConfig {
 func (c *ChainConfig) String() string {
 	var engine interface{}
 	switch {
-	case c.NeatByFT != nil:
-		engine = c.NeatByFT
+	case c.NeatCon != nil:
+		engine = c.NeatCon
 	default:
 		engine = "unknown"
 	}

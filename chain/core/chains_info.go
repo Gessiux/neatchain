@@ -11,7 +11,7 @@ import (
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/go-wire"
-	ep "github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
+	ep "github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
 	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/utilities/common"
@@ -43,13 +43,13 @@ type CoreChainInfo struct {
 	EpochNumber uint64
 
 	//the statitics for balance in & out
-	//depositInMainChain >= depositInChildChain
-	//withdrawFromChildChain >= withdrawFromMainChain
-	//depositInMainChain >= withdrawFromChildChain
-	DepositInMainChain     *big.Int //total deposit by users from main
-	DepositInChildChain    *big.Int //total deposit allocated to users in child chain
-	WithdrawFromChildChain *big.Int //total withdraw by users from child chain
-	WithdrawFromMainChain  *big.Int //total withdraw refund to users in main chain
+	//depositInMainChain >= depositInSideChain
+	//withdrawFromSideChain >= withdrawFromMainChain
+	//depositInMainChain >= withdrawFromSideChain
+	DepositInMainChain    *big.Int //total deposit by users from main
+	DepositInSideChain    *big.Int //total deposit allocated to users in side chain
+	WithdrawFromSideChain *big.Int //total withdraw by users from side chain
+	WithdrawFromMainChain *big.Int //total withdraw refund to users in main chain
 }
 
 type JoinedValidator struct {
@@ -61,7 +61,7 @@ type JoinedValidator struct {
 type ChainInfo struct {
 	CoreChainInfo
 
-	//be careful, this Epoch could be different with the current epoch in the child chain
+	//be careful, this Epoch could be different with the current epoch in the side chain
 	//it is just for cache
 	Epoch *ep.Epoch
 }
@@ -69,7 +69,7 @@ type ChainInfo struct {
 const (
 	chainInfoKey  = "CHAIN"
 	ethGenesisKey = "ETH_GENESIS"
-	tdmGenesisKey = "TDM_GENESIS"
+	ntcGenesisKey = "NTC_GENESIS"
 )
 
 var allChainKey = []byte("AllChainID")
@@ -90,8 +90,8 @@ func calcETHGenesisKey(chainId string) []byte {
 	return []byte(ethGenesisKey + ":" + chainId)
 }
 
-func calcTDMGenesisKey(chainId string) []byte {
-	return []byte(tdmGenesisKey + ":" + chainId)
+func calcNTCGenesisKey(chainId string) []byte {
+	return []byte(ntcGenesisKey + ":" + chainId)
 }
 
 func GetChainInfo(db dbm.DB, chainId string) *ChainInfo {
@@ -267,13 +267,13 @@ func saveId(db dbm.DB, chainId string) {
 	}
 }
 
-func GetChildChainIds(db dbm.DB) []string {
+func GetSideChainIds(db dbm.DB) []string {
 	mtx.RLock()
 	defer mtx.RUnlock()
 
 	buf := db.Get(allChainKey)
 
-	log.Debugf("Get child chain IDs, buf is %v, len is %d", buf, len(buf))
+	log.Debugf("Get side chain IDs, buf is %v, len is %d", buf, len(buf))
 
 	if len(buf) == 0 {
 		return []string{}
@@ -282,8 +282,8 @@ func GetChildChainIds(db dbm.DB) []string {
 	return strings.Split(string(buf), specialSep)
 }
 
-func CheckChildChainRunning(db dbm.DB, chainId string) bool {
-	ids := GetChildChainIds(db)
+func CheckSideChainRunning(db dbm.DB, chainId string) bool {
+	ids := GetSideChainIds(db)
 
 	for _, id := range ids {
 		if id == chainId {
@@ -294,25 +294,25 @@ func CheckChildChainRunning(db dbm.DB, chainId string) bool {
 	return false
 }
 
-// SaveChainGenesis save the genesis file for child chain
-func SaveChainGenesis(db dbm.DB, chainId string, ethGenesis, tdmGenesis []byte) {
+// SaveChainGenesis save the genesis file for side chain
+func SaveChainGenesis(db dbm.DB, chainId string, ethGenesis, ntcGenesis []byte) {
 	mtx.Lock()
 	defer mtx.Unlock()
 
 	// Save the neatptc genesis
 	db.SetSync(calcETHGenesisKey(chainId), ethGenesis)
 
-	// Save the tdm genesis
-	db.SetSync(calcTDMGenesisKey(chainId), tdmGenesis)
+	// Save the ntc genesis
+	db.SetSync(calcNTCGenesisKey(chainId), ntcGenesis)
 }
 
-// LoadChainGenesis load the genesis file for child chain
-func LoadChainGenesis(db dbm.DB, chainId string) (ethGenesis, tdmGenesis []byte) {
+// LoadChainGenesis load the genesis file for side chain
+func LoadChainGenesis(db dbm.DB, chainId string) (ethGenesis, ntcGenesis []byte) {
 	mtx.RLock()
 	defer mtx.RUnlock()
 
 	ethGenesis = db.Get(calcETHGenesisKey(chainId))
-	tdmGenesis = db.Get(calcTDMGenesisKey(chainId))
+	ntcGenesis = db.Get(calcNTCGenesisKey(chainId))
 	return
 }
 
@@ -332,8 +332,8 @@ type pendingIdxData struct {
 	End     *big.Int
 }
 
-// GetPendingChildChainData get the pending child chain data from db with key pending chain
-func GetPendingChildChainData(db dbm.DB, chainId string) *CoreChainInfo {
+// GetPendingSideChainData get the pending side chain data from db with key pending chain
+func GetPendingSideChainData(db dbm.DB, chainId string) *CoreChainInfo {
 
 	pendingChainByteSlice := db.Get(calcPendingChainInfoKey(chainId))
 	if pendingChainByteSlice != nil {
@@ -345,18 +345,18 @@ func GetPendingChildChainData(db dbm.DB, chainId string) *CoreChainInfo {
 	return nil
 }
 
-// CreatePendingChildChainData create the pending child chain data with index
-func CreatePendingChildChainData(db dbm.DB, cci *CoreChainInfo) {
-	storePendingChildChainData(db, cci, true)
+// CreatePendingSideChainData create the pending side chain data with index
+func CreatePendingSideChainData(db dbm.DB, cci *CoreChainInfo) {
+	storePendingSideChainData(db, cci, true)
 }
 
-// UpdatePendingChildChainData update the pending child chain data without index
-func UpdatePendingChildChainData(db dbm.DB, cci *CoreChainInfo) {
-	storePendingChildChainData(db, cci, false)
+// UpdatePendingSideChainData update the pending side chain data without index
+func UpdatePendingSideChainData(db dbm.DB, cci *CoreChainInfo) {
+	storePendingSideChainData(db, cci, false)
 }
 
-// storePendingChildChainData save the pending child chain data into db with key pending chain
-func storePendingChildChainData(db dbm.DB, cci *CoreChainInfo, create bool) {
+// storePendingSideChainData save the pending side chain data into db with key pending chain
+func storePendingSideChainData(db dbm.DB, cci *CoreChainInfo, create bool) {
 	pendingChainMtx.Lock()
 	defer pendingChainMtx.Unlock()
 
@@ -382,16 +382,16 @@ func storePendingChildChainData(db dbm.DB, cci *CoreChainInfo, create bool) {
 	}
 }
 
-// DeletePendingChildChainData delete the pending child chain data from db with chain id
-func DeletePendingChildChainData(db dbm.DB, chainId string) {
+// DeletePendingSideChainData delete the pending side chain data from db with chain id
+func DeletePendingSideChainData(db dbm.DB, chainId string) {
 	pendingChainMtx.Lock()
 	defer pendingChainMtx.Unlock()
 
 	db.DeleteSync(calcPendingChainInfoKey(chainId))
 }
 
-// GetChildChainForLaunch get the child chain for pending db for launch
-func GetChildChainForLaunch(db dbm.DB, height *big.Int, stateDB *state.StateDB) (readyForLaunch []string, newPendingIdxBytes []byte, deleteChildChainIds []string) {
+// GetSideChainForLaunch get the side chain for pending db for launch
+func GetSideChainForLaunch(db dbm.DB, height *big.Int, stateDB *state.StateDB) (readyForLaunch []string, newPendingIdxBytes []byte, deleteSideChainIds []string) {
 	pendingChainMtx.Lock()
 	defer pendingChainMtx.Unlock()
 
@@ -414,9 +414,9 @@ func GetChildChainForLaunch(db dbm.DB, height *big.Int, stateDB *state.StateDB) 
 			newPendingIdx = append(newPendingIdx, v)
 		} else if v.End.Cmp(height) < 0 {
 			// Refund the Lock Balance
-			cci := GetPendingChildChainData(db, v.ChainID)
+			cci := GetPendingSideChainData(db, v.ChainID)
 			for _, jv := range cci.JoinedValidators {
-				stateDB.SubChildChainDepositBalance(jv.Address, v.ChainID, jv.DepositAmount)
+				stateDB.SubSideChainDepositBalance(jv.Address, v.ChainID, jv.DepositAmount)
 				stateDB.AddBalance(jv.Address, jv.DepositAmount)
 			}
 
@@ -427,17 +427,17 @@ func GetChildChainForLaunch(db dbm.DB, height *big.Int, stateDB *state.StateDB) 
 				log.Error("the chain balance is not 0 when create chain failed, watch out!!!")
 			}
 
-			// Add the Child Chain Id to Remove List, to be removed after the consensus
-			deleteChildChainIds = append(deleteChildChainIds, v.ChainID)
+			// Add the Side Chain Id to Remove List, to be removed after the consensus
+			deleteSideChainIds = append(deleteSideChainIds, v.ChainID)
 			//db.DeleteSync(calcPendingChainInfoKey(v.ChainID))
 		} else {
 			// check condition
-			cci := GetPendingChildChainData(db, v.ChainID)
+			cci := GetPendingSideChainData(db, v.ChainID)
 			if len(cci.JoinedValidators) >= int(cci.MinValidators) && cci.TotalDeposit().Cmp(cci.MinDepositAmount) >= 0 {
 				// Deduct the Deposit
 				for _, jv := range cci.JoinedValidators {
-					// Deposit will move to the Child Chain Account
-					stateDB.SubChildChainDepositBalance(jv.Address, v.ChainID, jv.DepositAmount)
+					// Deposit will move to the Side Chain Account
+					stateDB.SubSideChainDepositBalance(jv.Address, v.ChainID, jv.DepositAmount)
 					stateDB.AddChainBalance(cci.Owner, jv.DepositAmount)
 				}
 				// Append the Chain ID to Ready Launch List
@@ -454,16 +454,16 @@ func GetChildChainForLaunch(db dbm.DB, height *big.Int, stateDB *state.StateDB) 
 		//db.SetSync(pendingChainIndexKey, wire.BinaryBytes(newPendingIdx))
 	}
 
-	// Return the ready for launch Child Chain
+	// Return the ready for launch Side Chain
 	return
 }
 
-func ProcessPostPendingData(db dbm.DB, newPendingIdxBytes []byte, deleteChildChainIds []string) {
+func ProcessPostPendingData(db dbm.DB, newPendingIdxBytes []byte, deleteSideChainIds []string) {
 	pendingChainMtx.Lock()
 	defer pendingChainMtx.Unlock()
 
-	// Remove the Child Chain
-	for _, id := range deleteChildChainIds {
+	// Remove the Side Chain
+	for _, id := range deleteSideChainIds {
 		db.DeleteSync(calcPendingChainInfoKey(id))
 	}
 

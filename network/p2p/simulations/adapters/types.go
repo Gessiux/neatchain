@@ -36,7 +36,7 @@ import (
 // NodeAdapter, for example:
 //
 // * SimNode    - An in-memory node
-// * ExecNode   - A child process node
+// * ExecNode   - A side process node
 // * DockerNode - A Docker container node
 //
 type Node interface {

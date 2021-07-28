@@ -7,7 +7,7 @@ import (
 
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
 	"github.com/Gessiux/neatchain/chain/core/state"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	neatAbi "github.com/Gessiux/neatchain/neatabi/abi"
@@ -31,12 +31,12 @@ type CrossChainHelper interface {
 	GetMainChainId() string
 	GetChainInfoDB() dbm.DB
 
-	CanCreateChildChain(from common.Address, chainId string, minValidators uint16, minDepositAmount, startupCost *big.Int, startBlock, endBlock *big.Int) error
-	CreateChildChain(from common.Address, chainId string, minValidators uint16, minDepositAmount *big.Int, startBlock, endBlock *big.Int) error
-	ValidateJoinChildChain(from common.Address, pubkey []byte, chainId string, depositAmount *big.Int, signature []byte) error
-	JoinChildChain(from common.Address, pubkey crypto.PubKey, chainId string, depositAmount *big.Int) error
-	ReadyForLaunchChildChain(height *big.Int, stateDB *state.StateDB) ([]string, []byte, []string)
-	ProcessPostPendingData(newPendingIdxBytes []byte, deleteChildChainIds []string)
+	CanCreateSideChain(from common.Address, chainId string, minValidators uint16, minDepositAmount, startupCost *big.Int, startBlock, endBlock *big.Int) error
+	CreateSideChain(from common.Address, chainId string, minValidators uint16, minDepositAmount *big.Int, startBlock, endBlock *big.Int) error
+	ValidateJoinSideChain(from common.Address, pubkey []byte, chainId string, depositAmount *big.Int, signature []byte) error
+	JoinSideChain(from common.Address, pubkey crypto.PubKey, chainId string, depositAmount *big.Int) error
+	ReadyForLaunchSideChain(height *big.Int, stateDB *state.StateDB) ([]string, []byte, []string)
+	ProcessPostPendingData(newPendingIdxBytes []byte, deleteSideChainIds []string)
 
 	VoteNextEpoch(ep *epoch.Epoch, from common.Address, voteHash common.Hash, txHash common.Hash) error
 	RevealVote(ep *epoch.Epoch, from common.Address, pubkey crypto.PubKey, depositAmount *big.Int, salt string, txHash common.Hash) error
@@ -49,16 +49,16 @@ type CrossChainHelper interface {
 	ChangeValidators(chainId string)
 
 	// for epoch only
-	VerifyChildChainProofData(bs []byte) error
-	SaveChildChainProofDataToMainChain(bs []byte) error
+	VerifySideChainProofData(bs []byte) error
+	SaveSideChainProofDataToMainChain(bs []byte) error
 
 	TX3LocalCache
 	ValidateTX3ProofData(proofData *types.TX3ProofData) error
 	ValidateTX4WithInMemTX3ProofData(tx4 *types.Transaction, tx3ProofData *types.TX3ProofData) error
 
 	////SaveDataToMainV1 acceps both epoch and tx3
-	//VerifyChildChainProofDataV1(proofData *types.ChildChainProofDataV1) error
-	//SaveChildChainProofDataToMainChainV1(proofData *types.ChildChainProofDataV1) error
+	//VerifySideChainProofDataV1(proofData *types.SideChainProofDataV1) error
+	//SaveSideChainProofDataToMainChainV1(proofData *types.SideChainProofDataV1) error
 }
 
 // CrossChain Callback

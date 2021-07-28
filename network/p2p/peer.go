@@ -49,8 +49,8 @@ const (
 	pongMsg      = 0x03
 
 	// NeatChain message belonging to neatchain/64
-	BroadcastNewChildChainMsg = 0x04
-	ConfirmNewChildChainMsg   = 0x05
+	BroadcastNewSideChainMsg = 0x04
+	ConfirmNewSideChainMsg   = 0x05
 
 	RefreshValidatorNodeInfoMsg = 0x06
 	RemoveValidatorNodeInfoMsg  = 0x07
@@ -293,26 +293,26 @@ func (p *Peer) handle(msg Msg) error {
 		// check errors because, the connection will be closed after it.
 		rlp.Decode(msg.Payload, &reason)
 		return reason[0]
-	case msg.Code == BroadcastNewChildChainMsg:
-		// Got New Child Chain message from peer
+	case msg.Code == BroadcastNewSideChainMsg:
+		// Got New Side Chain message from peer
 		var chainId string
 		if err := msg.Decode(&chainId); err != nil {
 			return err
 		}
 
-		p.log.Infof("Got new child chain msg from Peer %v, Before add protocol. Caps %v, Running Proto %+v", p.String(), p.Caps(), p.Info().Protocols)
+		p.log.Infof("Got new side chain msg from Peer %v, Before add protocol. Caps %v, Running Proto %+v", p.String(), p.Caps(), p.Info().Protocols)
 
 		newRunning := p.checkAndUpdateProtocol(chainId)
 		if newRunning {
 			// Add new protocol to peer, tell back to the peer
-			go Send(p.rw, ConfirmNewChildChainMsg, chainId)
+			go Send(p.rw, ConfirmNewSideChainMsg, chainId)
 		}
 
 		// Add the cap to the peer, start the protocol
-		p.log.Infof("Got new child chain msg After add protocol. Caps %v, Running Proto %+v", p.Caps(), p.Info().Protocols)
+		p.log.Infof("Got new side chain msg After add protocol. Caps %v, Running Proto %+v", p.Caps(), p.Info().Protocols)
 
-	case msg.Code == ConfirmNewChildChainMsg:
-		// Got New Child Chain message from peer
+	case msg.Code == ConfirmNewSideChainMsg:
+		// Got New Side Chain message from peer
 		var chainId string
 		if err := msg.Decode(&chainId); err != nil {
 			return err
@@ -399,22 +399,22 @@ func (p *Peer) handle(msg Msg) error {
 
 func (p *Peer) checkAndUpdateProtocol(chainId string) bool {
 
-	childProtocolName := "neatchain_" + chainId
+	sideProtocolName := "neatchain_" + chainId
 
-	// Check childChainId already added
+	// Check sideChainId already added
 	// TODO Protoect the changing of running under multi-thread env
-	if _, exist := p.running[childProtocolName]; exist {
-		p.log.Infof("Child Chain %v is already running on peer", childProtocolName)
+	if _, exist := p.running[sideProtocolName]; exist {
+		p.log.Infof("Side Chain %v is already running on peer", sideProtocolName)
 		return false
 	}
 
-	// Check we are support the same child chain or not
-	childProtocolOffset := getLargestOffset(p.running)
-	if match, protoRW := matchServerProtocol(*p.srvProtocols, childProtocolName, childProtocolOffset, p.rw); match {
+	// Check we are support the same side chain or not
+	sideProtocolOffset := getLargestOffset(p.running)
+	if match, protoRW := matchServerProtocol(*p.srvProtocols, sideProtocolName, sideProtocolOffset, p.rw); match {
 		// Start the ProtoRW and add it to running protoRW
-		p.startChildChainProtocol(protoRW)
+		p.startSideChainProtocol(protoRW)
 		// Add the protoRW to peer
-		p.running[childProtocolName] = protoRW
+		p.running[sideProtocolName] = protoRW
 
 		protoCap := protoRW.cap()
 		capExist := false
@@ -429,7 +429,7 @@ func (p *Peer) checkAndUpdateProtocol(chainId string) bool {
 		return true
 	}
 
-	p.log.Infof("No Local Server Protocol matched, perhaps local server has not start the child chain %v yet.", childProtocolName)
+	p.log.Infof("No Local Server Protocol matched, perhaps local server has not start the side chain %v yet.", sideProtocolName)
 	return false
 }
 
@@ -518,7 +518,7 @@ func (p *Peer) startProtocols(writeStart <-chan struct{}, writeErr chan<- error)
 	}
 }
 
-func (p *Peer) startChildChainProtocol(proto *protoRW) {
+func (p *Peer) startSideChainProtocol(proto *protoRW) {
 	p.wg.Add(1)
 
 	proto.closed = p.closed

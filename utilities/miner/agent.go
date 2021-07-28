@@ -22,7 +22,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Gessiux/neatchain/chain/consensus"
-	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ntcTypes "github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core/types"
 	"github.com/Gessiux/neatchain/chain/log"
 )
@@ -110,7 +110,7 @@ func (self *CpuAgent) mine(work *Work, stop <-chan struct{}) {
 		case *types.Block:
 			self.logger.Info("Successfully sealed new block", "number", result.Number(), "hash", result.Hash())
 			self.returnCh <- &Result{Work: work, Block: result}
-		case *ncTypes.IntermediateBlockResult:
+		case *ntcTypes.IntermediateBlockResult:
 			self.logger.Info("v Successfully sealed new block", "number", result.Block.Number(), "hash", result.Block.Hash())
 			self.returnCh <- &Result{Intermediate: result}
 		}

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/consensus"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/consensus"
 	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/internal/debug"
 	"github.com/Gessiux/neatchain/utilities/utils"
@@ -21,12 +21,12 @@ func neatchainCmd(ctx *cli.Context) error {
 		return nil
 	}
 
-	log.Info("NEAT Chain is the world's first bottom up new-generation blockchain of things (BoT) communication standard and base application platform.")
+	log.Info("NEAT | Blazing FAST, ultra SECURE and ECO friendly payment solution.")
 
 	chainMgr := GetCMInstance(ctx)
 
-	// ChildChainFlag flag
-	requestChildChain := strings.Split(ctx.GlobalString(utils.ChildChainFlag.Name), ",")
+	// SideChainFlag flag
+	requestSideChain := strings.Split(ctx.GlobalString(utils.SideChainFlag.Name), ",")
 
 	// Initial P2P Server
 	chainMgr.InitP2P()
@@ -52,14 +52,14 @@ func neatchainCmd(ctx *cli.Context) error {
 	// Start Main Chain
 	err = chainMgr.StartMainChain()
 
-	// Load Child Chain
-	err = chainMgr.LoadChains(requestChildChain)
+	// Load Side Chain
+	err = chainMgr.LoadChains(requestSideChain)
 	if err != nil {
-		log.Errorf("Load Child Chains failed. %v", err)
+		log.Errorf("Load Side Chains failed. %v", err)
 		return err
 	}
 
-	// Start Child Chain
+	// Start Side Chain
 	err = chainMgr.StartChains()
 	if err != nil {
 		log.Error("start chains failed")
@@ -68,7 +68,7 @@ func neatchainCmd(ctx *cli.Context) error {
 
 	err = chainMgr.StartRPC()
 	if err != nil {
-		log.Error("start intrpc failed")
+		log.Error("start NEAT RPC failed")
 		return err
 	}
 

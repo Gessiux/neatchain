@@ -26,7 +26,7 @@ import (
 	"time"
 
 	"github.com/Gessiux/neatchain/chain/consensus"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
 	"github.com/Gessiux/neatchain/chain/core/state"
 
 	goCrypto "github.com/Gessiux/go-crypto"
@@ -1285,8 +1285,8 @@ func (args *SendTxArgs) setDefaults(ctx context.Context, b Backend) error {
 		}
 	}
 
-	// force GasLimit to 0 for DepositInChildChain/WithdrawFromMainChain/SaveDataToMainChain in order to avoid being dropped by TxPool.
-	if function == neatAbi.DepositInChildChain || function == neatAbi.WithdrawFromMainChain || function == neatAbi.SaveDataToMainChain {
+	// force GasLimit to 0 for DepositInSideChain/WithdrawFromMainChain/SaveDataToMainChain in order to avoid being dropped by TxPool.
+	if function == neatAbi.DepositInSideChain || function == neatAbi.WithdrawFromMainChain || function == neatAbi.SaveDataToMainChain {
 		args.Gas = new(hexutil.Uint64)
 		*(*uint64)(args.Gas) = 0
 	} else {
@@ -2069,8 +2069,8 @@ func registerValidation(from common.Address, tx *types.Transaction, state *state
 
 	// Annual/SemiAnnual supernode can not become candidate
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
-		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
+	if nc, ok := bc.Engine().(consensus.NeatCon); ok {
+		ep = nc.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(from.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
 		return nil, core.ErrCannotCandidate
@@ -2140,8 +2140,8 @@ func unRegisterValidation(from common.Address, tx *types.Transaction, state *sta
 
 	// Super node can't unregister
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
-		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
+	if nc, ok := bc.Engine().(consensus.NeatCon); ok {
+		ep = nc.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(from.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
 		return core.ErrCannotUnRegister
@@ -2227,8 +2227,8 @@ func delegateValidation(from common.Address, tx *types.Transaction, state *state
 
 	// If Candidate is supernode, only allow to increase the stack(whitelist proxied list), not allow to create the new stack
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
-		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
+	if nc, ok := bc.Engine().(consensus.NeatCon); ok {
+		ep = nc.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(args.Candidate.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
 		if depositBalance.Sign() == 0 {
@@ -2308,8 +2308,8 @@ func unDelegateValidation(from common.Address, tx *types.Transaction, state *sta
 
 	// Super node Candidate can't decrease balance
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
-		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
+	if nc, ok := bc.Engine().(consensus.NeatCon); ok {
+		ep = nc.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 	if _, supernode := ep.Validators.GetByAddress(args.Candidate.Bytes()); supernode != nil && supernode.RemainingEpoch > 0 {
 		return nil, core.ErrCannotUnBond
@@ -2476,12 +2476,12 @@ func concatCopyPreAllocate(slices [][]byte) []byte {
 
 func getEpoch(bc *core.BlockChain) (*epoch.Epoch, error) {
 	var ep *epoch.Epoch
-	if tdm, ok := bc.Engine().(consensus.NeatByFT); ok {
-		ep = tdm.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
+	if nc, ok := bc.Engine().(consensus.NeatCon); ok {
+		ep = nc.GetEpoch().GetEpochByBlockNumber(bc.CurrentBlock().NumberU64())
 	}
 
 	if ep == nil {
-		return nil, errors.New("epoch is nil, are you running on NeatByFT Consensus Engine")
+		return nil, errors.New("epoch is nil, are you running on NeatCon Consensus Engine")
 	}
 
 	return ep, nil

@@ -14,8 +14,8 @@ import (
 	"github.com/Gessiux/go-crypto"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/chain/consensus"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
-	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
+	ntcTypes "github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/chain/core/rawdb"
 	"github.com/Gessiux/neatchain/chain/core/state"
@@ -58,8 +58,8 @@ func (cch *CrossChainHelper) GetMainChainId() string {
 	return cch.mainChainId
 }
 
-// CanCreateChildChain check the condition before send the create child chain into the tx pool
-func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId string, minValidators uint16, minDepositAmount, startupCost *big.Int, startBlock, endBlock *big.Int) error {
+// CanCreateSideChain check the condition before send the create side chain into the tx pool
+func (cch *CrossChainHelper) CanCreateSideChain(from common.Address, chainId string, minValidators uint16, minDepositAmount, startupCost *big.Int, startBlock, endBlock *big.Int) error {
 
 	if chainId == "" || strings.Contains(chainId, ";") {
 		return errors.New("chainId is nil or empty, or contains ';', should be meaningful")
@@ -75,7 +75,7 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	if chainId == MainChain || chainId == TestnetChain {
-		return errors.New("you can't create NeatChain as a child chain, try use other name instead")
+		return errors.New("you can't create NeatChain as a side chain, try use other name instead")
 	}
 
 	// Check if "chainId" has been created
@@ -85,7 +85,7 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	}
 
 	// Check if "chainId" has been registered
-	cci := core.GetPendingChildChainData(cch.chainInfoDB, chainId)
+	cci := core.GetPendingSideChainData(cch.chainInfoDB, chainId)
 	if cci != nil {
 		return fmt.Errorf("Chain %s has already applied, try use other name instead", chainId)
 	}
@@ -121,9 +121,9 @@ func (cch *CrossChainHelper) CanCreateChildChain(from common.Address, chainId st
 	return nil
 }
 
-// CreateChildChain Save the Child Chain Data into the DB, the data will be used later during Block Commit Callback
-func (cch *CrossChainHelper) CreateChildChain(from common.Address, chainId string, minValidators uint16, minDepositAmount *big.Int, startBlock, endBlock *big.Int) error {
-	log.Debug("CreateChildChain - start")
+// CreateSideChain Save the Side Chain Data into the DB, the data will be used later during Block Commit Callback
+func (cch *CrossChainHelper) CreateSideChain(from common.Address, chainId string, minValidators uint16, minDepositAmount *big.Int, startBlock, endBlock *big.Int) error {
+	log.Debug("CreateSideChain - start")
 
 	cci := &core.CoreChainInfo{
 		Owner:            from,
@@ -134,18 +134,18 @@ func (cch *CrossChainHelper) CreateChildChain(from common.Address, chainId strin
 		EndBlock:         endBlock,
 		JoinedValidators: make([]core.JoinedValidator, 0),
 	}
-	core.CreatePendingChildChainData(cch.chainInfoDB, cci)
+	core.CreatePendingSideChainData(cch.chainInfoDB, cci)
 
-	log.Debug("CreateChildChain - end")
+	log.Debug("CreateSideChain - end")
 	return nil
 }
 
-// ValidateJoinChildChain check the criteria whether it meets the join child chain requirement
-func (cch *CrossChainHelper) ValidateJoinChildChain(from common.Address, consensusPubkey []byte, chainId string, depositAmount *big.Int, signature []byte) error {
-	log.Debug("ValidateJoinChildChain - start")
+// ValidateJoinSideChain check the criteria whether it meets the join side chain requirement
+func (cch *CrossChainHelper) ValidateJoinSideChain(from common.Address, consensusPubkey []byte, chainId string, depositAmount *big.Int, signature []byte) error {
+	log.Debug("ValidateJoinSideChain - start")
 
 	if chainId == MainChain || chainId == TestnetChain {
-		return errors.New("you can't join NeatChain as a child chain, try use other name instead")
+		return errors.New("you can't join NeatChain as a side chain, try use other name instead")
 	}
 
 	// Check Signature of the PubKey matched against the Address
@@ -154,12 +154,12 @@ func (cch *CrossChainHelper) ValidateJoinChildChain(from common.Address, consens
 	}
 
 	// Check if "chainId" has been created/registered
-	ci := core.GetPendingChildChainData(cch.chainInfoDB, chainId)
+	ci := core.GetPendingSideChainData(cch.chainInfoDB, chainId)
 	if ci == nil {
 		if core.GetChainInfo(cch.chainInfoDB, chainId) != nil {
 			return fmt.Errorf("chain %s has already created/started, try use other name instead", chainId)
 		} else {
-			return fmt.Errorf("child chain %s not exist, try use other name instead", chainId)
+			return fmt.Errorf("side chain %s not exist, try use other name instead", chainId)
 		}
 	}
 
@@ -173,7 +173,7 @@ func (cch *CrossChainHelper) ValidateJoinChildChain(from common.Address, consens
 	}
 
 	if find {
-		return errors.New(fmt.Sprintf("You have already joined the Child Chain %s", chainId))
+		return errors.New(fmt.Sprintf("You have already joined the Side Chain %s", chainId))
 	}
 
 	// Check the deposit amount
@@ -181,19 +181,19 @@ func (cch *CrossChainHelper) ValidateJoinChildChain(from common.Address, consens
 		return errors.New("deposit amount must be greater than 0")
 	}
 
-	log.Debug("ValidateJoinChildChain - end")
+	log.Debug("ValidateJoinSideChain - end")
 	return nil
 }
 
-// JoinChildChain Join the Child Chain
-func (cch *CrossChainHelper) JoinChildChain(from common.Address, pubkey crypto.PubKey, chainId string, depositAmount *big.Int) error {
-	log.Debug("JoinChildChain - start")
+// JoinSideChain Join the Side Chain
+func (cch *CrossChainHelper) JoinSideChain(from common.Address, pubkey crypto.PubKey, chainId string, depositAmount *big.Int) error {
+	log.Debug("JoinSideChain - start")
 
-	// Load the Child Chain first
-	ci := core.GetPendingChildChainData(cch.chainInfoDB, chainId)
+	// Load the Side Chain first
+	ci := core.GetPendingSideChainData(cch.chainInfoDB, chainId)
 	if ci == nil {
-		log.Errorf("JoinChildChain - Child Chain %s not exist, you can't join the chain", chainId)
-		return fmt.Errorf("Child Chain %s not exist, you can't join the chain", chainId)
+		log.Errorf("JoinSideChain - Side Chain %s not exist, you can't join the chain", chainId)
+		return fmt.Errorf("Side Chain %s not exist, you can't join the chain", chainId)
 	}
 
 	for _, joined := range ci.JoinedValidators {
@@ -210,28 +210,28 @@ func (cch *CrossChainHelper) JoinChildChain(from common.Address, pubkey crypto.P
 
 	ci.JoinedValidators = append(ci.JoinedValidators, jv)
 
-	core.UpdatePendingChildChainData(cch.chainInfoDB, ci)
+	core.UpdatePendingSideChainData(cch.chainInfoDB, ci)
 
-	log.Debug("JoinChildChain - end")
+	log.Debug("JoinSideChain - end")
 	return nil
 }
 
-func (cch *CrossChainHelper) ReadyForLaunchChildChain(height *big.Int, stateDB *state.StateDB) ([]string, []byte, []string) {
-	//log.Debug("ReadyForLaunchChildChain - start")
+func (cch *CrossChainHelper) ReadyForLaunchSideChain(height *big.Int, stateDB *state.StateDB) ([]string, []byte, []string) {
+	//log.Debug("ReadyForLaunchSideChain - start")
 
-	readyId, updateBytes, removedId := core.GetChildChainForLaunch(cch.chainInfoDB, height, stateDB)
+	readyId, updateBytes, removedId := core.GetSideChainForLaunch(cch.chainInfoDB, height, stateDB)
 	if len(readyId) == 0 {
-		//log.Debugf("ReadyForLaunchChildChain - No child chain to be launch in Block %v", height)
+		//log.Debugf("ReadyForLaunchSideChain - No side chain to be launch in Block %v", height)
 	} else {
-		//log.Infof("ReadyForLaunchChildChain - %v child chain(s) to be launch in Block %v. %v", len(readyId), height, readyId)
+		//log.Infof("ReadyForLaunchSideChain - %v side chain(s) to be launch in Block %v. %v", len(readyId), height, readyId)
 	}
 
-	//log.Debug("ReadyForLaunchChildChain - end")
+	//log.Debug("ReadyForLaunchSideChain - end")
 	return readyId, updateBytes, removedId
 }
 
-func (cch *CrossChainHelper) ProcessPostPendingData(newPendingIdxBytes []byte, deleteChildChainIds []string) {
-	core.ProcessPostPendingData(cch.chainInfoDB, newPendingIdxBytes, deleteChildChainIds)
+func (cch *CrossChainHelper) ProcessPostPendingData(newPendingIdxBytes []byte, deleteSideChainIds []string) {
+	core.ProcessPostPendingData(cch.chainInfoDB, newPendingIdxBytes, deleteSideChainIds)
 }
 
 func (cch *CrossChainHelper) VoteNextEpoch(ep *epoch.Epoch, from common.Address, voteHash common.Hash, txHash common.Hash) error {
@@ -322,8 +322,8 @@ func (cch *CrossChainHelper) GetTxFromMainChain(txHash common.Hash) *types.Trans
 func (cch *CrossChainHelper) GetEpochFromMainChain() (string, *epoch.Epoch) {
 	neatchain := MustGetNeatChainFromNode(chainMgr.mainChain.NeatNode)
 	var ep *epoch.Epoch
-	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
-		ep = neatbyft.GetEpoch()
+	if neatcon, ok := neatchain.Engine().(consensus.NeatCon); ok {
+		ep = neatcon.GetEpoch()
 	}
 	return neatchain.ChainConfig().NeatChainId, ep
 }
@@ -337,7 +337,7 @@ func (cch *CrossChainHelper) ChangeValidators(chainId string) {
 	var chain *Chain = nil
 	if chainId == MainChain || chainId == TestnetChain {
 		chain = chainMgr.mainChain
-	} else if chn, ok := chainMgr.childChains[chainId]; ok {
+	} else if chn, ok := chainMgr.sideChains[chainId]; ok {
 		chain = chn
 	}
 
@@ -352,11 +352,11 @@ func (cch *CrossChainHelper) ChangeValidators(chainId string) {
 
 // verify the signature of validators who voted for the block
 // most of the logic here is from 'VerifyHeader'
-func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
+func (cch *CrossChainHelper) VerifySideChainProofData(bs []byte) error {
 
-	log.Debug("VerifyChildChainProofData - start")
+	log.Debug("VerifySideChainProofData - start")
 
-	var proofData types.ChildChainProofData
+	var proofData types.SideChainProofData
 	err := rlp.DecodeBytes(bs, &proofData)
 	if err != nil {
 		return err
@@ -368,14 +368,14 @@ func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
 		//return errors.New("block in the future")
 	}
 
-	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
 	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
-		return fmt.Errorf("invalid child chain id: %s", chainId)
+		return fmt.Errorf("invalid side chain id: %s", chainId)
 	}
 
 	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
@@ -403,9 +403,9 @@ func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
 		}
 	}
 
-	// Bypass the validator check for official child chain 0
+	// Bypass the validator check for official side chain 0
 	// TODO where need
-	if chainId != "child_0" {
+	if chainId != "side_0" {
 		ci := core.GetChainInfo(cch.chainInfoDB, chainId)
 		if ci == nil {
 			return fmt.Errorf("chain info %s not found", chainId)
@@ -429,28 +429,28 @@ func (cch *CrossChainHelper) VerifyChildChainProofData(bs []byte) error {
 		}
 	}
 
-	log.Debug("VerifyChildChainProofData - end")
+	log.Debug("VerifySideChainProofData - end")
 	return nil
 }
 
-func (cch *CrossChainHelper) SaveChildChainProofDataToMainChain(bs []byte) error {
-	log.Debug("SaveChildChainProofDataToMainChain - start")
+func (cch *CrossChainHelper) SaveSideChainProofDataToMainChain(bs []byte) error {
+	log.Debug("SaveSideChainProofDataToMainChain - start")
 
-	var proofData types.ChildChainProofData
+	var proofData types.SideChainProofData
 	err := rlp.DecodeBytes(bs, &proofData)
 	if err != nil {
 		return err
 	}
 
 	header := proofData.Header
-	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
 	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
-		return fmt.Errorf("invalid child chain id: %s", chainId)
+		return fmt.Errorf("invalid side chain id: %s", chainId)
 	}
 
 	// here is epoch update; should be a more general mechanism
@@ -458,7 +458,7 @@ func (cch *CrossChainHelper) SaveChildChainProofDataToMainChain(bs []byte) error
 		ep := epoch.FromBytes(ncExtra.EpochBytes)
 		if ep != nil {
 			ci := core.GetChainInfo(cch.chainInfoDB, ncExtra.ChainID)
-			// ChainInfo is nil means we need to wait for Child Chain to be launched, this could happened during catch-up scenario
+			// ChainInfo is nil means we need to wait for Side Chain to be launched, this could happened during catch-up scenario
 			if ci == nil {
 				for {
 					// wait for 3 sec and try again
@@ -485,7 +485,7 @@ func (cch *CrossChainHelper) SaveChildChainProofDataToMainChain(bs []byte) error
 		}
 	}
 
-	log.Debug("SaveChildChainProofDataToMainChain - end")
+	log.Debug("SaveSideChainProofDataToMainChain - end")
 	return nil
 }
 
@@ -498,14 +498,14 @@ func (cch *CrossChainHelper) ValidateTX3ProofData(proofData *types.TX3ProofData)
 		//return errors.New("block in the future")
 	}
 
-	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 	if err != nil {
 		return err
 	}
 
 	chainId := ncExtra.ChainID
 	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
-		return fmt.Errorf("invalid child chain id: %s", chainId)
+		return fmt.Errorf("invalid side chain id: %s", chainId)
 	}
 
 	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
@@ -622,24 +622,24 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 		return core.ErrInvalidSender
 	}
 
-	var tx3Args neatAbi.WithdrawFromChildChainArgs
+	var tx3Args neatAbi.WithdrawFromSideChainArgs
 	tx3Data := tx3.Data()
-	if err := neatAbi.ChainABI.UnpackMethodInputs(&tx3Args, neatAbi.WithdrawFromChildChain.String(), tx3Data[4:]); err != nil {
+	if err := neatAbi.ChainABI.UnpackMethodInputs(&tx3Args, neatAbi.WithdrawFromSideChain.String(), tx3Data[4:]); err != nil {
 		return err
 	}
 
 	// Does TX3 & TX4 Match
 	if from != tx3From || args.ChainId != tx3Args.ChainId || args.Amount.Cmp(tx3.Value()) != 0 {
-		return errors.New("params are not consistent with tx in child chain")
+		return errors.New("params are not consistent with tx in side chain")
 	}
 
 	return nil
 }
 
 //SaveDataToMainV1 acceps both epoch and tx3
-//func (cch *CrossChainHelper) VerifyChildChainProofDataV1(proofData *types.ChildChainProofDataV1) error {
+//func (cch *CrossChainHelper) VerifySideChainProofDataV1(proofData *types.SideChainProofDataV1) error {
 //
-//	log.Debug("VerifyChildChainProofDataV1 - start")
+//	log.Debug("VerifySideChainProofDataV1 - start")
 //
 //	header := proofData.Header
 //	// Don't waste time checking blocks from the future
@@ -647,14 +647,14 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //		//return errors.New("block in the future")
 //	}
 //
-//	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+//	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		return err
 //	}
 //
 //	chainId := ncExtra.ChainID
 //	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
-//		return fmt.Errorf("invalid child chain id: %s", chainId)
+//		return fmt.Errorf("invalid side chain id: %s", chainId)
 //	}
 //
 //	if header.Nonce != (types.NeatConEmptyNonce) && !bytes.Equal(header.Nonce[:], types.NeatConNonce) {
@@ -679,19 +679,19 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //	}
 //
 //	isSd2mc := params.IsSd2mc(cch.GetMainChainId(), cch.GetHeightFromMainChain())
-//	// Bypass the validator check for official child chain 0
-//	if chainId != "child_0" || isSd2mc {
+//	// Bypass the validator check for official side chain 0
+//	if chainId != "side_0" || isSd2mc {
 //
 //		getValidatorsFromChainInfo := false
 //		if ncExtra.EpochBytes != nil && len(ncExtra.EpochBytes) != 0 {
 //			ep := epoch.FromBytes(ncExtra.EpochBytes)
 //			if ep != nil && ep.Number == 0 {
-//				//Child chain just created and save the epoch info, get validators from chain info
+//				//Side chain just created and save the epoch info, get validators from chain info
 //				getValidatorsFromChainInfo = true
 //			}
 //		}
 //
-//		var valSet *ncTypes.ValidatorSet = nil
+//		var valSet *ntcTypes.ValidatorSet = nil
 //		if !getValidatorsFromChainInfo {
 //			ep := ci.GetEpochByBlockNumber(ncExtra.Height)
 //			if ep == nil {
@@ -699,11 +699,11 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //			}
 //			valSet = ep.Validators
 //		} else {
-//			_, tdmGenesis := core.LoadChainGenesis(cch.chainInfoDB, chainId)
-//			if tdmGenesis == nil {
-//				return errors.New(fmt.Sprintf("unable to retrieve the genesis file for child chain %s", chainId))
+//			_, ntcGenesis := core.LoadChainGenesis(cch.chainInfoDB, chainId)
+//			if ntcGenesis == nil {
+//				return errors.New(fmt.Sprintf("unable to retrieve the genesis file for side chain %s", chainId))
 //			}
-//			coreGenesis, err := ncTypes.GenesisDocFromJSON(tdmGenesis)
+//			coreGenesis, err := ntcTypes.GenesisDocFromJSON(ntcGenesis)
 //			if err != nil {
 //				return err
 //			}
@@ -741,31 +741,31 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //		}
 //	}
 //
-//	log.Debug("VerifyChildChainProofDataV1 - end")
+//	log.Debug("VerifySideChainProofDataV1 - end")
 //	return nil
 //}
 //
-//func (cch *CrossChainHelper) SaveChildChainProofDataToMainChainV1(proofData *types.ChildChainProofDataV1) error {
-//	log.Info("SaveChildChainProofDataToMainChainV1 - start")
+//func (cch *CrossChainHelper) SaveSideChainProofDataToMainChainV1(proofData *types.SideChainProofDataV1) error {
+//	log.Info("SaveSideChainProofDataToMainChainV1 - start")
 //
 //	header := proofData.Header
-//	ncExtra, err := ncTypes.ExtractNeatConExtra(header)
+//	ncExtra, err := ntcTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		return err
 //	}
 //
 //	chainId := ncExtra.ChainID
 //	if chainId == "" || chainId == MainChain || chainId == TestnetChain {
-//		return fmt.Errorf("invalid child chain id: %s", chainId)
+//		return fmt.Errorf("invalid side chain id: %s", chainId)
 //	}
 //
 //	// here is epoch update; should be a more general mechanism
 //	if len(ncExtra.EpochBytes) != 0 {
-//		log.Info("SaveChildChainProofDataToMainChainV1 - Save Epoch")
+//		log.Info("SaveSideChainProofDataToMainChainV1 - Save Epoch")
 //		ep := epoch.FromBytes(ncExtra.EpochBytes)
 //		if ep != nil {
 //			ci := core.GetChainInfo(cch.chainInfoDB, ncExtra.ChainID)
-//			// ChainInfo is nil means we need to wait for Child Chain to be launched, this could happened during catch-up scenario
+//			// ChainInfo is nil means we need to wait for Side Chain to be launched, this could happened during catch-up scenario
 //			if ci == nil {
 //				return fmt.Errorf("not possible to pass verification")
 //			}
@@ -787,7 +787,7 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //	// Write the TX3ProofData
 //	if len(proofData.TxIndexs) != 0 {
 //
-//		log.Infof("SaveChildChainProofDataToMainChainV1 - Save Tx3, count is %v", len(proofData.TxIndexs))
+//		log.Infof("SaveSideChainProofDataToMainChainV1 - Save Tx3, count is %v", len(proofData.TxIndexs))
 //		tx3ProofData := &types.TX3ProofData{
 //			Header:   proofData.Header,
 //			TxIndexs: proofData.TxIndexs,
@@ -798,7 +798,7 @@ func (cch *CrossChainHelper) ValidateTX4WithInMemTX3ProofData(tx4 *types.Transac
 //		}
 //	}
 //
-//	log.Info("SaveChildChainProofDataToMainChainV1 - end")
+//	log.Info("SaveSideChainProofDataToMainChainV1 - end")
 //	return nil
 //}
 

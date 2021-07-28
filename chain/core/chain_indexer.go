@@ -62,15 +62,15 @@ type ChainIndexerChain interface {
 // connected to the blockchain through the event system by starting a
 // ChainEventLoop in a goroutine.
 //
-// Further child ChainIndexers can be added which use the output of the parent
-// section indexer. These child indexers receive new head notifications only
+// Further side ChainIndexers can be added which use the output of the parent
+// section indexer. These side indexers receive new head notifications only
 // after an entire section has been finished or in case of rollbacks that might
 // affect already finished sections.
 type ChainIndexer struct {
-	chainDb  neatdb.Database     // Chain database to index the data from
-	indexDb  neatdb.Database     // Prefixed table-view of the db to write index metadata into
-	backend  ChainIndexerBackend // Background processor generating the index data content
-	children []*ChainIndexer     // Child indexers to cascade chain updates to
+	chainDb neatdb.Database     // Chain database to index the data from
+	indexDb neatdb.Database     // Prefixed table-view of the db to write index metadata into
+	backend ChainIndexerBackend // Background processor generating the index data content
+	sideren []*ChainIndexer     // Side indexers to cascade chain updates to
 
 	active uint32          // Flag whether the event loop was started
 	update chan struct{}   // Notification channel that headers should be processed
@@ -152,9 +152,9 @@ func (c *ChainIndexer) Close() error {
 			errs = append(errs, err)
 		}
 	}
-	// Close all children
-	for _, child := range c.children {
-		if err := child.Close(); err != nil {
+	// Close all sideren
+	for _, side := range c.sideren {
+		if err := side.Close(); err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -235,13 +235,13 @@ func (c *ChainIndexer) newHead(head uint64, reorg bool) {
 		if changed < c.storedSections {
 			c.setValidSections(changed)
 		}
-		// Update the new head number to the finalized section end and notify children
+		// Update the new head number to the finalized section end and notify sideren
 		head = changed * c.sectionSize
 
 		if head < c.cascadedHead {
 			c.cascadedHead = head
-			for _, child := range c.children {
-				child.newHead(c.cascadedHead, true)
+			for _, side := range c.sideren {
+				side.newHead(c.cascadedHead, true)
 			}
 		}
 		return
@@ -312,9 +312,9 @@ func (c *ChainIndexer) updateLoop() {
 					}
 
 					c.cascadedHead = c.storedSections*c.sectionSize - 1
-					for _, child := range c.children {
+					for _, side := range c.sideren {
 						c.log.Trace("Cascading chain index update", "head", c.cascadedHead)
-						child.newHead(c.cascadedHead, false)
+						side.newHead(c.cascadedHead, false)
 					}
 				} else {
 					// If processing failed, don't retry until further notification
@@ -381,14 +381,14 @@ func (c *ChainIndexer) Sections() (uint64, uint64, common.Hash) {
 	return c.storedSections, c.storedSections*c.sectionSize - 1, c.SectionHead(c.storedSections - 1)
 }
 
-// AddChildIndexer adds a child ChainIndexer that can use the output of this one
+// AddChildIndexer adds a side ChainIndexer that can use the output of this one
 func (c *ChainIndexer) AddChildIndexer(indexer *ChainIndexer) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	c.children = append(c.children, indexer)
+	c.sideren = append(c.sideren, indexer)
 
-	// Cascade any pending updates to new children too
+	// Cascade any pending updates to new sideren too
 	if c.storedSections > 0 {
 		indexer.newHead(c.storedSections*c.sectionSize-1, false)
 	}

@@ -107,9 +107,10 @@ func Map(m Interface, c chan struct{}, protocol string, extport, intport int, na
 	}()
 	if err := m.AddMapping(protocol, extport, intport, name, mapTimeout); err != nil {
 		log.Debug("Couldn't add port mapping", "err", err)
-	} else {
-		log.Info("Mapped network port")
 	}
+	// else {
+	// log.Info("Mapped network port")
+	// }
 	for {
 		select {
 		case _, ok := <-c:

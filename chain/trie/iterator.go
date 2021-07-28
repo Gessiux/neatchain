@@ -64,7 +64,7 @@ func (it *Iterator) Prove() [][]byte {
 
 // NodeIterator is an iterator to traverse the trie pre-order.
 type NodeIterator interface {
-	// Next moves the iterator to the next node. If the parameter is false, any child
+	// Next moves the iterator to the next node. If the parameter is false, any side
 	// nodes will be skipped.
 	Next(bool) bool
 
@@ -108,7 +108,7 @@ type nodeIteratorState struct {
 	hash    common.Hash // Hash of the node being iterated (nil if not standalone)
 	node    node        // Trie node being iterated
 	parent  common.Hash // Hash of the first full ancestor node (nil if current is the root)
-	index   int         // Child to be processed next
+	index   int         // Side to be processed next
 	pathlen int         // Length of the path to this node
 }
 
@@ -268,11 +268,11 @@ func (it *nodeIterator) peek(descend bool) (*nodeIteratorState, *int, []byte, er
 		return state, nil, nil, err
 	}
 	if !descend {
-		// If we're skipping children, pop the current node first
+		// If we're skipping sideren, pop the current node first
 		it.pop()
 	}
 
-	// Continue iteration to the next child
+	// Continue iteration to the next side
 	for len(it.stack) > 0 {
 		parent := it.stack[len(it.stack)-1]
 		ancestor := parent.hash
@@ -286,7 +286,7 @@ func (it *nodeIterator) peek(descend bool) (*nodeIteratorState, *int, []byte, er
 			}
 			return state, &parent.index, path, nil
 		}
-		// No more child nodes, move back up.
+		// No more side nodes, move back up.
 		it.pop()
 	}
 	return nil, nil, nil, errIteratorEnd
@@ -307,14 +307,14 @@ func (st *nodeIteratorState) resolve(tr *Trie, path []byte) error {
 func (it *nodeIterator) nextChild(parent *nodeIteratorState, ancestor common.Hash) (*nodeIteratorState, []byte, bool) {
 	switch node := parent.node.(type) {
 	case *fullNode:
-		// Full node, move to the first non-nil child.
+		// Full node, move to the first non-nil side.
 		for i := parent.index + 1; i < len(node.Children); i++ {
-			child := node.Children[i]
-			if child != nil {
-				hash, _ := child.cache()
+			side := node.Children[i]
+			if side != nil {
+				hash, _ := side.cache()
 				state := &nodeIteratorState{
 					hash:    common.BytesToHash(hash),
-					node:    child,
+					node:    side,
 					parent:  ancestor,
 					index:   -1,
 					pathlen: len(it.path),
@@ -325,7 +325,7 @@ func (it *nodeIterator) nextChild(parent *nodeIteratorState, ancestor common.Has
 			}
 		}
 	case *shortNode:
-		// Short node, return the pointer singleton child
+		// Short node, return the pointer singleton side
 		if parent.index < 0 {
 			hash, _ := node.Val.cache()
 			state := &nodeIteratorState{

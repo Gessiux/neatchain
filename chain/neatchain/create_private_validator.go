@@ -7,7 +7,7 @@ import (
 
 	"github.com/Gessiux/go-crypto"
 	"github.com/Gessiux/go-wire"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/log"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/common"

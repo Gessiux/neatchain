@@ -237,16 +237,16 @@ func (p *PruneProcessor) countBlockChainTrie(root common.Hash, markNoPrune bool)
 
 func countTrie(t state.Trie, nodeCount NodeCount, markNoPrune bool, processLeaf processLeafTrie) {
 
-	child := true
+	side := true
 	if !markNoPrune {
-		for it := t.NodeIterator(nil); it.Next(child); {
+		for it := t.NodeIterator(nil); it.Next(side); {
 			if !it.Leaf() {
 				nodeHash := it.Hash()
 				if _, exist := nodeCount[nodeHash]; exist {
-					child = false
+					side = false
 				} else {
 					nodeCount[nodeHash] = 0 //this node occurs, may need prune
-					child = true
+					side = true
 				}
 			} else {
 				// Process the Account -> Inner Trie
@@ -262,7 +262,7 @@ func countTrie(t state.Trie, nodeCount NodeCount, markNoPrune bool, processLeaf 
 			}
 		}
 	} else {
-		for it := t.NodeIterator(nil); it.Next(child); {
+		for it := t.NodeIterator(nil); it.Next(side); {
 			if !it.Leaf() {
 				nodeHash := it.Hash()
 				nodeCount[nodeHash] = 1 //this node occurs in the latest block, mark no prune
@@ -413,8 +413,8 @@ func (p *PruneProcessor) pruneBlockChainTrie(root common.Hash, nodeCount NodeCou
 }
 
 func pruneTrie(t state.Trie, nodeCount NodeCount, pendingDeleteHashList *[]common.Hash, processLeaf processLeafTrie) {
-	child := true
-	for it := t.NodeIterator(nil); it.Next(child); {
+	side := true
+	for it := t.NodeIterator(nil); it.Next(side); {
 		if !it.Leaf() {
 			nodeHash := it.Hash()
 			if nodeCount[nodeHash] > 0 {
@@ -422,11 +422,11 @@ func pruneTrie(t state.Trie, nodeCount NodeCount, pendingDeleteHashList *[]commo
 			}
 
 			if nodeCount[nodeHash] == 0 {
-				child = true
+				side = true
 				*pendingDeleteHashList = append(*pendingDeleteHashList, nodeHash)
 				delete(nodeCount, nodeHash)
 			} else {
-				child = false
+				side = false
 			}
 		} else {
 			// Process the Account -> Inner Trie

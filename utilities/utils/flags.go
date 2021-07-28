@@ -50,7 +50,7 @@ import (
 
 	// import neatcon config
 	cfg "github.com/Gessiux/go-config"
-	tmcfg "github.com/Gessiux/neatchain/chain/consensus/neatbyft/config/neatcon"
+	tmcfg "github.com/Gessiux/neatchain/chain/consensus/neatcon/config/neatcon"
 )
 
 var (
@@ -472,10 +472,10 @@ var (
 	//	Value: DirectoryString{"log"},
 	//}
 
-	// Child Chain Flag
-	ChildChainFlag = cli.StringFlag{
-		Name:  "childChain",
-		Usage: "Specify one or more child chain should be start. Ex: child-1,child-2",
+	// Side Chain Flag
+	SideChainFlag = cli.StringFlag{
+		Name:  "sideChain",
+		Usage: "Specify one or more side chain should be start. Ex: side-1,side-2",
 	}
 
 	// ----------------------------
@@ -1226,7 +1226,7 @@ func MigrateFlags(action func(ctx *cli.Context) error) func(*cli.Context) error 
 }
 
 var (
-	// neatbyft config
+	// neatcon config
 	Config cfg.Config
 )
 

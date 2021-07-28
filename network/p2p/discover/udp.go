@@ -235,7 +235,7 @@ func ListenUDP(c conn, cfg Config) (*Table, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Info("UDP listener up", "self", tab.self)
+	//log.Info("UDP listener up", "self", tab.self)
 	return tab, nil
 }
 

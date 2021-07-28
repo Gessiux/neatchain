@@ -12,8 +12,8 @@ import (
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/chain/accounts"
 	"github.com/Gessiux/neatchain/chain/consensus"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/epoch"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/epoch"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/chain/core/rawdb"
 	"github.com/Gessiux/neatchain/chain/log"
@@ -33,9 +33,9 @@ type ChainManager struct {
 	mainQuit      <-chan struct{}
 	mainStartDone chan struct{}
 
-	createChildChainLock sync.Mutex
-	childChains          map[string]*Chain
-	childQuits           map[string]<-chan struct{}
+	createSideChainLock sync.Mutex
+	sideChains          map[string]*Chain
+	sideQuits           map[string]<-chan struct{}
 
 	stop chan struct{} // Channel wait for NEATChain stop
 
@@ -51,8 +51,8 @@ func GetCMInstance(ctx *cli.Context) *ChainManager {
 	once.Do(func() {
 		chainMgr = &ChainManager{ctx: ctx}
 		chainMgr.stop = make(chan struct{})
-		chainMgr.childChains = make(map[string]*Chain)
-		chainMgr.childQuits = make(map[string]<-chan struct{})
+		chainMgr.sideChains = make(map[string]*Chain)
+		chainMgr.sideQuits = make(map[string]<-chan struct{})
 		chainMgr.cch = &CrossChainHelper{}
 	})
 	return chainMgr
@@ -80,25 +80,25 @@ func (cm *ChainManager) LoadMainChain() error {
 	return nil
 }
 
-func (cm *ChainManager) LoadChains(childIds []string) error {
+func (cm *ChainManager) LoadChains(sideIds []string) error {
 
-	childChainIds := core.GetChildChainIds(cm.cch.chainInfoDB)
-	log.Infof("Before load child chains, child chain IDs are %v, len is %d", childChainIds, len(childChainIds))
+	sideChainIds := core.GetSideChainIds(cm.cch.chainInfoDB)
+	//log.Infof("Before load side chains, side chain IDs are %v, len is %d", sideChainIds, len(sideChainIds))
 
-	readyToLoadChains := make(map[string]bool) // Key: Child Chain ID, Value: Enable Mining (deprecated)
+	readyToLoadChains := make(map[string]bool) // Key: Side Chain ID, Value: Enable Mining (deprecated)
 
-	// Check we are belong to the validator of Child Chain in DB first (Mining Mode)
-	for _, chainId := range childChainIds {
-		// Check Current Validator is Child Chain Validator
+	// Check we are belong to the validator of Side Chain in DB first (Mining Mode)
+	for _, chainId := range sideChainIds {
+		// Check Current Validator is Side Chain Validator
 		ci := core.GetChainInfo(cm.cch.chainInfoDB, chainId)
-		// Check if we are in this child chain
-		if ci.Epoch != nil && cm.checkCoinbaseInChildChain(ci.Epoch) {
+		// Check if we are in this side chain
+		if ci.Epoch != nil && cm.checkCoinbaseInSideChain(ci.Epoch) {
 			readyToLoadChains[chainId] = true
 		}
 	}
 
-	// Check request from Child Chain
-	for _, requestId := range childIds {
+	// Check request from Side Chain
+	for _, requestId := range sideIds {
 		if requestId == "" {
 			// Ignore the Empty ID
 			continue
@@ -114,18 +114,18 @@ func (cm *ChainManager) LoadChains(childIds []string) error {
 		}
 	}
 
-	log.Infof("Number of child chain to be loaded :%v", len(readyToLoadChains))
-	log.Infof("Start to load child chain: %v", readyToLoadChains)
+	//log.Infof("Number of side chain to be loaded :%v", len(readyToLoadChains))
+	//log.Infof("Start to load side chain: %v", readyToLoadChains)
 
 	for chainId := range readyToLoadChains {
-		chain := LoadChildChain(cm.ctx, chainId)
+		chain := LoadSideChain(cm.ctx, chainId)
 		if chain == nil {
-			log.Errorf("Load child chain: %s Failed.", chainId)
+			log.Errorf("Load side chain: %s Failed.", chainId)
 			continue
 		}
 
-		cm.childChains[chainId] = chain
-		log.Infof("Load child chain: %s Success!", chainId)
+		cm.sideChains[chainId] = chain
+		log.Infof("Load side chain: %s Success!", chainId)
 	}
 	return nil
 }
@@ -160,8 +160,8 @@ func (cm *ChainManager) StartP2PServer() error {
 	srv := cm.server.Server()
 	// Append Main Chain Protocols
 	srv.Protocols = append(srv.Protocols, cm.mainChain.NeatNode.GatherProtocols()...)
-	// Append Child Chain Protocols
-	//for _, chain := range cm.childChains {
+	// Append Side Chain Protocols
+	//for _, chain := range cm.sideChains {
 	//	srv.Protocols = append(srv.Protocols, chain.EthNode.GatherProtocols()...)
 	//}
 	// Start the server
@@ -189,14 +189,14 @@ func (cm *ChainManager) StartMainChain() error {
 
 func (cm *ChainManager) StartChains() error {
 
-	for _, chain := range cm.childChains {
+	for _, chain := range cm.sideChains {
 		// Start each Chain
 		srv := cm.server.Server()
-		childProtocols := chain.NeatNode.GatherProtocols()
-		// Add Child Protocols to P2P Server Protocols
-		srv.Protocols = append(srv.Protocols, childProtocols...)
-		// Add Child Protocols to P2P Server Caps
-		srv.AddChildProtocolCaps(childProtocols)
+		sideProtocols := chain.NeatNode.GatherProtocols()
+		// Add Side Protocols to P2P Server Protocols
+		srv.Protocols = append(srv.Protocols, sideProtocols...)
+		// Add Side Protocols to P2P Server Caps
+		srv.AddChildProtocolCaps(sideProtocols)
 
 		chain.NeatNode.SetP2PServer(srv)
 
@@ -208,10 +208,10 @@ func (cm *ChainManager) StartChains() error {
 		StartChain(cm.ctx, chain, startDone)
 		<-startDone
 
-		cm.childQuits[chain.Id] = chain.NeatNode.StopChan()
+		cm.sideQuits[chain.Id] = chain.NeatNode.StopChan()
 
-		// Tell other peers that we have added into a new child chain
-		cm.server.BroadcastNewChildChainMsg(chain.Id)
+		// Tell other peers that we have added into a new side chain
+		cm.server.BroadcastNewSideChainMsg(chain.Id)
 	}
 
 	return nil
@@ -230,11 +230,11 @@ func (cm *ChainManager) StartRPC() error {
 			} else {
 				log.Errorf("Load Main Chain RPC HTTP handler failed: %v", err)
 			}
-			for _, chain := range cm.childChains {
+			for _, chain := range cm.sideChains {
 				if h, err := chain.NeatNode.GetHTTPHandler(); err == nil {
 					utils.HookupHTTP(chain.Id, h)
 				} else {
-					log.Errorf("Load Child Chain RPC HTTP handler failed: %v", err)
+					log.Errorf("Load Side Chain RPC HTTP handler failed: %v", err)
 				}
 			}
 		}
@@ -245,11 +245,11 @@ func (cm *ChainManager) StartRPC() error {
 			} else {
 				log.Errorf("Load Main Chain RPC WS handler failed: %v", err)
 			}
-			for _, chain := range cm.childChains {
+			for _, chain := range cm.sideChains {
 				if h, err := chain.NeatNode.GetWSHandler(); err == nil {
 					utils.HookupWS(chain.Id, h)
 				} else {
-					log.Errorf("Load Child Chain RPC WS handler failed: %v", err)
+					log.Errorf("Load Side Chain RPC WS handler failed: %v", err)
 				}
 			}
 		}
@@ -260,36 +260,36 @@ func (cm *ChainManager) StartRPC() error {
 
 func (cm *ChainManager) StartInspectEvent() {
 
-	createChildChainCh := make(chan core.CreateChildChainEvent, 10)
-	createChildChainSub := MustGetNeatChainFromNode(cm.mainChain.NeatNode).BlockChain().SubscribeCreateChildChainEvent(createChildChainCh)
+	createSideChainCh := make(chan core.CreateSideChainEvent, 10)
+	createSideChainSub := MustGetNeatChainFromNode(cm.mainChain.NeatNode).BlockChain().SubscribeCreateSideChainEvent(createSideChainCh)
 
 	go func() {
-		defer createChildChainSub.Unsubscribe()
+		defer createSideChainSub.Unsubscribe()
 
 		for {
 			select {
-			case event := <-createChildChainCh:
-				log.Infof("CreateChildChainEvent received: %v", event)
+			case event := <-createSideChainCh:
+				log.Infof("CreateSideChainEvent received: %v", event)
 
 				go func() {
-					cm.createChildChainLock.Lock()
-					defer cm.createChildChainLock.Unlock()
+					cm.createSideChainLock.Lock()
+					defer cm.createSideChainLock.Unlock()
 
-					cm.LoadChildChainInRT(event.ChainId)
+					cm.LoadSideChainInRT(event.ChainId)
 				}()
-			case <-createChildChainSub.Err():
+			case <-createSideChainSub.Err():
 				return
 			}
 		}
 	}()
 }
 
-func (cm *ChainManager) LoadChildChainInRT(chainId string) {
+func (cm *ChainManager) LoadSideChainInRT(chainId string) {
 
-	// Load Child Chain data from pending data
-	cci := core.GetPendingChildChainData(cm.cch.chainInfoDB, chainId)
+	// Load Side Chain data from pending data
+	cci := core.GetPendingSideChainData(cm.cch.chainInfoDB, chainId)
 	if cci == nil {
-		log.Errorf("child chain: %s does not exist, can't load", chainId)
+		log.Errorf("side chain: %s does not exist, can't load", chainId)
 		return
 	}
 
@@ -301,8 +301,8 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 	cm.mainChain.NeatNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
-		localEtherbase = neatbyft.PrivateValidator()
+	if neatcon, ok := neatchain.Engine().(consensus.NeatCon); ok {
+		localEtherbase = neatcon.PrivateValidator()
 	}
 
 	for _, v := range cci.JoinedValidators {
@@ -327,15 +327,15 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 	defer writeGenesisIntoChainInfoDB(cm.cch.chainInfoDB, chainId, validators)
 
 	if !validator {
-		log.Warnf("You are not in the validators of child chain %v, no need to start the child chain", chainId)
-		// Update Child Chain to formal
-		cm.formalizeChildChain(chainId, *cci, nil)
+		log.Warnf("You are not in the validators of side chain %v, no need to start the side chain", chainId)
+		// Update Side Chain to formal
+		cm.formalizeSideChain(chainId, *cci, nil)
 		return
 	}
 
-	// if child chain already loaded, just return (For catch-up case)
-	if _, ok := cm.childChains[chainId]; ok {
-		log.Infof("Child Chain [%v] has been already loaded.", chainId)
+	// if side chain already loaded, just return (For catch-up case)
+	if _, ok := cm.sideChains[chainId]; ok {
+		log.Infof("Side Chain [%v] has been already loaded.", chainId)
 		return
 	}
 
@@ -350,30 +350,30 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 		}
 	}
 
-	// child chain uses the same validator with the main chain.
+	// side chain uses the same validator with the main chain.
 	privValidatorFile := cm.mainChain.Config.GetString("priv_validator_file")
 	self := types.LoadPrivValidator(privValidatorFile)
 
-	err := CreateChildChain(cm.ctx, chainId, *self, keyJson, validators)
+	err := CreateSideChain(cm.ctx, chainId, *self, keyJson, validators)
 	if err != nil {
-		log.Errorf("Create Child Chain %v failed! %v", chainId, err)
+		log.Errorf("Create Side Chain %v failed! %v", chainId, err)
 		return
 	}
 
-	chain := LoadChildChain(cm.ctx, chainId)
+	chain := LoadSideChain(cm.ctx, chainId)
 	if chain == nil {
-		log.Errorf("Child Chain %v load failed!", chainId)
+		log.Errorf("Side Chain %v load failed!", chainId)
 		return
 	}
 
-	//StartChildChain to attach intp2p and intrpc
-	//TODO Hookup new Created Child Chain to P2P server
+	//StartSideChain to attach intp2p and intrpc
+	//TODO Hookup new Created Side Chain to P2P server
 	srv := cm.server.Server()
-	childProtocols := chain.NeatNode.GatherProtocols()
-	// Add Child Protocols to P2P Server Protocols
-	srv.Protocols = append(srv.Protocols, childProtocols...)
-	// Add Child Protocols to P2P Server Caps
-	srv.AddChildProtocolCaps(childProtocols)
+	sideProtocols := chain.NeatNode.GatherProtocols()
+	// Add Side Protocols to P2P Server Protocols
+	srv.Protocols = append(srv.Protocols, sideProtocols...)
+	// Add Side Protocols to P2P Server Caps
+	srv.AddChildProtocolCaps(sideProtocols)
 
 	chain.NeatNode.SetP2PServer(srv)
 
@@ -381,7 +381,7 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 		srv.AddLocalValidator(chain.Id, address)
 	}
 
-	// Start the new Child Chain, and it will start child chain reactors as well
+	// Start the new Side Chain, and it will start side chain reactors as well
 	startDone := make(chan struct{})
 	err = StartChain(cm.ctx, chain, startDone)
 	<-startDone
@@ -389,55 +389,55 @@ func (cm *ChainManager) LoadChildChainInRT(chainId string) {
 		return
 	}
 
-	cm.childQuits[chain.Id] = chain.NeatNode.StopChan()
+	cm.sideQuits[chain.Id] = chain.NeatNode.StopChan()
 
-	var childEthereum *neatptc.NeatChain
-	chain.NeatNode.Service(&childEthereum)
-	firstEpoch := childEthereum.Engine().(consensus.NeatByFT).GetEpoch()
-	// Child Chain start success, then delete the pending data in chain info db
-	cm.formalizeChildChain(chainId, *cci, firstEpoch)
+	var sideEthereum *neatptc.NeatChain
+	chain.NeatNode.Service(&sideEthereum)
+	firstEpoch := sideEthereum.Engine().(consensus.NeatCon).GetEpoch()
+	// Side Chain start success, then delete the pending data in chain info db
+	cm.formalizeSideChain(chainId, *cci, firstEpoch)
 
-	// Add Child Chain Id into Chain Manager
-	cm.childChains[chainId] = chain
+	// Add Side Chain Id into Chain Manager
+	cm.sideChains[chainId] = chain
 
-	//TODO Broadcast Child ID to all Main Chain peers
-	go cm.server.BroadcastNewChildChainMsg(chainId)
+	//TODO Broadcast Side ID to all Main Chain peers
+	go cm.server.BroadcastNewSideChainMsg(chainId)
 
 	//hookup utils
 	if utils.IsHTTPRunning() {
 		if h, err := chain.NeatNode.GetHTTPHandler(); err == nil {
 			utils.HookupHTTP(chain.Id, h)
 		} else {
-			log.Errorf("Unable Hook up Child Chain (%v) RPC HTTP Handler: %v", chainId, err)
+			log.Errorf("Unable Hook up Side Chain (%v) RPC HTTP Handler: %v", chainId, err)
 		}
 	}
 	if utils.IsWSRunning() {
 		if h, err := chain.NeatNode.GetWSHandler(); err == nil {
 			utils.HookupWS(chain.Id, h)
 		} else {
-			log.Errorf("Unable Hook up Child Chain (%v) RPC WS Handler: %v", chainId, err)
+			log.Errorf("Unable Hook up Side Chain (%v) RPC WS Handler: %v", chainId, err)
 		}
 	}
 
 }
 
-func (cm *ChainManager) formalizeChildChain(chainId string, cci core.CoreChainInfo, ep *epoch.Epoch) {
-	// Child Chain start success, then delete the pending data in chain info db
-	core.DeletePendingChildChainData(cm.cch.chainInfoDB, chainId)
+func (cm *ChainManager) formalizeSideChain(chainId string, cci core.CoreChainInfo, ep *epoch.Epoch) {
+	// Side Chain start success, then delete the pending data in chain info db
+	core.DeletePendingSideChainData(cm.cch.chainInfoDB, chainId)
 	// Convert the Chain Info from Pending to Formal
 	core.SaveChainInfo(cm.cch.chainInfoDB, &core.ChainInfo{CoreChainInfo: cci, Epoch: ep})
 }
 
-func (cm *ChainManager) checkCoinbaseInChildChain(childEpoch *epoch.Epoch) bool {
+func (cm *ChainManager) checkCoinbaseInSideChain(sideEpoch *epoch.Epoch) bool {
 	var neatchain *neatptc.NeatChain
 	cm.mainChain.NeatNode.Service(&neatchain)
 
 	var localEtherbase common.Address
-	if neatbyft, ok := neatchain.Engine().(consensus.NeatByFT); ok {
-		localEtherbase = neatbyft.PrivateValidator()
+	if neatcon, ok := neatchain.Engine().(consensus.NeatCon); ok {
+		localEtherbase = neatcon.PrivateValidator()
 	}
 
-	return childEpoch.Validators.HasAddress(localEtherbase[:])
+	return sideEpoch.Validators.HasAddress(localEtherbase[:])
 }
 
 func (cm *ChainManager) StopChain() {
@@ -449,11 +449,11 @@ func (cm *ChainManager) StopChain() {
 			log.Info("Main Chain Closed")
 		}
 	}()
-	for _, child := range cm.childChains {
+	for _, side := range cm.sideChains {
 		go func() {
-			childChainError := child.NeatNode.Close()
-			if childChainError != nil {
-				log.Error("Error when closing child chain", "child id", child.Id, "err", childChainError)
+			sideChainError := side.NeatNode.Close()
+			if sideChainError != nil {
+				log.Error("Error when closing side chain", "side id", side.Id, "err", sideChainError)
 			}
 		}()
 	}
@@ -461,7 +461,7 @@ func (cm *ChainManager) StopChain() {
 
 func (cm *ChainManager) WaitChainsStop() {
 	<-cm.mainQuit
-	for _, quit := range cm.childQuits {
+	for _, quit := range cm.sideQuits {
 		<-quit
 	}
 }
@@ -480,21 +480,21 @@ func (cm *ChainManager) Wait() {
 	<-cm.stop
 }
 
-func (cm *ChainManager) getNodeValidator(intNode *node.Node) (common.Address, bool) {
+func (cm *ChainManager) getNodeValidator(neatNode *node.Node) (common.Address, bool) {
 
 	var neatchain *neatptc.NeatChain
-	intNode.Service(&neatchain)
+	neatNode.Service(&neatchain)
 
 	var coinbase common.Address
-	tdm := neatchain.Engine()
-	epoch := tdm.GetEpoch()
-	coinbase = tdm.PrivateValidator()
+	ntc := neatchain.Engine()
+	epoch := ntc.GetEpoch()
+	coinbase = ntc.PrivateValidator()
 	log.Debugf("getNodeValidator() coinbase is :%v", coinbase)
 	return coinbase, epoch.Validators.HasAddress(coinbase[:])
 }
 
-func writeGenesisIntoChainInfoDB(db dbm.DB, childChainId string, validators []types.GenesisValidator) {
-	ethByte, _ := generateETHGenesis(childChainId, validators)
-	tdmByte, _ := generateTDMGenesis(childChainId, validators)
-	core.SaveChainGenesis(db, childChainId, ethByte, tdmByte)
+func writeGenesisIntoChainInfoDB(db dbm.DB, sideChainId string, validators []types.GenesisValidator) {
+	ethByte, _ := generateETHGenesis(sideChainId, validators)
+	ntcByte, _ := generateNTCGenesis(sideChainId, validators)
+	core.SaveChainGenesis(db, sideChainId, ethByte, ntcByte)
 }

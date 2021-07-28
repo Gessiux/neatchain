@@ -244,19 +244,19 @@ func (set *RewardSet) DecodeRLP(s *rlp.Stream) error {
 	return nil
 }
 
-// ----- Child Chain Reward Per Block
+// ----- Side Chain Reward Per Block
 
-func (self *StateDB) SetChildChainRewardPerBlock(rewardPerBlock *big.Int) {
-	self.childChainRewardPerBlock = rewardPerBlock
-	self.childChainRewardPerBlockDirty = true
+func (self *StateDB) SetSideChainRewardPerBlock(rewardPerBlock *big.Int) {
+	self.sideChainRewardPerBlock = rewardPerBlock
+	self.sideChainRewardPerBlockDirty = true
 }
 
-func (self *StateDB) GetChildChainRewardPerBlock() *big.Int {
-	if self.childChainRewardPerBlock != nil {
-		return self.childChainRewardPerBlock
+func (self *StateDB) GetSideChainRewardPerBlock() *big.Int {
+	if self.sideChainRewardPerBlock != nil {
+		return self.sideChainRewardPerBlock
 	}
 	// Try to get from Trie
-	enc, err := self.trie.TryGet(childChainRewardPerBlockKey)
+	enc, err := self.trie.TryGet(sideChainRewardPerBlockKey)
 	if err != nil {
 		self.setError(err)
 		return nil
@@ -267,19 +267,19 @@ func (self *StateDB) GetChildChainRewardPerBlock() *big.Int {
 		if err != nil {
 			self.setError(err)
 		}
-		self.childChainRewardPerBlock = value
+		self.sideChainRewardPerBlock = value
 	}
 	return value
 }
 
-func (self *StateDB) commitChildChainRewardPerBlock() {
-	data, err := rlp.EncodeToBytes(self.childChainRewardPerBlock)
+func (self *StateDB) commitSideChainRewardPerBlock() {
+	data, err := rlp.EncodeToBytes(self.sideChainRewardPerBlock)
 	if err != nil {
-		panic(fmt.Errorf("can't encode child chain reward per block : %v", err))
+		panic(fmt.Errorf("can't encode side chain reward per block : %v", err))
 	}
-	self.setError(self.trie.TryUpdate(childChainRewardPerBlockKey, data))
+	self.setError(self.trie.TryUpdate(sideChainRewardPerBlockKey, data))
 }
 
-// Child Chain Reward Per Block
+// Side Chain Reward Per Block
 
-var childChainRewardPerBlockKey = []byte("RewardPerBlock")
+var sideChainRewardPerBlockKey = []byte("RewardPerBlock")

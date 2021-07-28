@@ -34,8 +34,8 @@ type PendingOp interface {
 	String() string
 }
 
-// CreateChildChain op
-type CreateChildChainOp struct {
+// CreateSideChain op
+type CreateSideChainOp struct {
 	From             common.Address
 	ChainId          string
 	MinValidators    uint16
@@ -44,56 +44,56 @@ type CreateChildChainOp struct {
 	EndBlock         *big.Int
 }
 
-func (op *CreateChildChainOp) Conflict(op1 PendingOp) bool {
-	if op1, ok := op1.(*CreateChildChainOp); ok {
+func (op *CreateSideChainOp) Conflict(op1 PendingOp) bool {
+	if op1, ok := op1.(*CreateSideChainOp); ok {
 		return op.ChainId == op1.ChainId
 	}
 	return false
 }
 
-func (op *CreateChildChainOp) String() string {
-	return fmt.Sprintf("CreateChildChainOp - From: %x, ChainId: %s, MinValidators: %d, MinDepositAmount: %x, StartBlock: %x, EndBlock: %x",
+func (op *CreateSideChainOp) String() string {
+	return fmt.Sprintf("CreateSideChainOp - From: %x, ChainId: %s, MinValidators: %d, MinDepositAmount: %x, StartBlock: %x, EndBlock: %x",
 		op.From, op.ChainId, op.MinValidators, op.MinDepositAmount, op.StartBlock, op.EndBlock)
 }
 
-// JoinChildChain op
-type JoinChildChainOp struct {
+// JoinSideChain op
+type JoinSideChainOp struct {
 	From          common.Address
 	PubKey        crypto.PubKey
 	ChainId       string
 	DepositAmount *big.Int
 }
 
-func (op *JoinChildChainOp) Conflict(op1 PendingOp) bool {
-	if op1, ok := op1.(*JoinChildChainOp); ok {
+func (op *JoinSideChainOp) Conflict(op1 PendingOp) bool {
+	if op1, ok := op1.(*JoinSideChainOp); ok {
 		return op.ChainId == op1.ChainId && op.From == op1.From
 	}
 	return false
 }
 
-func (op *JoinChildChainOp) String() string {
-	return fmt.Sprintf("JoinChildChainOp - From: %x, PubKey: %s, ChainId: %s, DepositAmount: %x",
+func (op *JoinSideChainOp) String() string {
+	return fmt.Sprintf("JoinSideChainOp - From: %x, PubKey: %s, ChainId: %s, DepositAmount: %x",
 		op.From, op.PubKey, op.ChainId, op.DepositAmount)
 }
 
-// LaunchChildChain op
-type LaunchChildChainsOp struct {
-	ChildChainIds       []string
-	NewPendingIdx       []byte
-	DeleteChildChainIds []string
+// LaunchSideChain op
+type LaunchSideChainsOp struct {
+	SideChainIds       []string
+	NewPendingIdx      []byte
+	DeleteSideChainIds []string
 }
 
-func (op *LaunchChildChainsOp) Conflict(op1 PendingOp) bool {
-	if _, ok := op1.(*LaunchChildChainsOp); ok {
-		// Only one LaunchChildChainsOp is allowed in each block
+func (op *LaunchSideChainsOp) Conflict(op1 PendingOp) bool {
+	if _, ok := op1.(*LaunchSideChainsOp); ok {
+		// Only one LaunchSideChainsOp is allowed in each block
 		return true
 	}
 	return false
 }
 
-func (op *LaunchChildChainsOp) String() string {
-	return fmt.Sprintf("LaunchChildChainsOp - Launch Child Chain: %v, New Pending Child Chain Length: %v, To be deleted Child Chain: %v",
-		op.ChildChainIds, len(op.NewPendingIdx), op.DeleteChildChainIds)
+func (op *LaunchSideChainsOp) String() string {
+	return fmt.Sprintf("LaunchSideChainsOp - Launch Side Chain: %v, New Pending Side Chain Length: %v, To be deleted Side Chain: %v",
+		op.SideChainIds, len(op.NewPendingIdx), op.DeleteSideChainIds)
 }
 
 // SaveBlockToMainChain op

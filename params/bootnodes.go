@@ -20,7 +20,7 @@ package params
 // the NEAT Chain main network.
 var MainnetBootnodes = []string{
 
-	"enode://492569fc888e584052a64aba03c2df1e28d5a08883cd004eecebf42f54883a44a75f07dfe0adab70ed43f12508a3247122395ec0497df9ce3a1d88ee76d94b83@135.181.195.79:8550",
+	"enode://367da97ca636dab9ecdf38b11c3f9cab95f6560248383993e1e37d555fc5caf7fc9b59fb8f148059ce036c47c104412c4f62821e165fc35ab621d52defecfe51@135.181.195.79:8550",
 }
 
 // TestnetBootnodes are the enode URLs of the P2P bootstrap nodes running on the

@@ -87,7 +87,7 @@ func (h *hasher) hash(n node, db *Database, force bool) (node, node, error) {
 			}
 		}
 	}
-	// Trie not processed yet or needs storage, walk the children
+	// Trie not processed yet or needs storage, walk the sideren
 	collapsed, cached, err := h.hashChildren(n, db)
 	if err != nil {
 		return hashNode{}, n, err
@@ -115,15 +115,15 @@ func (h *hasher) hash(n node, db *Database, force bool) (node, node, error) {
 	return hashed, cached, nil
 }
 
-// hashChildren replaces the children of a node with their hashes if the encoded
-// size of the child is larger than a hash, returning the collapsed node as well
-// as a replacement for the original node with the child hashes cached in.
+// hashChildren replaces the sideren of a node with their hashes if the encoded
+// size of the side is larger than a hash, returning the collapsed node as well
+// as a replacement for the original node with the side hashes cached in.
 func (h *hasher) hashChildren(original node, db *Database) (node, node, error) {
 	var err error
 
 	switch n := original.(type) {
 	case *shortNode:
-		// Hash the short node's child, caching the newly hashed subtree
+		// Hash the short node's side, caching the newly hashed subtree
 		collapsed, cached := n.copy(), n.copy()
 		collapsed.Key = hexToCompact(n.Key)
 		cached.Key = common.CopyBytes(n.Key)
@@ -137,7 +137,7 @@ func (h *hasher) hashChildren(original node, db *Database) (node, node, error) {
 		return collapsed, cached, nil
 
 	case *fullNode:
-		// Hash the full node's children, caching the newly hashed subtrees
+		// Hash the full node's sideren, caching the newly hashed subtrees
 		collapsed, cached := n.copy(), n.copy()
 
 		for i := 0; i < 16; i++ {
@@ -152,13 +152,13 @@ func (h *hasher) hashChildren(original node, db *Database) (node, node, error) {
 		return collapsed, cached, nil
 
 	default:
-		// Value and hash nodes don't have children so they're left as were
+		// Value and hash nodes don't have sideren so they're left as were
 		return n, original, nil
 	}
 }
 
 // store hashes the node n and if we have a storage layer specified, it writes
-// the key/value pair to it and tracks any node->child references as well as any
+// the key/value pair to it and tracks any node->side references as well as any
 // node->external trie references.
 func (h *hasher) store(n node, db *Database, force bool) (node, error) {
 	// Don't store hashes or empty nodes.
@@ -191,13 +191,13 @@ func (h *hasher) store(n node, db *Database, force bool) (node, error) {
 		if h.onleaf != nil {
 			switch n := n.(type) {
 			case *shortNode:
-				if child, ok := n.Val.(valueNode); ok {
-					h.onleaf(child, hash)
+				if side, ok := n.Val.(valueNode); ok {
+					h.onleaf(side, hash)
 				}
 			case *fullNode:
 				for i := 0; i < 16; i++ {
-					if child, ok := n.Children[i].(valueNode); ok {
-						h.onleaf(child, hash)
+					if side, ok := n.Children[i].(valueNode); ok {
+						h.onleaf(side, hash)
 					}
 				}
 			}

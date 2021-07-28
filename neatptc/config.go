@@ -25,7 +25,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/neatptc/downloader"
 	"github.com/Gessiux/neatchain/neatptc/gasprice"
@@ -111,7 +111,7 @@ type Config struct {
 	EnablePreimageRecording bool
 
 	// NeatCon options
-	NeatByFT neatbyft.Config
+	NeatCon neatcon.Config
 
 	// Miscellaneous options
 	DocRoot string `toml:"-"`

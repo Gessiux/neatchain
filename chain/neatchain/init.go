@@ -25,7 +25,7 @@ import (
 	cfg "github.com/Gessiux/go-config"
 	dbm "github.com/Gessiux/go-db"
 	"github.com/Gessiux/neatchain/chain/accounts/keystore"
-	"github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	"github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core"
 	"github.com/Gessiux/neatchain/params"
 	"github.com/Gessiux/neatchain/utilities/common"
@@ -144,7 +144,7 @@ func initCmd(ctx *cli.Context) error {
 	return init_cmd(ctx, utils.GetNeatConConfig(chainId, ctx), chainId, neatGenesisPath)
 }
 
-func InitChildChainCmd(ctx *cli.Context) error {
+func InitSideChainCmd(ctx *cli.Context) error {
 
 	chainInfoDb := dbm.NewDB("chaininfo", "leveldb", ctx.GlobalString(utils.DataDirFlag.Name))
 	if chainInfoDb == nil {
@@ -152,21 +152,21 @@ func InitChildChainCmd(ctx *cli.Context) error {
 	}
 	defer chainInfoDb.Close()
 
-	childChainIds := ctx.GlobalString("childChain")
-	if childChainIds == "" {
-		return errors.New("please provide child chain id to initialization")
+	sideChainIds := ctx.GlobalString("sideChain")
+	if sideChainIds == "" {
+		return errors.New("please provide side chain id to initialization")
 	}
 
-	chainIds := strings.Split(childChainIds, ",")
+	chainIds := strings.Split(sideChainIds, ",")
 	for _, chainId := range chainIds {
-		ethGenesis, tdmGenesis := core.LoadChainGenesis(chainInfoDb, chainId)
-		if ethGenesis == nil || tdmGenesis == nil {
-			return errors.New(fmt.Sprintf("unable to retrieve the genesis file for child chain %s", chainId))
+		ethGenesis, ntcGenesis := core.LoadChainGenesis(chainInfoDb, chainId)
+		if ethGenesis == nil || ntcGenesis == nil {
+			return errors.New(fmt.Sprintf("unable to retrieve the genesis file for side chain %s", chainId))
 		}
 
-		childConfig := utils.GetNeatConConfig(chainId, ctx)
+		sideConfig := utils.GetNeatConConfig(chainId, ctx)
 
-		ethGenesisPath := childConfig.GetString("neat_genesis_file")
+		ethGenesisPath := sideConfig.GetString("neat_genesis_file")
 		if err := ioutil.WriteFile(ethGenesisPath, ethGenesis, 0644); err != nil {
 			utils.Fatalf("write neat_genesis_file failed")
 			return err
@@ -174,8 +174,8 @@ func InitChildChainCmd(ctx *cli.Context) error {
 
 		init_neatchain(chainId, ethGenesisPath, ctx)
 
-		if err := ioutil.WriteFile(childConfig.GetString("genesis_file"), tdmGenesis, 0644); err != nil {
-			utils.Fatalf("write tdm genesis_file failed")
+		if err := ioutil.WriteFile(sideConfig.GetString("genesis_file"), ntcGenesis, 0644); err != nil {
+			utils.Fatalf("write ntc genesis_file failed")
 			return err
 		}
 
@@ -312,7 +312,7 @@ func createGenesisDoc(config cfg.Config, chainId string, coreGenesis *core.Genes
 		fmt.Printf("init reward block %v\n", rewardPerBlock)
 		genDoc := types.GenesisDoc{
 			ChainID:      chainId,
-			Consensus:    types.CONSENSUS_NeatByFT,
+			Consensus:    types.CONSENSUS_NeatCon,
 			GenesisTime:  time.Now(),
 			RewardScheme: rewardScheme,
 			CurrentEpoch: types.OneEpochDoc{
@@ -344,7 +344,7 @@ func createGenesisDoc(config cfg.Config, chainId string, coreGenesis *core.Genes
 	return nil
 }
 
-func generateTDMGenesis(childChainID string, validators []types.GenesisValidator) ([]byte, error) {
+func generateNTCGenesis(sideChainID string, validators []types.GenesisValidator) ([]byte, error) {
 	var rewardScheme = types.RewardSchemeDoc{
 		TotalReward:        big.NewInt(0),
 		RewardFirstYear:    big.NewInt(0),
@@ -353,8 +353,8 @@ func generateTDMGenesis(childChainID string, validators []types.GenesisValidator
 	}
 
 	genDoc := types.GenesisDoc{
-		ChainID:      childChainID,
-		Consensus:    types.CONSENSUS_NeatByFT,
+		ChainID:      sideChainID,
+		Consensus:    types.CONSENSUS_NeatCon,
 		GenesisTime:  time.Now(),
 		RewardScheme: rewardScheme,
 		CurrentEpoch: types.OneEpochDoc{
@@ -369,7 +369,7 @@ func generateTDMGenesis(childChainID string, validators []types.GenesisValidator
 
 	contents, err := json.Marshal(genDoc)
 	if err != nil {
-		utils.Fatalf("marshal tdm Genesis failed")
+		utils.Fatalf("marshal ntc Genesis failed")
 		return nil, err
 	}
 	return contents, nil
@@ -449,13 +449,13 @@ func checkAccount(coreGenesis core.Genesis) (common.Address, *big.Int, error) {
 	return act, amount, nil
 }
 
-func initEthGenesisFromExistValidator(childChainID string, childConfig cfg.Config, validators []types.GenesisValidator) error {
+func initEthGenesisFromExistValidator(sideChainID string, sideConfig cfg.Config, validators []types.GenesisValidator) error {
 
-	contents, err := generateETHGenesis(childChainID, validators)
+	contents, err := generateETHGenesis(sideChainID, validators)
 	if err != nil {
 		return err
 	}
-	ethGenesisPath := childConfig.GetString("neat_genesis_file")
+	ethGenesisPath := sideConfig.GetString("neat_genesis_file")
 	if err = ioutil.WriteFile(ethGenesisPath, contents, 0654); err != nil {
 		utils.Fatalf("write neat_genesis_file failed")
 		return err
@@ -463,9 +463,9 @@ func initEthGenesisFromExistValidator(childChainID string, childConfig cfg.Confi
 	return nil
 }
 
-func generateETHGenesis(childChainID string, validators []types.GenesisValidator) ([]byte, error) {
+func generateETHGenesis(sideChainID string, validators []types.GenesisValidator) ([]byte, error) {
 	var coreGenesis = core.Genesis{
-		Config:     params.NewChildChainConfig(childChainID),
+		Config:     params.NewSideChainConfig(sideChainID),
 		Nonce:      0xdeadbeefdeadbeef,
 		Timestamp:  0x0,
 		ParentHash: common.Hash{},
@@ -483,7 +483,7 @@ func generateETHGenesis(childChainID string, validators []types.GenesisValidator
 		}
 	}
 
-	coreGenesis.Alloc[abi.ChildChainTokenIncentiveAddr] = core.GenesisAccount{
+	coreGenesis.Alloc[abi.SideChainTokenIncentiveAddr] = core.GenesisAccount{
 		Balance: new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e+18)),
 		Amount:  common.Big0,
 	}

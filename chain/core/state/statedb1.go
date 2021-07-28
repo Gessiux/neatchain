@@ -15,11 +15,11 @@ func (self *StateDB) GetDepositBalance(addr common.Address) *big.Int {
 	return common.Big0
 }
 
-// Retrieve the child chain deposit balance from the given address or 0 if object not found
-func (self *StateDB) GetChildChainDepositBalance(chainId string, addr common.Address) *big.Int {
+// Retrieve the side chain deposit balance from the given address or 0 if object not found
+func (self *StateDB) GetSideChainDepositBalance(chainId string, addr common.Address) *big.Int {
 	stateObject := self.getStateObject(addr)
 	if stateObject != nil {
-		return stateObject.ChildChainDepositBalance(chainId)
+		return stateObject.SideChainDepositBalance(chainId)
 	}
 	return common.Big0
 }
@@ -56,26 +56,26 @@ func (self *StateDB) SetDepositBalance(addr common.Address, amount *big.Int) {
 	}
 }
 
-// AddChildChainDepositBalance adds amount to the child chain deposit balance associated with addr
-func (self *StateDB) AddChildChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
+// AddSideChainDepositBalance adds amount to the side chain deposit balance associated with addr
+func (self *StateDB) AddSideChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.AddChildChainDepositBalance(chainId, amount)
+		stateObject.AddSideChainDepositBalance(chainId, amount)
 	}
 }
 
-// SubDepositBalance subs amount to the child chain deposit balance associated with addr
-func (self *StateDB) SubChildChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
+// SubDepositBalance subs amount to the side chain deposit balance associated with addr
+func (self *StateDB) SubSideChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.SubChildChainDepositBalance(chainId, amount)
+		stateObject.SubSideChainDepositBalance(chainId, amount)
 	}
 }
 
-func (self *StateDB) SetChildChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
+func (self *StateDB) SetSideChainDepositBalance(addr common.Address, chainId string, amount *big.Int) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.SetChildChainDepositBalance(chainId, amount)
+		stateObject.SetSideChainDepositBalance(chainId, amount)
 	}
 }
 

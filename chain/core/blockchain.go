@@ -101,15 +101,15 @@ type BlockChain struct {
 	triegc *prque.Prque    // Priority queue mapping block numbers to tries to gc
 	gcproc time.Duration   // Accumulates canonical block processing for trie dumping
 
-	hc                   *HeaderChain
-	rmLogsFeed           event.Feed
-	chainFeed            event.Feed
-	chainSideFeed        event.Feed
-	chainHeadFeed        event.Feed
-	logsFeed             event.Feed
-	createChildChainFeed event.Feed
-	startMiningFeed      event.Feed
-	stopMiningFeed       event.Feed
+	hc                  *HeaderChain
+	rmLogsFeed          event.Feed
+	chainFeed           event.Feed
+	chainSideFeed       event.Feed
+	chainHeadFeed       event.Feed
+	logsFeed            event.Feed
+	createSideChainFeed event.Feed
+	startMiningFeed     event.Feed
+	stopMiningFeed      event.Feed
 
 	scope        event.SubscriptionScope
 	genesisBlock *types.Block
@@ -262,15 +262,15 @@ func (bc *BlockChain) loadLastState() error {
 	}
 
 	// Issue a status log for the user
-	currentFastBlock := bc.CurrentFastBlock()
+	//currentFastBlock := bc.CurrentFastBlock()
 
-	headerTd := bc.GetTd(currentHeader.Hash(), currentHeader.Number.Uint64())
-	blockTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
-	fastTd := bc.GetTd(currentFastBlock.Hash(), currentFastBlock.NumberU64())
+	//headerTd := bc.GetTd(currentHeader.Hash(), currentHeader.Number.Uint64())
+	//blockTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
+	//fastTd := bc.GetTd(currentFastBlock.Hash(), currentFastBlock.NumberU64())
 
-	bc.logger.Info("Loaded most recent local header", "number", currentHeader.Number, "hash", currentHeader.Hash(), "td", headerTd)
-	bc.logger.Info("Loaded most recent local full block", "number", currentBlock.Number(), "hash", currentBlock.Hash(), "td", blockTd)
-	bc.logger.Info("Loaded most recent local fast block", "number", currentFastBlock.Number(), "hash", currentFastBlock.Hash(), "td", fastTd)
+	bc.logger.Info("Local chain block height is:", "block", currentHeader.Number, "hash", currentHeader.Hash())
+	//bc.logger.Info("Loaded most recent local full block", "number", currentBlock.Number(), "hash", currentBlock.Hash(), "td", blockTd)
+	//bc.logger.Info("Loaded most recent local fast block", "number", currentFastBlock.Number(), "hash", currentFastBlock.Hash(), "td", fastTd)
 
 	return nil
 }
@@ -497,7 +497,7 @@ func (bc *BlockChain) insert(block *types.Block) {
 		bc.currentFastBlock.Store(block)
 	}
 
-	bc.logger.Info(fmt.Sprintf("BlockChain insert block number %v, hash: %x", block.NumberU64(), block.Hash()))
+	//bc.logger.Info(fmt.Sprintf("Inserted block number %v, hash: %x", block.NumberU64(), block.Hash()))
 	ibCbMap := GetInsertBlockCbMap()
 	for _, cb := range ibCbMap {
 		cb(bc, block)
@@ -665,7 +665,7 @@ func (bc *BlockChain) ValidateBlock(block *types.Block) (*state.StateDB, types.R
 	}
 
 	// Header verify
-	if err := bc.engine.(consensus.NeatByFT).VerifyHeaderBeforeConsensus(bc, block.Header(), true); err != nil {
+	if err := bc.engine.(consensus.NeatCon).VerifyHeaderBeforeConsensus(bc, block.Header(), true); err != nil {
 		return nil, nil, nil, err
 	}
 
@@ -995,10 +995,10 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	triedb := bc.stateCache.TrieDB()
 
 	//we flush db within 5 blocks before/after epoch-switch to avoid rollback issues
-	tdm := bc.Engine().(consensus.NeatByFT)
+	nc := bc.Engine().(consensus.NeatCon)
 	FORCEFULSHWINDOW := uint64(5)
 	curBlockNumber := block.NumberU64()
-	curEpoch := tdm.GetEpoch().GetEpochByBlockNumber(curBlockNumber)
+	curEpoch := nc.GetEpoch().GetEpochByBlockNumber(curBlockNumber)
 	withinEpochSwitchWindow := curBlockNumber < curEpoch.StartBlock+FORCEFULSHWINDOW || curBlockNumber > curEpoch.EndBlock-FORCEFULSHWINDOW
 
 	FLUSHBLOCKSINTERVAL := uint64(5000) //flush per this count to reduce catch-up effort/blocks when rollback occurs
@@ -1062,8 +1062,8 @@ func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.
 	rawdb.WriteReceipts(batch, block.Hash(), block.NumberU64(), receipts)
 
 	var reorg bool
-	if _, ok := bc.engine.(consensus.NeatByFT); ok {
-		// NeatByFT Engine always Canon State, insert the block to the chain,
+	if _, ok := bc.engine.(consensus.NeatCon); ok {
+		// NeatCon Engine always Canon State, insert the block to the chain,
 		reorg = true
 	} else {
 		// If the total difficulty is higher than our known, add it to the canonical chain
@@ -1224,7 +1224,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 	case err == consensus.ErrPrunedAncestor:
 		return bc.insertSidechain(block, it)
 
-	// First block is future, shove it (and all children) to the future queue (unknown ancestor)
+	// First block is future, shove it (and all sideren) to the future queue (unknown ancestor)
 	case err == consensus.ErrFutureBlock || (err == consensus.ErrUnknownAncestor && bc.futureBlocks.Contains(it.first().ParentHash())):
 		for block != nil && (it.index == 0 || err == consensus.ErrUnknownAncestor) {
 			if err := bc.addFutureBlock(block); err != nil {
@@ -1607,8 +1607,8 @@ func (bc *BlockChain) PostChainEvents(events []interface{}, logs []*types.Log) {
 		case ChainSideEvent:
 			bc.chainSideFeed.Send(ev)
 
-		case CreateChildChainEvent:
-			bc.createChildChainFeed.Send(ev)
+		case CreateSideChainEvent:
+			bc.createSideChainFeed.Send(ev)
 
 		case StartMiningEvent:
 			bc.startMiningFeed.Send(ev)
@@ -1792,9 +1792,9 @@ func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscript
 	return bc.scope.Track(bc.logsFeed.Subscribe(ch))
 }
 
-// SubscribeCreateChildChainEvent registers a subscription of CreateChildChainEvent.
-func (bc *BlockChain) SubscribeCreateChildChainEvent(ch chan<- CreateChildChainEvent) event.Subscription {
-	return bc.scope.Track(bc.createChildChainFeed.Subscribe(ch))
+// SubscribeCreateSideChainEvent registers a subscription of CreateSideChainEvent.
+func (bc *BlockChain) SubscribeCreateSideChainEvent(ch chan<- CreateSideChainEvent) event.Subscription {
+	return bc.scope.Track(bc.createSideChainFeed.Subscribe(ch))
 }
 
 // SubscribeStartMiningEvent registers a subscription of StartMiningEvent.
@@ -1827,7 +1827,7 @@ func (bc *BlockChain) SubscribeStopMiningEvent(ch chan<- StopMiningEvent) event.
 //		return nil
 //	}
 //
-//	extra, err := ncTypes.ExtractNeatConExtra(header)
+//	extra, err := ntcTypes.ExtractNeatConExtra(header)
 //	if err != nil {
 //		bc.logger.Debugf("update validator status decode extra data error %v", err)
 //		return err

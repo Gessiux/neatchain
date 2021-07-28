@@ -108,21 +108,21 @@ type stateObject struct {
 
 // empty returns whether the account is considered empty.
 func (s *stateObject) empty() bool {
-	return s.data.Nonce == 0 && s.data.Balance.Sign() == 0 && bytes.Equal(s.data.CodeHash, emptyCodeHash) && s.data.DepositBalance.Sign() == 0 && len(s.data.ChildChainDepositBalance) == 0 && s.data.ChainBalance.Sign() == 0 && s.data.DelegateBalance.Sign() == 0 && s.data.ProxiedBalance.Sign() == 0 && s.data.DepositProxiedBalance.Sign() == 0 && s.data.PendingRefundBalance.Sign() == 0 && s.data.AvailableRewardBalance.Sign() == 0
+	return s.data.Nonce == 0 && s.data.Balance.Sign() == 0 && bytes.Equal(s.data.CodeHash, emptyCodeHash) && s.data.DepositBalance.Sign() == 0 && len(s.data.SideChainDepositBalance) == 0 && s.data.ChainBalance.Sign() == 0 && s.data.DelegateBalance.Sign() == 0 && s.data.ProxiedBalance.Sign() == 0 && s.data.DepositProxiedBalance.Sign() == 0 && s.data.PendingRefundBalance.Sign() == 0 && s.data.AvailableRewardBalance.Sign() == 0
 }
 
 // Account is the Ethereum consensus representation of accounts.
 // These objects are stored in the main account trie.
 type Account struct {
-	Nonce                    uint64
-	Balance                  *big.Int                    // for normal user
-	DepositBalance           *big.Int                    // for validator, can not be consumed
-	ChildChainDepositBalance []*childChainDepositBalance // only valid in main chain for child chain validator before child chain launch, can not be consumed
-	ChainBalance             *big.Int                    // only valid in main chain for child chain owner, can not be consumed
-	Root                     common.Hash                 // merkle root of the storage trie
-	TX1Root                  common.Hash                 // merkle root of the TX1 trie
-	TX3Root                  common.Hash                 // merkle root of the TX3 trie
-	CodeHash                 []byte
+	Nonce                   uint64
+	Balance                 *big.Int                   // for normal user
+	DepositBalance          *big.Int                   // for validator, can not be consumed
+	SideChainDepositBalance []*sideChainDepositBalance // only valid in main chain for side chain validator before side chain launch, can not be consumed
+	ChainBalance            *big.Int                   // only valid in main chain for side chain owner, can not be consumed
+	Root                    common.Hash                // merkle root of the storage trie
+	TX1Root                 common.Hash                // merkle root of the TX1 trie
+	TX3Root                 common.Hash                // merkle root of the TX3 trie
+	CodeHash                []byte
 
 	// Delegation
 	DelegateBalance       *big.Int    // the accumulative balance which this account delegate the Balance to other user

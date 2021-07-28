@@ -89,7 +89,7 @@ type Header struct {
 	MixDigest   common.Hash    `json:"mixHash"          gencodec:"required"`
 	Nonce       BlockNonce     `json:"nonce"            gencodec:"required"`
 
-	// For Child Chain only
+	// For Side Chain only
 	MainChainNumber *big.Int `json:"mainNumber"           gencodec:"required"`
 }
 
@@ -111,8 +111,8 @@ func (h *Header) Hash() common.Hash {
 	// specific hash calculation.
 	if h.MixDigest == NeatConDigest {
 		// Seal is reserved in extra-data. To prove block is signed by the proposer.
-		if tdmHeader := NeatConFilteredHeader(h, true); tdmHeader != nil {
-			return rlpHash(tdmHeader)
+		if ntcHeader := NeatConFilteredHeader(h, true); ntcHeader != nil {
+			return rlpHash(ntcHeader)
 		}
 	}
 	return rlpHash(h)
@@ -462,12 +462,12 @@ func (self blockSorter) Less(i, j int) bool { return self.by(self.blocks[i], sel
 
 func Number(b1, b2 *Block) bool { return b1.header.Number.Cmp(b2.header.Number) < 0 }
 
-// ChildChainProofData represents epoch from child chain to the main chain.
-type ChildChainProofData struct {
+// SideChainProofData represents epoch from side chain to the main chain.
+type SideChainProofData struct {
 	Header *Header
 }
 
-// TX3ProofData represents proof of tx3 from child chain to the main chain.
+// TX3ProofData represents proof of tx3 from side chain to the main chain.
 type TX3ProofData struct {
 	Header *Header
 
@@ -475,8 +475,8 @@ type TX3ProofData struct {
 	TxProofs []*BSKeyValueSet
 }
 
-func NewChildChainProofData(block *Block) (*ChildChainProofData, error) {
-	ret := &ChildChainProofData{
+func NewSideChainProofData(block *Block) (*SideChainProofData, error) {
+	ret := &SideChainProofData{
 		Header: block.Header(),
 	}
 
@@ -506,7 +506,7 @@ func NewTX3ProofData(block *Block) (*TX3ProofData, error) {
 				continue
 			}
 
-			if function == neatAbi.WithdrawFromChildChain {
+			if function == neatAbi.WithdrawFromSideChain {
 				kvSet := MakeBSKeyValueSet()
 				keybuf.Reset()
 				rlp.Encode(keybuf, uint(i))
@@ -523,17 +523,17 @@ func NewTX3ProofData(block *Block) (*TX3ProofData, error) {
 	return ret, nil
 }
 
-// ChildChainProofData represents epoch from child chain to the main chain.
-type ChildChainProofDataV1 struct {
+// SideChainProofData represents epoch from side chain to the main chain.
+type SideChainProofDataV1 struct {
 	Header *Header
 
 	TxIndexs []uint
 	TxProofs []*BSKeyValueSet
 }
 
-//func NewChildChainProofDataV1(block *Block) (*ChildChainProofDataV1, error) {
+//func NewSideChainProofDataV1(block *Block) (*SideChainProofDataV1, error) {
 //
-//	ret := &ChildChainProofDataV1{
+//	ret := &SideChainProofDataV1{
 //		Header: block.Header(),
 //	}
 //
@@ -555,7 +555,7 @@ type ChildChainProofDataV1 struct {
 //				continue
 //			}
 //
-//			if function == neatAbi.WithdrawFromChildChain {
+//			if function == neatAbi.WithdrawFromSideChain {
 //				kvSet := MakeBSKeyValueSet()
 //				keybuf.Reset()
 //				rlp.Encode(keybuf, uint(i))
@@ -572,8 +572,8 @@ type ChildChainProofDataV1 struct {
 //	return ret, nil
 //}
 
-func DecodeChildChainProofData(bs []byte) (*ChildChainProofData, error) {
-	proofData := &ChildChainProofData{}
+func DecodeSideChainProofData(bs []byte) (*SideChainProofData, error) {
+	proofData := &SideChainProofData{}
 	err := rlp.DecodeBytes(bs, proofData)
 	if err != nil {
 		return nil, err
@@ -581,8 +581,8 @@ func DecodeChildChainProofData(bs []byte) (*ChildChainProofData, error) {
 	return proofData, nil
 }
 
-//func DecodeChildChainProofDataV1(bs []byte) (*ChildChainProofDataV1, error) {
-//	proofData := &ChildChainProofDataV1{}
+//func DecodeSideChainProofDataV1(bs []byte) (*SideChainProofDataV1, error) {
+//	proofData := &SideChainProofDataV1{}
 //	err := rlp.DecodeBytes(bs, proofData)
 //	if err != nil {
 //		return nil, err

@@ -45,9 +45,9 @@ import (
 )
 
 // ExecAdapter is a NodeAdapter which runs simulation nodes by executing the
-// current binary as a child process.
+// current binary as a side process.
 //
-// An init hook is used so that the child process executes the node services
+// An init hook is used so that the side process executes the node services
 // (rather than whataver the main() function would normally do), see the
 // execP2PNode function for more information.
 type ExecAdapter struct {
@@ -234,7 +234,7 @@ func (n *ExecNode) Start(snapshots map[string][]byte) (err error) {
 }
 
 // execCommand returns a command which runs the node locally by exec'ing
-// the current binary but setting argv[0] to "p2p-node" so that the child
+// the current binary but setting argv[0] to "p2p-node" so that the side
 // runs execP2PNode
 func (n *ExecNode) execCommand() *exec.Cmd {
 	return &exec.Cmd{
@@ -330,7 +330,7 @@ func init() {
 }
 
 // execNodeConfig is used to serialize the node configuration so it can be
-// passed to the child process as a JSON encoded environment variable
+// passed to the side process as a JSON encoded environment variable
 type execNodeConfig struct {
 	Stack     node.Config       `json:"stack"`
 	Node      *NodeConfig       `json:"node"`

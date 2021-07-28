@@ -251,7 +251,7 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 }
 
 func (pm *ProtocolManager) Stop() {
-	pm.logger.Info("Stopping NEAT Chain protocol")
+	pm.logger.Info("Stopping Neatio protocol")
 
 	pm.txSub.Unsubscribe()         // quits txBroadcastLoop
 	pm.tx3PrfDtSub.Unsubscribe()   // quits tx3PrfDtBroadcastLoop
@@ -273,7 +273,7 @@ func (pm *ProtocolManager) Stop() {
 	// Wait for all peer handler goroutines and the loops to come down.
 	pm.wg.Wait()
 
-	pm.logger.Info("NEAT Chain protocol stopped")
+	pm.logger.Info("Neatio protocol stopped")
 }
 
 func (pm *ProtocolManager) newPeer(pv int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {

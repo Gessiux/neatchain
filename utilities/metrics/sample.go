@@ -597,9 +597,9 @@ func (h *expDecaySampleHeap) down(i, n int) {
 		if j1 >= n || j1 < 0 { // j1 < 0 after int overflow
 			break
 		}
-		j := j1 // left child
+		j := j1 // left side
 		if j2 := j1 + 1; j2 < n && !(h.s[j1].k < h.s[j2].k) {
-			j = j2 // = 2*i + 2  // right child
+			j = j2 // = 2*i + 2  // right side
 		}
 		if !(h.s[j].k < h.s[i].k) {
 			break

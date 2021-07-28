@@ -193,8 +193,8 @@ func (s *Sync) Process(results []SyncResult) (bool, int, error) {
 		}
 		request.data = item.Data
 
-		// Create and schedule a request for all the children nodes
-		requests, err := s.children(request, node)
+		// Create and schedule a request for all the sideren nodes
+		requests, err := s.sideren(request, node)
 		if err != nil {
 			return committed, i, err
 		}
@@ -204,8 +204,8 @@ func (s *Sync) Process(results []SyncResult) (bool, int, error) {
 			continue
 		}
 		request.deps += len(requests)
-		for _, child := range requests {
-			s.schedule(child)
+		for _, side := range requests {
+			s.schedule(side)
 		}
 	}
 	return committed, 0, nil
@@ -246,26 +246,26 @@ func (s *Sync) schedule(req *request) {
 	s.requests[req.hash] = req
 }
 
-// children retrieves all the missing children of a state trie entry for future
+// sideren retrieves all the missing sideren of a state trie entry for future
 // retrieval scheduling.
-func (s *Sync) children(req *request, object node) ([]*request, error) {
-	// Gather all the children of the node, irrelevant whether known or not
-	type child struct {
+func (s *Sync) sideren(req *request, object node) ([]*request, error) {
+	// Gather all the sideren of the node, irrelevant whether known or not
+	type side struct {
 		node  node
 		depth int
 	}
-	var children []child
+	var sideren []side
 
 	switch node := (object).(type) {
 	case *shortNode:
-		children = []child{{
+		sideren = []side{{
 			node:  node.Val,
 			depth: req.depth + len(node.Key),
 		}}
 	case *fullNode:
 		for i := 0; i < 17; i++ {
 			if node.Children[i] != nil {
-				children = append(children, child{
+				sideren = append(sideren, side{
 					node:  node.Children[i],
 					depth: req.depth + 1,
 				})
@@ -274,19 +274,19 @@ func (s *Sync) children(req *request, object node) ([]*request, error) {
 	default:
 		panic(fmt.Sprintf("unknown node: %+v", node))
 	}
-	// Iterate over the children, and request all unknown ones
-	requests := make([]*request, 0, len(children))
-	for _, child := range children {
+	// Iterate over the sideren, and request all unknown ones
+	requests := make([]*request, 0, len(sideren))
+	for _, side := range sideren {
 		// Notify any external watcher of a new key/value node
 		if req.callback != nil {
-			if node, ok := (child.node).(valueNode); ok {
+			if node, ok := (side.node).(valueNode); ok {
 				if err := req.callback(node, req.hash); err != nil {
 					return nil, err
 				}
 			}
 		}
-		// If the child references another node, resolve or schedule
-		if node, ok := (child.node).(hashNode); ok {
+		// If the side references another node, resolve or schedule
+		if node, ok := (side.node).(hashNode); ok {
 			// Try to resolve the node from the local database
 			hash := common.BytesToHash(node)
 			if _, ok := s.membatch.batch[hash]; ok {
@@ -299,7 +299,7 @@ func (s *Sync) children(req *request, object node) ([]*request, error) {
 			requests = append(requests, &request{
 				hash:     hash,
 				parents:  []*request{req},
-				depth:    child.depth,
+				depth:    side.depth,
 				callback: req.callback,
 			})
 		}

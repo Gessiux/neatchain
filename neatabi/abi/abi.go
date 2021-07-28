@@ -12,19 +12,19 @@ type FunctionType struct {
 	id    int
 	cross bool // Tx type, cross chain / non cross chain
 	main  bool // allow to be execute on main chain or not
-	child bool // allow to be execute on child chain or not
+	side  bool // allow to be execute on side chain or not
 }
 
 var (
 	// Cross Chain Function
-	CreateChildChain       = FunctionType{0, true, true, false}
-	JoinChildChain         = FunctionType{1, true, true, false}
-	DepositInMainChain     = FunctionType{2, true, true, false}
-	DepositInChildChain    = FunctionType{3, true, false, true}
-	WithdrawFromChildChain = FunctionType{4, true, false, true}
-	WithdrawFromMainChain  = FunctionType{5, true, true, false}
-	SaveDataToMainChain    = FunctionType{6, true, true, false}
-	SetBlockReward         = FunctionType{7, true, false, true}
+	CreateSideChain       = FunctionType{0, true, true, false}
+	JoinSideChain         = FunctionType{1, true, true, false}
+	DepositInMainChain    = FunctionType{2, true, true, false}
+	DepositInSideChain    = FunctionType{3, true, false, true}
+	WithdrawFromSideChain = FunctionType{4, true, false, true}
+	WithdrawFromMainChain = FunctionType{5, true, true, false}
+	SaveDataToMainChain   = FunctionType{6, true, true, false}
+	SetBlockReward        = FunctionType{7, true, false, true}
 	// Non-Cross Chain Function
 	VoteNextEpoch  = FunctionType{10, false, true, true}
 	RevealVote     = FunctionType{11, false, true, true}
@@ -48,21 +48,21 @@ func (t FunctionType) AllowInMainChain() bool {
 	return t.main
 }
 
-func (t FunctionType) AllowInChildChain() bool {
-	return t.child
+func (t FunctionType) AllowInSideChain() bool {
+	return t.side
 }
 
 func (t FunctionType) RequiredGas() uint64 {
 	switch t {
-	case CreateChildChain:
+	case CreateSideChain:
 		return 42000
-	case JoinChildChain:
+	case JoinSideChain:
 		return 21000
 	case DepositInMainChain:
 		return 42000
-	case DepositInChildChain:
+	case DepositInSideChain:
 		return 0
-	case WithdrawFromChildChain:
+	case WithdrawFromSideChain:
 		return 42000
 	case WithdrawFromMainChain:
 		return 0
@@ -91,16 +91,16 @@ func (t FunctionType) RequiredGas() uint64 {
 
 func (t FunctionType) String() string {
 	switch t {
-	case CreateChildChain:
-		return "CreateChildChain"
-	case JoinChildChain:
-		return "JoinChildChain"
+	case CreateSideChain:
+		return "CreateSideChain"
+	case JoinSideChain:
+		return "JoinSideChain"
 	case DepositInMainChain:
 		return "DepositInMainChain"
-	case DepositInChildChain:
-		return "DepositInChildChain"
-	case WithdrawFromChildChain:
-		return "WithdrawFromChildChain"
+	case DepositInSideChain:
+		return "DepositInSideChain"
+	case WithdrawFromSideChain:
+		return "WithdrawFromSideChain"
 	case WithdrawFromMainChain:
 		return "WithdrawFromMainChain"
 	case SaveDataToMainChain:
@@ -134,16 +134,16 @@ func (t FunctionType) String() string {
 
 func StringToFunctionType(s string) FunctionType {
 	switch s {
-	case "CreateChildChain":
-		return CreateChildChain
-	case "JoinChildChain":
-		return JoinChildChain
+	case "CreateSideChain":
+		return CreateSideChain
+	case "JoinSideChain":
+		return JoinSideChain
 	case "DepositInMainChain":
 		return DepositInMainChain
-	case "DepositInChildChain":
-		return DepositInChildChain
-	case "WithdrawFromChildChain":
-		return WithdrawFromChildChain
+	case "DepositInSideChain":
+		return DepositInSideChain
+	case "WithdrawFromSideChain":
+		return WithdrawFromSideChain
 	case "WithdrawFromMainChain":
 		return WithdrawFromMainChain
 	case "SaveDataToMainChain":
@@ -175,7 +175,7 @@ func StringToFunctionType(s string) FunctionType {
 	}
 }
 
-type CreateChildChainArgs struct {
+type CreateSideChainArgs struct {
 	ChainId          string
 	MinValidators    uint16
 	MinDepositAmount *big.Int
@@ -183,7 +183,7 @@ type CreateChildChainArgs struct {
 	EndBlock         *big.Int
 }
 
-type JoinChildChainArgs struct {
+type JoinSideChainArgs struct {
 	PubKey    []byte
 	ChainId   string
 	Signature []byte
@@ -193,12 +193,12 @@ type DepositInMainChainArgs struct {
 	ChainId string
 }
 
-type DepositInChildChainArgs struct {
+type DepositInSideChainArgs struct {
 	ChainId string
 	TxHash  common.Hash
 }
 
-type WithdrawFromChildChainArgs struct {
+type WithdrawFromSideChainArgs struct {
 	ChainId string
 }
 
@@ -261,7 +261,7 @@ const jsonChainABI = `
 [
 	{
 		"type": "function",
-		"name": "CreateChildChain",
+		"name": "CreateSideChain",
 		"constant": false,
 		"inputs": [
 			{
@@ -288,7 +288,7 @@ const jsonChainABI = `
 	},
 	{
 		"type": "function",
-		"name": "JoinChildChain",
+		"name": "JoinSideChain",
 		"constant": false,
 		"inputs": [
 			{
@@ -318,7 +318,7 @@ const jsonChainABI = `
 	},
 	{
 		"type": "function",
-		"name": "DepositInChildChain",
+		"name": "DepositInSideChain",
 		"constant": false,
 		"inputs": [
 			{
@@ -333,7 +333,7 @@ const jsonChainABI = `
 	},
 	{
 		"type": "function",
-		"name": "WithdrawFromChildChain",
+		"name": "WithdrawFromSideChain",
 		"constant": false,
 		"inputs": [
 			{
@@ -525,8 +525,8 @@ const jsonChainABI = `
 	}
 ]`
 
-// NeatChain Child Chain Token Incentive Address
-var ChildChainTokenIncentiveAddr = common.StringToAddress("NEATCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+// NeatChain Side Chain Token Incentive Address
+var SideChainTokenIncentiveAddr = common.StringToAddress("NEATCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
 
 // NeatChain Internal Contract Address
 var ChainContractMagicAddr = common.StringToAddress("NEATBBBBBBBBBBBBBBBBBBBBBBBBBBBB") // don't conflict with neatchain/core/vm/contracts.go

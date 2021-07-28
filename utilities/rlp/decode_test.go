@@ -323,8 +323,8 @@ type simplestruct struct {
 }
 
 type recstruct struct {
-	I     uint
-	Child *recstruct `rlp:"nil"`
+	I    uint
+	Side *recstruct `rlp:"nil"`
 }
 
 type invalidTail1 struct {
@@ -482,7 +482,7 @@ var decodeTests = []decodeTest{
 	{
 		input: "C501C3C00000",
 		ptr:   new(recstruct),
-		error: "rlp: expected input string or byte for uint, decoding into (rlp.recstruct).Child.I",
+		error: "rlp: expected input string or byte for uint, decoding into (rlp.recstruct).Side.I",
 	},
 	{
 		input: "C0",

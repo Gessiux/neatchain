@@ -111,9 +111,9 @@ func (n rawFullNode) fstring(ind string) string     { panic("this should never e
 func (n rawFullNode) EncodeRLP(w io.Writer) error {
 	var nodes [17]node
 
-	for i, child := range n {
-		if child != nil {
-			nodes[i] = child
+	for i, side := range n {
+		if side != nil {
+			nodes[i] = side
 		} else {
 			nodes[i] = nilValueNode
 		}
@@ -141,8 +141,8 @@ type cachedNode struct {
 	node node   // Cached collapsed trie node, or raw rlp data
 	size uint16 // Byte size of the useful cached data
 
-	parents  uint32                 // Number of live nodes referencing this one
-	children map[common.Hash]uint16 // External children referenced by this node
+	parents uint32                 // Number of live nodes referencing this one
+	sideren map[common.Hash]uint16 // External sideren referenced by this node
 
 	flushPrev common.Hash // Previous node in the flush-list
 	flushNext common.Hash // Next node in the flush-list
@@ -170,32 +170,32 @@ func (n *cachedNode) obj(hash common.Hash) node {
 	return expandNode(hash[:], n.node)
 }
 
-// childs returns all the tracked children of this node, both the implicit ones
+// sides returns all the tracked sideren of this node, both the implicit ones
 // from inside the node as well as the explicit ones from outside the node.
-func (n *cachedNode) childs() []common.Hash {
-	children := make([]common.Hash, 0, 16)
-	for child := range n.children {
-		children = append(children, child)
+func (n *cachedNode) sides() []common.Hash {
+	sideren := make([]common.Hash, 0, 16)
+	for side := range n.sideren {
+		sideren = append(sideren, side)
 	}
 	if _, ok := n.node.(rawNode); !ok {
-		gatherChildren(n.node, &children)
+		gatherChildren(n.node, &sideren)
 	}
-	return children
+	return sideren
 }
 
 // gatherChildren traverses the node hierarchy of a collapsed storage node and
-// retrieves all the hashnode children.
-func gatherChildren(n node, children *[]common.Hash) {
+// retrieves all the hashnode sideren.
+func gatherChildren(n node, sideren *[]common.Hash) {
 	switch n := n.(type) {
 	case *rawShortNode:
-		gatherChildren(n.Val, children)
+		gatherChildren(n.Val, sideren)
 
 	case rawFullNode:
 		for i := 0; i < 16; i++ {
-			gatherChildren(n[i], children)
+			gatherChildren(n[i], sideren)
 		}
 	case hashNode:
-		*children = append(*children, common.BytesToHash(n))
+		*sideren = append(*sideren, common.BytesToHash(n))
 
 	case valueNode, nil:
 
@@ -235,7 +235,7 @@ func simplifyNode(n node) node {
 func expandNode(hash hashNode, n node) node {
 	switch n := n.(type) {
 	case *rawShortNode:
-		// Short nodes need key and child expansion
+		// Short nodes need key and side expansion
 		return &shortNode{
 			Key: compactToHex(n.Key),
 			Val: expandNode(nil, n.Val),
@@ -245,7 +245,7 @@ func expandNode(hash hashNode, n node) node {
 		}
 
 	case rawFullNode:
-		// Full nodes need child expansion
+		// Full nodes need side expansion
 		node := &fullNode{
 			flags: nodeFlag{
 				hash: hash,
@@ -317,7 +317,7 @@ func (db *Database) DiskDB() neatdb.Reader {
 // InsertBlob writes a new reference tracked blob to the memory database if it's
 // yet unknown. This method should only be used for non-trie nodes that require
 // reference counting, since trie nodes are garbage collected directly through
-// their embedded children.
+// their embedded sideren.
 func (db *Database) InsertBlob(hash common.Hash, blob []byte) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
@@ -340,8 +340,8 @@ func (db *Database) insert(hash common.Hash, blob []byte, node node) {
 		size:      uint16(len(blob)),
 		flushPrev: db.newest,
 	}
-	for _, child := range entry.childs() {
-		if c := db.dirties[child]; c != nil {
+	for _, side := range entry.sides() {
+		if c := db.dirties[side]; c != nil {
 			c.parents++
 		}
 	}
@@ -476,29 +476,29 @@ func (db *Database) Nodes() []common.Hash {
 	return hashes
 }
 
-// Reference adds a new reference from a parent node to a child node.
-func (db *Database) Reference(child common.Hash, parent common.Hash) {
+// Reference adds a new reference from a parent node to a side node.
+func (db *Database) Reference(side common.Hash, parent common.Hash) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
 
-	db.reference(child, parent)
+	db.reference(side, parent)
 }
 
 // reference is the private locked version of Reference.
-func (db *Database) reference(child common.Hash, parent common.Hash) {
+func (db *Database) reference(side common.Hash, parent common.Hash) {
 	// If the node does not exist, it's a node pulled from disk, skip
-	node, ok := db.dirties[child]
+	node, ok := db.dirties[side]
 	if !ok {
 		return
 	}
 	// If the reference already exists, only duplicate for roots
-	if db.dirties[parent].children == nil {
-		db.dirties[parent].children = make(map[common.Hash]uint16)
-	} else if _, ok = db.dirties[parent].children[child]; ok && parent != (common.Hash{}) {
+	if db.dirties[parent].sideren == nil {
+		db.dirties[parent].sideren = make(map[common.Hash]uint16)
+	} else if _, ok = db.dirties[parent].sideren[side]; ok && parent != (common.Hash{}) {
 		return
 	}
 	node.parents++
-	db.dirties[parent].children[child]++
+	db.dirties[parent].sideren[side]++
 }
 
 // Dereference removes an existing reference from a root node.
@@ -527,22 +527,22 @@ func (db *Database) Dereference(root common.Hash) {
 }
 
 // dereference is the private locked version of Dereference.
-func (db *Database) dereference(child common.Hash, parent common.Hash) {
-	// Dereference the parent-child
+func (db *Database) dereference(side common.Hash, parent common.Hash) {
+	// Dereference the parent-side
 	node := db.dirties[parent]
 
-	if node.children != nil && node.children[child] > 0 {
-		node.children[child]--
-		if node.children[child] == 0 {
-			delete(node.children, child)
+	if node.sideren != nil && node.sideren[side] > 0 {
+		node.sideren[side]--
+		if node.sideren[side] == 0 {
+			delete(node.sideren, side)
 		}
 	}
-	// If the child does not exist, it's a previously committed node.
-	node, ok := db.dirties[child]
+	// If the side does not exist, it's a previously committed node.
+	node, ok := db.dirties[side]
 	if !ok {
 		return
 	}
-	// If there are no more references to the child, delete it and cascade
+	// If there are no more references to the side, delete it and cascade
 	if node.parents > 0 {
 		// This is a special cornercase where a node loaded from disk (i.e. not in the
 		// memcache any more) gets reinjected as a new node (short node split into full,
@@ -552,7 +552,7 @@ func (db *Database) dereference(child common.Hash, parent common.Hash) {
 	}
 	if node.parents == 0 {
 		// Remove the node from the flush-list
-		switch child {
+		switch side {
 		case db.oldest:
 			db.oldest = node.flushNext
 			db.dirties[node.flushNext].flushPrev = common.Hash{}
@@ -563,11 +563,11 @@ func (db *Database) dereference(child common.Hash, parent common.Hash) {
 			db.dirties[node.flushPrev].flushNext = node.flushNext
 			db.dirties[node.flushNext].flushPrev = node.flushPrev
 		}
-		// Dereference all children and delete the node
-		for _, hash := range node.childs() {
-			db.dereference(hash, child)
+		// Dereference all sideren and delete the node
+		for _, hash := range node.sides() {
+			db.dereference(hash, side)
 		}
-		delete(db.dirties, child)
+		delete(db.dirties, side)
 		db.dirtiesSize -= common.StorageSize(common.HashLength + int(node.size))
 	}
 }
@@ -667,7 +667,7 @@ func (db *Database) Cap(limit common.StorageSize) error {
 	return nil
 }
 
-// Commit iterates over all the children of a particular node, writes them out
+// Commit iterates over all the sideren of a particular node, writes them out
 // to disk, forcefully tearing down all references in both directions. As a side
 // effect, all pre-images accumulated up to this point are also written.
 //
@@ -751,8 +751,8 @@ func (db *Database) commit(hash common.Hash, batch neatdb.Batch, uncacher *clean
 	if !ok {
 		return nil
 	}
-	for _, child := range node.childs() {
-		if err := db.commit(child, batch, uncacher); err != nil {
+	for _, side := range node.sides() {
+		if err := db.commit(side, batch, uncacher); err != nil {
 			return err
 		}
 	}
@@ -841,8 +841,8 @@ func (db *Database) verifyIntegrity() {
 	// Iterate over all the cached nodes and accumulate them into a set
 	reachable := map[common.Hash]struct{}{{}: {}}
 
-	for child := range db.dirties[common.Hash{}].children {
-		db.accumulate(child, reachable)
+	for side := range db.dirties[common.Hash{}].sideren {
+		db.accumulate(side, reachable)
 	}
 	// Find any unreachable but cached nodes
 	var unreachable []string
@@ -858,7 +858,7 @@ func (db *Database) verifyIntegrity() {
 }
 
 // accumulate iterates over the trie defined by hash and accumulates all the
-// cached children found in memory.
+// cached sideren found in memory.
 func (db *Database) accumulate(hash common.Hash, reachable map[common.Hash]struct{}) {
 	// Mark the node reachable if present in the memory cache
 	node, ok := db.dirties[hash]
@@ -867,8 +867,8 @@ func (db *Database) accumulate(hash common.Hash, reachable map[common.Hash]struc
 	}
 	reachable[hash] = struct{}{}
 
-	// Iterate over all the children and accumulate them too
-	for _, child := range node.childs() {
-		db.accumulate(child, reachable)
+	// Iterate over all the sideren and accumulate them too
+	for _, side := range node.sides() {
+		db.accumulate(side, reachable)
 	}
 }

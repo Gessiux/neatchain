@@ -5,7 +5,7 @@ import (
 
 	cfg "github.com/Gessiux/go-config"
 	"github.com/Gessiux/neatchain/chain/accounts/keystore"
-	ncTypes "github.com/Gessiux/neatchain/chain/consensus/neatbyft/types"
+	ntcTypes "github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/log"
 	neatnode "github.com/Gessiux/neatchain/network/node"
 	"github.com/Gessiux/neatchain/utilities/utils"
@@ -29,16 +29,16 @@ func LoadMainChain(ctx *cli.Context, chainId string) *Chain {
 	config := utils.GetNeatConConfig(chainId, ctx)
 	chain.Config = config
 
-	log.Info("Make full node")
+	log.Info("Starting Neatio full node...")
 	stack := makeFullNode(ctx, GetCMInstance(ctx).cch, chainId)
 	chain.NeatNode = stack
 
 	return chain
 }
 
-func LoadChildChain(ctx *cli.Context, chainId string) *Chain {
+func LoadSideChain(ctx *cli.Context, chainId string) *Chain {
 
-	log.Infof("now load child: %s", chainId)
+	log.Infof("now load side: %s", chainId)
 
 	chain := &Chain{Id: chainId}
 	config := utils.GetNeatConConfig(chainId, ctx)
@@ -57,7 +57,7 @@ func LoadChildChain(ctx *cli.Context, chainId string) *Chain {
 
 func StartChain(ctx *cli.Context, chain *Chain, startDone chan<- struct{}) error {
 
-	log.Infof("Start Chain: %s", chain.Id)
+	//log.Infof("Starting Chain: %s", chain.Id)
 	go func() {
 		utils.StartNode(ctx, chain.NeatNode)
 
@@ -69,7 +69,7 @@ func StartChain(ctx *cli.Context, chain *Chain, startDone chan<- struct{}) error
 	return nil
 }
 
-func CreateChildChain(ctx *cli.Context, chainId string, validator ncTypes.PrivValidator, keyJson []byte, validators []ncTypes.GenesisValidator) error {
+func CreateSideChain(ctx *cli.Context, chainId string, validator ntcTypes.PrivValidator, keyJson []byte, validators []ntcTypes.GenesisValidator) error {
 
 	config := utils.GetNeatConConfig(chainId, ctx)
 

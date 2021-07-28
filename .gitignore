@@ -37,7 +37,7 @@ profile.cov
 # block data
 neatchain/chaindata*
 data/neatchain*
-data/child*
+data/side*
 
 
 # log

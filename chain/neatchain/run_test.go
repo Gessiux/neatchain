@@ -62,7 +62,7 @@ func TestMain(m *testing.M) {
 }
 
 // spawns neatchain with the given command line args. If the args don't set --datadir, the
-// child g gets a temporary data directory.
+// side g gets a temporary data directory.
 func runneatchain(t *testing.T, args ...string) *testneatchain {
 	tt := &testneatchain{}
 	tt.TestCmd = cmdtest.NewTestCmd(t, tt)

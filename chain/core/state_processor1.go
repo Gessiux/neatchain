@@ -91,11 +91,11 @@ func ApplyTransactionEx(config *params.ChainConfig, bc *BlockChain, author *comm
 		}
 		log.Infof("ApplyTransactionEx() 0, Chain Function is %v", function.String())
 
-		// check Function main/child flag
+		// check Function main/side flag
 		if config.IsMainChain() && !function.AllowInMainChain() {
 			return nil, 0, ErrNotAllowedInMainChain
-		} else if !config.IsMainChain() && !function.AllowInChildChain() {
-			return nil, 0, ErrNotAllowedInChildChain
+		} else if !config.IsMainChain() && !function.AllowInSideChain() {
+			return nil, 0, ErrNotAllowedInSideChain
 		}
 
 		from := msg.From()

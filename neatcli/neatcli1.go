@@ -90,7 +90,7 @@ func (ec *Client) SendDataToMainChain(ctx context.Context, data []byte, prv *ecd
 // BroadcastDataToMainChain send tx3 proof data to MainChain via rpc call, then broadcast it via p2p network
 func (ec *Client) BroadcastDataToMainChain(ctx context.Context, chainId string, data []byte) error {
 	if chainId == "" || chainId == params.MainnetChainConfig.NeatChainId || chainId == params.TestnetChainConfig.NeatChainId {
-		return errors.New("invalid child chainId")
+		return errors.New("invalid side chainId")
 	}
 
 	err := retry(1, time.Millisecond*200, func() error {

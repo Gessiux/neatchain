@@ -85,7 +85,7 @@ var (
 		//configFileFlag,
 
 		//utils.LogDirFlag,
-		utils.ChildChainFlag,
+		utils.SideChainFlag,
 	}
 
 	rpcFlags = []cli.Flag{
@@ -113,7 +113,7 @@ func init() {
 		createValidatorCmd,
 		initNEATGenesisCmd,
 		initCommand,
-		//initChildChainCmd,
+		//initSideChainCmd,
 		importCommand,
 		exportCommand,
 		copydbCommand,

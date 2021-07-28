@@ -56,8 +56,8 @@ type ChainSideEvent struct {
 
 type ChainHeadEvent struct{ Block *types.Block }
 
-// Create Child Chain Event
-type CreateChildChainEvent struct {
+// Create Side Chain Event
+type CreateSideChainEvent struct {
 	ChainId string
 }
 

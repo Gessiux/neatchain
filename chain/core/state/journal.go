@@ -51,7 +51,7 @@ type (
 		account *common.Address
 		prev    *big.Int
 	}
-	childChainDepositBalanceChange struct {
+	sideChainDepositBalanceChange struct {
 		account *common.Address
 		chainId string
 		prev    *big.Int
@@ -200,25 +200,25 @@ func (ch depositBalanceChange) undo(s *StateDB) {
 	s.getStateObject(*ch.account).setDepositBalance(ch.prev)
 }
 
-func (ch childChainDepositBalanceChange) undo(s *StateDB) {
+func (ch sideChainDepositBalanceChange) undo(s *StateDB) {
 	self := s.getStateObject(*ch.account)
 
 	var index = -1
-	for i := range self.data.ChildChainDepositBalance {
-		if self.data.ChildChainDepositBalance[i].ChainId == ch.chainId {
+	for i := range self.data.SideChainDepositBalance {
+		if self.data.SideChainDepositBalance[i].ChainId == ch.chainId {
 			index = i
 			break
 		}
 	}
 	if index < 0 { // not found, we'll append
-		self.data.ChildChainDepositBalance = append(self.data.ChildChainDepositBalance, &childChainDepositBalance{
+		self.data.SideChainDepositBalance = append(self.data.SideChainDepositBalance, &sideChainDepositBalance{
 			ChainId:        ch.chainId,
 			DepositBalance: new(big.Int),
 		})
-		index = len(self.data.ChildChainDepositBalance) - 1
+		index = len(self.data.SideChainDepositBalance) - 1
 	}
 
-	self.setChildChainDepositBalance(index, ch.prev)
+	self.setSideChainDepositBalance(index, ch.prev)
 }
 
 func (ch chainBalanceChange) undo(s *StateDB) {

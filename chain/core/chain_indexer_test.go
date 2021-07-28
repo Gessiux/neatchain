@@ -67,7 +67,7 @@ func testChainIndexer(t *testing.T, count int) {
 			backends[i-1].indexer.AddChildIndexer(backends[i].indexer)
 		}
 	}
-	defer backends[0].indexer.Close() // parent indexer shuts down children
+	defer backends[0].indexer.Close() // parent indexer shuts down sideren
 	// notify pings the root indexer about a new head or reorg, then expect
 	// processed blocks if a section is processable
 	notify := func(headNum, failNum uint64, reorg bool) {

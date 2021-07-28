@@ -53,11 +53,11 @@ synchronous `net.Pipe` and connecting to their RPC server using an in-memory
 
 ### ExecAdapter
 
-The `ExecAdapter` runs nodes as child processes of the running simulation.
+The `ExecAdapter` runs nodes as side processes of the running simulation.
 
 It does this by executing the binary which is running the simulation but
 setting `argv[0]` (i.e. the program name) to `p2p-node` which is then
-detected by an init hook in the child process which runs the `node.Service`
+detected by an init hook in the side process which runs the `node.Service`
 using the devp2p node stack rather than executing `main()`.
 
 The nodes listen for devp2p connections and WebSocket RPC clients on random

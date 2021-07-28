@@ -154,9 +154,9 @@ func (l *logger) write(msg string, lvl Lvl, ctx []interface{}, skip int) {
 }
 
 func (l *logger) New(ctx ...interface{}) Logger {
-	child := &logger{newContext(l.ctx, ctx), new(swapHandler)}
-	child.SetHandler(l.h)
-	return child
+	side := &logger{newContext(l.ctx, ctx), new(swapHandler)}
+	side.SetHandler(l.h)
+	return side
 }
 
 func newContext(prefix []interface{}, suffix []interface{}) []interface{} {
@@ -244,7 +244,7 @@ func normalize(ctx []interface{}) []interface{} {
 // to compute until it is certain that it must be evaluated with the given filters.
 //
 // Lazy may also be used in conjunction with a Logger's New() function
-// to generate a child logger which always reports the current value of changing
+// to generate a side logger which always reports the current value of changing
 // state.
 //
 // You may wrap any function which takes no arguments to Lazy. It may return any

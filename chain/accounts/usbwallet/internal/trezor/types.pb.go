@@ -518,7 +518,7 @@ func (WordRequestType) EnumDescriptor() ([]byte, []int) { return fileDescriptor0
 type HDNodeType struct {
 	Depth            *uint32 `protobuf:"varint,1,req,name=depth" json:"depth,omitempty"`
 	Fingerprint      *uint32 `protobuf:"varint,2,req,name=fingerprint" json:"fingerprint,omitempty"`
-	ChildNum         *uint32 `protobuf:"varint,3,req,name=child_num,json=childNum" json:"child_num,omitempty"`
+	ChildNum         *uint32 `protobuf:"varint,3,req,name=side_num,json=sideNum" json:"side_num,omitempty"`
 	ChainCode        []byte  `protobuf:"bytes,4,req,name=chain_code,json=chainCode" json:"chain_code,omitempty"`
 	PrivateKey       []byte  `protobuf:"bytes,5,opt,name=private_key,json=privateKey" json:"private_key,omitempty"`
 	PublicKey        []byte  `protobuf:"bytes,6,opt,name=public_key,json=publicKey" json:"public_key,omitempty"`

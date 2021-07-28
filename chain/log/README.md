@@ -7,7 +7,7 @@ Package log15 provides an opinionated, simple toolkit for best-practice logging 
 ## Features
 - A simple, easy-to-understand API
 - Promotes structured logging by encouraging use of key/value pairs
-- Child loggers which inherit and add their own private context
+- Side loggers which inherit and add their own private context
 - Lazy evaluation of expensive operations
 - Simple Handler interface allowing for construction of flexible, custom logging configurations with a tiny API.
 - Color terminal support
@@ -33,7 +33,7 @@ srvlog := log.New("module", "app/server")
 // all log messages can have key/value context
 srvlog.Warn("abnormal conn rate", "rate", curRate, "low", lowRate, "high", highRate)
 
-// child loggers with inherited context
+// side loggers with inherited context
 connlog := srvlog.New("raddr", c.RemoteAddr())
 connlog.Info("connection open")
 
