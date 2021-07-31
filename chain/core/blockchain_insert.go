@@ -56,10 +56,10 @@ func (st *insertStats) report(chain []*types.Block, index int, dirty common.Stor
 
 		// Assemble the log context and send it to the logger
 		context := []interface{}{
-			"Blocks", st.processed, "New height", end.Number(),
+			"Blocks", st.processed, "   New height", end.Number(),
 		}
 		if timestamp := time.Unix(int64(end.Time()), 0); time.Since(timestamp) > time.Minute {
-			context = append(context, []interface{}{"You are behind", common.PrettyAge(timestamp)}...)
+			context = append(context, []interface{}{"   You are behind", common.PrettyAge(timestamp)}...)
 		}
 		//context = append(context, []interface{}{"dirty", dirty}...)
 
