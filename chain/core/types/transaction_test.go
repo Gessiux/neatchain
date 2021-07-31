@@ -294,7 +294,7 @@ func TestSignTx(t *testing.T) {
 		Recipient:    &address,
 		Payload:      []byte(""),
 		Amount:       big.NewInt(1),
-		GasLimit:     21000,
+		GasLimit:     100000,
 		Price:        big.NewInt(10000000000),
 		V:            new(big.Int),
 		R:            new(big.Int),

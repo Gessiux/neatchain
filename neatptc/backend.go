@@ -145,7 +145,7 @@ func New(ctx *node.ServiceContext, config *Config, cliCtx *cli.Context,
 	if bcVersion != nil {
 		dbVer = fmt.Sprintf("%d", *bcVersion)
 	}
-	logger.Info("Initialising Neatio protocol", "network", chainConfig.NeatChainId)
+	logger.Info("Initialising Neatio protocol", "Network", chainConfig.NeatChainId)
 
 	if !config.SkipBcVersionCheck {
 		if bcVersion != nil && *bcVersion > core.BlockChainVersion {

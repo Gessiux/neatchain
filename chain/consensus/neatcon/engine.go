@@ -326,7 +326,7 @@ func (sb *backend) VerifyHeaders(chain consensus.ChainReader, headers []*types.H
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
-	sb.logger.Info("NeatCon is verifying headers")
+	//sb.logger.Info("NeatCon is verifying headers")
 
 	go func() {
 		for i, header := range headers {

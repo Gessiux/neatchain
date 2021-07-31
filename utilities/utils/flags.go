@@ -122,7 +122,7 @@ var (
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
-		Usage: "Network identifier (integer, mainnet=8550, testnet=8551)",
+		Usage: "Network identifier (integer, mainnet=9910, testnet=9911)",
 		Value: neatptc.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
@@ -382,7 +382,7 @@ var (
 	ListenPortFlag = cli.IntFlag{
 		Name:  "port",
 		Usage: "Network listening port",
-		Value: 8550,
+		Value: 9910,
 	}
 	BootnodesFlag = cli.StringFlag{
 		Name:  "bootnodes",
@@ -1060,7 +1060,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *neatptc.Config) {
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
-			cfg.NetworkId = 8551
+			cfg.NetworkId = 9911
 		}
 		//
 		//cfg.Genesis = core.DefaultTestnetGenesisBlock()

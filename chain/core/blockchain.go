@@ -268,7 +268,7 @@ func (bc *BlockChain) loadLastState() error {
 	//blockTd := bc.GetTd(currentBlock.Hash(), currentBlock.NumberU64())
 	//fastTd := bc.GetTd(currentFastBlock.Hash(), currentFastBlock.NumberU64())
 
-	bc.logger.Info("Local chain block height is:", "block", currentHeader.Number, "hash", currentHeader.Hash())
+	bc.logger.Info("Local chain block height is:", "Block", currentHeader.Number, "Hash", currentHeader.Hash())
 	//bc.logger.Info("Loaded most recent local full block", "number", currentBlock.Number(), "hash", currentBlock.Hash(), "td", blockTd)
 	//bc.logger.Info("Loaded most recent local fast block", "number", currentFastBlock.Number(), "hash", currentFastBlock.Hash(), "td", fastTd)
 
