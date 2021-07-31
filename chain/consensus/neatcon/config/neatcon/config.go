@@ -131,6 +131,9 @@ node_laddr = "tcp://0.0.0.0:46656"
 seeds = ""
 fast_sync = true
 db_backend = "leveldb"
+create_empty_blocks = false
+create_empty_blocks = 10000
+
 #rpc_laddr = "tcp://0.0.0.0:46657"
 `
 
