@@ -117,8 +117,8 @@ func GetConfig(rootDir, chainId string) cfg.Config {
 	//mapConfig.SetDefault("tx_index", "kv")
 
 	// EmptyBlocks mode and possible interval between empty blocks
-	//mapConfig.SetDefault("create_empty_blocks", true)
-	//mapConfig.SetDefault("create_empty_blocks_interval", 0)
+	mapConfig.SetDefault("create_empty_blocks", false)
+	mapConfig.SetDefault("create_empty_blocks_interval", 10000)
 
 	return mapConfig
 }

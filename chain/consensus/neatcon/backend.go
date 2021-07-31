@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"sync"
 
+	cfg "github.com/Gessiux/go-config"
 	"github.com/Gessiux/neatchain/chain/consensus"
 	"github.com/Gessiux/neatchain/chain/consensus/neatcon/types"
 	"github.com/Gessiux/neatchain/chain/core"
@@ -26,7 +27,7 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 	config := GetNeatConConfig(chainConfig.NeatChainId, cliCtx)
 
 	backend := &backend{
-		//config:             config,
+		config:          config,
 		chainConfig:     chainConfig,
 		neatconEventMux: new(event.TypeMux),
 		privateKey:      privateKey,
@@ -47,7 +48,7 @@ func New(chainConfig *params.ChainConfig, cliCtx *cli.Context,
 }
 
 type backend struct {
-	//config             cfg.Config
+	config          cfg.Config
 	chainConfig     *params.ChainConfig
 	neatconEventMux *event.TypeMux
 	privateKey      *ecdsa.PrivateKey
@@ -82,18 +83,18 @@ type backend struct {
 }
 
 // WaitForTxs returns true if the consensus should wait for transactions before entering the propose step
-//func (b *backend) WaitForTxs() bool {
-//
-//	return !b.config.GetBool("create_empty_blocks") || b.config.GetInt("create_empty_blocks_interval") > 0
-//}
-//
-//func (b *backend) GetCreateEmptyBlocks() bool {
-//	return b.config.GetBool("create_empty_blocks")
-//}
-//
-//func (b *backend) GetCreateEmptyBlocksInterval() int {
-//	return b.config.GetInt("create_empty_blocks_interval")
-//}
+func (b *backend) WaitForTxs() bool {
+
+	return !b.config.GetBool("create_empty_blocks") || b.config.GetInt("create_empty_blocks_interval") > 0
+}
+
+func (b *backend) GetCreateEmptyBlocks() bool {
+	return b.config.GetBool("create_empty_blocks")
+}
+
+func (b *backend) GetCreateEmptyBlocksInterval() int {
+	return b.config.GetInt("create_empty_blocks_interval")
+}
 
 func GetBackend() backend {
 	return backend{}

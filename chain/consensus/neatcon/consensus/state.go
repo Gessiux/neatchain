@@ -41,9 +41,9 @@ type Backend interface {
 	ChainReader() consss.ChainReader
 	GetBroadcaster() consss.Broadcaster
 	GetLogger() log.Logger
-	//WaitForTxs() bool
-	//GetCreateEmptyBlocks() bool
-	//GetCreateEmptyBlocksInterval() int
+	WaitForTxs() bool
+	GetCreateEmptyBlocks() bool
+	GetCreateEmptyBlocksInterval() int
 }
 
 //-----------------------------------------------------------------------------
